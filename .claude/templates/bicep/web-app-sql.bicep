@@ -44,7 +44,7 @@ param location string = resourceGroup().location
 
 @description('SQL Server administrator login (stored in Key Vault)')
 @secure()
-param sqlAdminLogin string = 'sqladmin'
+param sqlAdminLogin string
 
 @description('SQL Server administrator password (stored in Key Vault)')
 @secure()
@@ -352,10 +352,6 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
     maxSizeBytes: currentSku.sqlDatabase.maxSizeBytes
     catalogCollation: 'SQL_Latin1_General_CP1_CI_AS'
     zoneRedundant: environment == 'prod'
-
-    // Auto-pause for development (serverless model)
-    autoPauseDelay: environment == 'dev' ? currentSku.autoPauseDelay : -1
-    minCapacity: environment == 'dev' ? 0.5 : currentSku.sqlDatabase.capacity
 
     // Backup configuration
     requestedBackupStorageRedundancy: currentSku.geoRedundantBackup ? 'Geo' : 'Local'

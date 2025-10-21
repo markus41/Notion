@@ -12,6 +12,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Documentation generation and knowledge management
 - Cost analysis and optimization for software/tools
 
+## Integration Summary
+
+**Recent Integration** (October 2025): This project has integrated valuable architectural patterns, specialized agents, and operational templates from enterprise-grade best practices to streamline innovation workflows and establish production-ready standards.
+
+### What Was Integrated
+
+**3 Specialized Agents** ([.claude/agents/](.claude/agents)):
+- **@database-architect**: Notion optimization and Azure data architecture specialist for scalable database design
+- **@compliance-orchestrator**: Software licensing and governance compliance specialist for regulatory requirements
+- **@architect-supreme**: Microsoft ecosystem architecture specialist with ADR documentation expertise
+
+**4 Architectural Patterns** ([.claude/docs/patterns/](.claude/docs/patterns)):
+- **Circuit-Breaker**: Resilience pattern for Azure/GitHub/Notion integrations (12KB)
+- **Retry with Exponential Backoff**: Transient failure handling for cloud operations (18KB)
+- **Saga Pattern**: Distributed transaction consistency across Notion + GitHub + Azure (15KB)
+- **Event Sourcing**: Complete audit trails and temporal analysis for compliance (27KB)
+
+**2 Operational Templates** ([.claude/templates/](.claude/templates)):
+- **ADR Template**: Standardized Architecture Decision Record documentation
+- **Runbook Template**: Operational procedures for Azure deployments and incident response
+
+**1 Slash Command** ([.claude/commands/compliance/](.claude/commands/compliance)):
+- `/compliance:audit`: Comprehensive software licensing and governance compliance assessment
+
+### Integration Value
+
+**Established Capabilities**:
+- **Production-Ready Resilience**: Circuit-breaker and retry patterns ensure reliable cloud integrations
+- **Transaction Consistency**: Saga pattern maintains data integrity across distributed systems
+- **Compliance Foundation**: Software licensing audit framework aligned with Innovation Nexus databases
+- **Architectural Governance**: ADR templates and architect-supreme agent for structured decision-making
+- **Operational Excellence**: Runbook templates for sustainable Azure deployment practices
+
+**Microsoft Ecosystem Alignment**:
+- Azure-specific patterns (App Service, Functions, SQL, Cosmos DB, Key Vault)
+- GitHub integration workflows with saga-based rollback
+- Notion MCP resilience with circuit-breaker protection
+- Power Platform event sourcing for audit compliance
+
+**Best for**: Organizations scaling innovation workflows across teams who require enterprise-grade reliability, compliance visibility, and architectural governance while maintaining sustainable development practices.
+
 ## Core Architecture
 
 ### Innovation Workflow
@@ -1427,6 +1468,9 @@ This project establishes 14 specialized sub-agents to streamline innovation work
 | **@notion-mcp-specialist** | Expert Notion operations & troubleshooting | Issues with Notion MCP or complex database operations | • MCP configuration<br>• Relation debugging<br>• Query optimization |
 | **@markdown-expert** | Format technical documentation | User needs README, docs, or technical writing | • Structure validation<br>• Markdown best practices<br>• AI-agent readability |
 | **@mermaid-diagram-expert** | Create visual diagrams & architecture charts | User needs "diagram", "flowchart", "architecture visual" | • Workflow diagrams<br>• ER diagrams<br>• Sequence diagrams |
+| **@database-architect** | Notion optimization and Azure data architecture specialist | User needs database schema design, query optimization, Notion schema enhancement, or data architecture decisions | • Cosmos DB schema design<br>• Azure SQL optimization<br>• Notion database relations<br>• Query performance tuning |
+| **@compliance-orchestrator** | Software licensing and governance compliance specialist | User requests compliance audit, software licensing requirements, security reviews, or regulatory assessment | • Software license compliance<br>• GDPR/CCPA assessment<br>• Integration security review<br>• Policy documentation |
+| **@architect-supreme** | Microsoft ecosystem architecture and ADR documentation specialist | User needs enterprise architecture design, Microsoft solution evaluation, scalability planning, or ADR creation | • Azure architecture design<br>• ADR documentation<br>• Microsoft service selection<br>• Scalability assessment |
 
 ### Agent Invocation Patterns
 
@@ -1452,6 +1496,176 @@ This project establishes 14 specialized sub-agents to streamline innovation work
 
 **Best for**: Organizations requiring intelligent task routing that maximizes specialized expertise while minimizing manual coordination overhead.
 
+## Architectural Patterns Reference
+
+This project implements production-grade architectural patterns designed for distributed systems, cloud integrations, and compliance requirements. All patterns are documented in [.claude/docs/patterns/](.claude/docs/patterns) with comprehensive examples aligned to Innovation Nexus workflows.
+
+### Available Patterns
+
+#### 1. Circuit-Breaker Pattern
+**File**: [circuit-breaker.md](.claude/docs/patterns/circuit-breaker.md) (12KB)
+**Purpose**: Prevent cascading failures in Azure, GitHub, and Notion MCP integrations by detecting failures and failing fast
+**Use Cases**:
+- Azure resource provisioning (quota limits, service outages)
+- GitHub API rate limiting
+- Notion MCP connection failures
+- Transient cloud service interruptions
+
+**Key States**: CLOSED (normal) → OPEN (failing fast) → HALF-OPEN (testing recovery)
+
+#### 2. Retry with Exponential Backoff
+**File**: [retry-exponential-backoff.md](.claude/docs/patterns/retry-exponential-backoff.md) (18KB)
+**Purpose**: Handle transient failures with intelligent retry scheduling to avoid overwhelming failing services
+**Use Cases**:
+- Network timeouts
+- API rate limiting (429 errors)
+- Database connection issues
+- Transient Azure service errors
+
+**Algorithm**: Wait time doubles with each retry (1s → 2s → 4s → 8s → 16s) with configurable jitter and max attempts
+
+#### 3. Saga Pattern for Distributed Transactions
+**File**: [saga-distributed-transactions.md](.claude/docs/patterns/saga-distributed-transactions.md) (15KB)
+**Purpose**: Maintain consistency across Notion + GitHub + Azure workflows with automatic compensation on failure
+**Use Cases**:
+- Example Build creation (Notion entry + GitHub repo + Azure resources)
+- Research investigation setup (Notion + SharePoint + OneNote)
+- Software cost tracking (Notion + Integration Registry + Azure billing)
+
+**Workflow**: Execute steps sequentially, compensate in reverse order on failure
+
+**Example**:
+```
+✓ Step 1: Create Notion Build Entry → buildId=123
+✓ Step 2: Create GitHub Repository → repoUrl=github.com/org/repo
+✗ Step 3: Provision Azure Resources → FAILED (quota exceeded)
+↺ Compensate Step 2 → Delete GitHub repository
+↺ Compensate Step 1 → Update buildId=123 status='Cancelled'
+Result: Clean state, no orphaned resources
+```
+
+#### 4. Event Sourcing
+**File**: [event-sourcing.md](.claude/docs/patterns/event-sourcing.md) (27KB)
+**Purpose**: Complete audit trails and temporal analysis for compliance, cost tracking, and historical reporting
+**Use Cases**:
+- Software & Cost Tracker audit trail (license changes, cost updates, approval workflows)
+- Compliance event logging (GDPR/CCPA data access, security reviews)
+- Idea/Research/Build lifecycle tracking (status transitions, viability assessments)
+- "Time travel" queries: "What was our total monthly spend on July 1st?"
+
+**Core Concept**: Store every state change as an immutable event, reconstruct current/historical state by replaying events
+
+### Pattern Integration in Innovation Nexus
+
+**Build Architect + Integration Specialist**:
+- Use **Saga Pattern** when creating builds (Notion + GitHub + Azure)
+- Use **Circuit-Breaker** for Azure resource provisioning
+- Use **Retry** for transient GitHub/Azure API failures
+
+**Cost Analyst**:
+- Use **Event Sourcing** for complete cost history and audit compliance
+- Track every cost change as immutable event for regulatory reporting
+
+**Compliance Orchestrator**:
+- Use **Event Sourcing** for GDPR/CCPA data access audit trails
+- Use **Saga Pattern** for multi-system compliance verification workflows
+
+**Research Coordinator + Knowledge Curator**:
+- Use **Saga Pattern** for coordinated SharePoint/OneNote/Notion setup
+- Use **Event Sourcing** for research decision history and lessons learned
+
+**Best for**: Organizations requiring enterprise-grade reliability, regulatory compliance, and distributed system consistency across Microsoft ecosystem integrations.
+
+## Documentation Templates
+
+This project provides reusable templates for standardizing technical and operational documentation. All templates are available in [.claude/templates/](.claude/templates) and follow Brookside BI brand guidelines with AI-agent-friendly structure.
+
+### Available Templates
+
+#### 1. Architecture Decision Record (ADR) Template
+**File**: [adr-template.md](.claude/templates/adr-template.md)
+**Purpose**: Document significant architectural decisions with context, alternatives, and rationale
+**Agent**: Primarily used by `@architect-supreme` for enterprise architecture governance
+**Use Cases**:
+- Technology stack selection (Azure SQL vs. Cosmos DB)
+- Integration pattern decisions (REST API vs. Event-driven)
+- Microsoft service evaluation (Azure Functions vs. App Service)
+- Security architecture choices (Managed Identity vs. Service Principal)
+
+**Key Sections**:
+- **Context**: Business problem and technical constraints
+- **Decision Drivers**: Requirements, priorities, constraints
+- **Options Analysis**: Alternatives considered with pros/cons
+- **Decision Outcome**: Selected approach with justification
+- **Cost Analysis**: Financial implications and ROI
+- **Microsoft Ecosystem Alignment**: How decision fits Microsoft-first strategy
+- **Monitoring & Validation**: Success criteria and KPIs
+
+**Example Usage**:
+```bash
+# Create new ADR for database selection
+cp .claude/templates/adr-template.md docs/adr/001-cosmos-db-for-event-sourcing.md
+# @architect-supreme fills in details based on requirements
+```
+
+#### 2. Runbook Template
+**File**: [runbook-template.md](.claude/templates/runbook-template.md)
+**Purpose**: Standardized operational procedures for Azure deployments and incident response
+**Agent**: Primarily used by `@integration-specialist` and `@deployment-orchestrator` (future agent)
+**Use Cases**:
+- Azure App Service deployment procedures
+- Database migration runbooks
+- Disaster recovery workflows
+- Incident response procedures (SEV1-SEV4)
+- Scaling operations
+
+**Key Sections**:
+- **Service Overview**: Azure resources, endpoints, dependencies
+- **Monitoring & Alerting**: Application Insights queries, alert thresholds
+- **Common Operations**: Deployment, rollback, scaling, configuration changes
+- **Incident Response**: Severity definitions, escalation procedures, communication templates
+- **Troubleshooting Guide**: Common issues, diagnostic steps, resolution procedures
+- **Contacts**: On-call rotations, escalation paths
+
+**Example Usage**:
+```bash
+# Create runbook for Example Build deployment
+cp .claude/templates/runbook-template.md docs/runbooks/cost-dashboard-deployment.md
+# @integration-specialist documents deployment procedures
+```
+
+### Template Usage Guidelines
+
+**When to Create ADR**:
+- Technology decisions with long-term impact (> 6 months)
+- Architectural changes affecting multiple systems
+- Microsoft service evaluations with alternatives
+- Security or compliance architecture decisions
+- Cost optimization strategies requiring justification
+
+**When to Create Runbook**:
+- New Azure service deployment
+- Production incident response procedures
+- Database migration or scaling operations
+- Disaster recovery workflows
+- Any operational procedure requiring team coordination
+
+**AI-Agent Friendly Structure**:
+- All templates use explicit headers and consistent formatting
+- Checklists for verification steps
+- Code blocks with exact commands (no ambiguity)
+- Environment-specific configurations clearly separated
+- Prerequisites and validation steps for every operation
+
+**Brookside BI Brand Alignment**:
+- Templates lead with business value and outcomes
+- Use consultative, solution-focused language
+- Emphasize Microsoft ecosystem integration
+- Include cost analysis and ROI considerations
+- Structure for scalability and team collaboration
+
+**Best for**: Organizations establishing governance frameworks for architecture decisions and operational excellence while maintaining sustainable practices that support growth across distributed teams.
+
 ## Slash Commands Quick Reference
 
 Slash commands provide executable workflows that delegate to specialized agents. This section establishes sustainable command patterns for innovation operations.
@@ -1464,8 +1678,9 @@ Slash commands provide executable workflows that delegate to specialized agents.
 |---------|---------|------------|---------|
 | `/innovation:new-idea` | Capture innovation opportunity with duplicate prevention | `[idea description]` | `/innovation:new-idea Automated Power BI deployment pipeline` |
 | `/innovation:start-research` | Begin structured feasibility investigation | `[topic] [originating-idea-title]` | `/innovation:start-research "Azure OpenAI integration" "AI-powered insights"` |
+| `/orchestrate-complex` | Orchestrate complex multi-agent workflows with parallel execution and dependency management | `[task-description]` | `/orchestrate-complex Build Azure OpenAI integration with architecture, deployment, and documentation` |
 
-**Delegates to**: `@ideas-capture`, `@research-coordinator`, `@workflow-router`, `@cost-analyst`
+**Delegates to**: `@ideas-capture`, `@research-coordinator`, `@workflow-router`, `@cost-analyst` (for ideas/research commands); Multiple specialized agents in parallel waves for `/orchestrate-complex`
 
 ### Cost Commands
 
@@ -1497,6 +1712,32 @@ Slash commands provide executable workflows that delegate to specialized agents.
 | `/knowledge:archive` | Complete lifecycle with learnings preservation | `[item-name] [database: idea\|research\|build]` | `/knowledge:archive "AI Documentation Generator" build` |
 
 **Delegates to**: `@archive-manager`, `@knowledge-curator`, `@markdown-expert`
+
+### Compliance Commands
+
+**Category**: `.claude/commands/compliance/`
+
+| Command | Purpose | Parameters | Example |
+|---------|---------|------------|---------|
+| `/compliance:audit` | Comprehensive software licensing and governance compliance assessment | `[scope: all\|active\|new]` | `/compliance:audit active` |
+
+**Delegates to**: `@compliance-orchestrator`, `@cost-analyst`, `@integration-specialist`, `@knowledge-curator`
+
+**Compliance Frameworks Supported**:
+- **Software Licensing**: MIT, Apache 2.0, GPL, BSD, Commercial licenses, EULA compliance
+- **GDPR**: EU data protection regulations (Art. 6, 7, 15, 17, 32)
+- **CCPA**: California Consumer Privacy Act requirements
+- **Third-Party Integration Security**: Authentication methods, data sharing, access controls
+
+**Audit Workflow**:
+1. **Scoping Phase** (3 agents parallel): Identify applicable frameworks, query Software Tracker, assess Integration Registry
+2. **Assessment Phase** (4 agents parallel): License compliance, GDPR assessment, CCPA evaluation, security review
+3. **Remediation Phase**: Prioritize findings, create action items, assign owners
+4. **Documentation Phase**: Generate compliance report, archive to Knowledge Vault
+
+**Output**: Comprehensive compliance report with findings categorized by severity (Critical, High, Medium, Low, Informational), remediation recommendations, and Knowledge Vault documentation.
+
+**Best for**: Organizations requiring regulatory compliance visibility, software licensing audit trails, and third-party integration security reviews across the Innovation Nexus platform.
 
 ### Team Commands
 

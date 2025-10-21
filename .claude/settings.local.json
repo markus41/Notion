@@ -1,63 +1,171 @@
-{
-  "cleanupPeriodDays": 90,
-  "env": {
-    "AZURE_TENANT_ID": "2930489e-9d8a-456b-9de9-e4787faeab9c",
-    "AZURE_SUBSCRIPTION_ID": "cfacbbe8-a2a3-445f-a188-68b3b35f0c84"
-  },
-  "includeCoAuthoredBy": true,
-  "permissions": {
-    "allow": [
-      "Bash(timeout /t 30)",
-      "Bash(tree:*)",
-      "Bash(Get-Content \"C:\\Users\\MarkusAhling\\.config\\claude-code\\mcp_config.json\")",
-      "Bash(ConvertFrom-Json)",
-      "Bash(ConvertTo-Json -Depth 10)",
-      "Bash(find:*)",
-      "Bash(mkdir:*)",
-      "Bash(poetry run python:*)",
-      "Bash(claude mcp list:*)",
-      "Bash(npx -y @notionhq/client@latest)",
-      "Bash(gh repo list:*)",
-      "Bash(az bicep build:*)",
-      "Bash(gh auth status:*)"
-    ],
-    "deny": [],
-    "ask": []
-  },
-  "model": "claude-sonnet-4-5-20250929",
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify System Generic.wav').PlaySync()\""
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify Messaging.wav').PlaySync()\""
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify Calendar.wav').PlaySync()\""
-          }
-        ]
-      }
-    ]
-  },
-  "sandbox": {
-    "enabled": false
-  }
+﻿{
+    "cleanupPeriodDays":  90,
+    "env":  {
+                "AZURE_TENANT_ID":  "2930489e-9d8a-456b-9de9-e4787faeab9c",
+                "AZURE_SUBSCRIPTION_ID":  "cfacbbe8-a2a3-445f-a188-68b3b35f0c84"
+            },
+    "includeCoAuthoredBy":  true,
+    "permissions":  {
+                        "allow":  [
+                                      "Bash(timeout /t 30)",
+                                      "Bash(tree:*)",
+                                      "Bash(Get-Content \"C:\\Users\\MarkusAhling\\.config\\claude-code\\mcp_config.json\")",
+                                      "Bash(ConvertFrom-Json)",
+                                      "Bash(ConvertTo-Json -Depth 10)",
+                                      "Bash(find:*)",
+                                      "Bash(mkdir:*)",
+                                      "Bash(poetry run python:*)",
+                                      "Bash(claude mcp list:*)",
+                                      "Bash(npx -y @notionhq/client@latest)",
+                                      "Bash(gh repo list:*)",
+                                      "Bash(az bicep build:*)",
+                                      "Bash(gh auth status:*)",
+                                      "Bash(pwsh:*)",
+                                      "Bash(az keyvault secret show:*)",
+                                      "Bash(echo:*)",
+                                      "Bash(gh auth login:*)",
+                                      "Bash(gh auth logout:*)",
+                                      "Bash(dir \"C:\\Users\\MarkusAhling\\Notion\\.claude\" /A)",
+                                      "Bash(python:*)",
+                                      "Read(//c/Users/MarkusAhling/.claude/**)",
+                                      "Bash(/dev/null)",
+                                      "Read(//c/Users/MarkusAhling/**)",
+                                      "Bash(cat:*)",
+                                      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\Users\\MarkusAhling\\Notion\\.claude\\hooks\\Install-Hooks.ps1\" -Scope Project)",
+                                      "Bash(powershell:*)",
+                                      "Bash(.claude/hooks/*)",
+                                      "Bash(git status:*)",
+                                      "Bash(git diff:*)",
+                                      "Bash(git log:*)",
+                                      "Bash(git branch:*)",
+                                      "Read(.claude/**)",
+                                      "Read(.git/**)"
+                                  ],
+                        "deny":  [
+
+                                 ],
+                        "ask":  [
+
+                                ]
+                    },
+    "model":  "claude-sonnet-4-5-20250929",
+    "hooks":  {
+                  "SessionStart":  [
+                                       {
+                                           "hooks":  [
+                                                         {
+                                                             "type":  "command",
+                                                             "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify System Generic.wav\u0027).PlaySync()\""
+                                                         }
+                                                     ]
+                                       }
+                                   ],
+                  "Notification":  [
+                                       {
+                                           "hooks":  [
+                                                         {
+                                                             "type":  "command",
+                                                             "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify Messaging.wav\u0027).PlaySync()\""
+                                                         }
+                                                     ]
+                                       }
+                                   ],
+                  "Stop":  [
+                               {
+                                   "hooks":  [
+                                                 {
+                                                     "type":  "command",
+                                                     "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify Calendar.wav\u0027).PlaySync()\""
+                                                 }
+                                             ]
+                               }
+                           ],
+                  "tool-call-hook":  [
+                                         {
+                                             "description":  "Pre-commit validation - Check for secrets, large files, protected branches",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Bash"
+                                                                     ],
+                                                           "pattern":  "git\\s+commit"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "bash .claude/hooks/pre-commit-validation.sh",
+                                                               "description":  "Run comprehensive pre-commit validation checks"
+                                                           }
+                                                       ]
+                                         },
+                                         {
+                                             "description":  "Commit message validation - Enforce Conventional Commits and Brookside BI branding",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Bash"
+                                                                     ],
+                                                           "pattern":  "git\\s+commit\\s+-m"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "bash .claude/hooks/commit-message-validator.sh",
+                                                               "description":  "Validate commit message format and brand alignment"
+                                                           }
+                                                       ]
+                                         },
+                                         {
+                                             "description":  "Force push protection - Prevent force push to protected branches",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Bash"
+                                                                     ],
+                                                           "pattern":  "git\\s+push.*(--force|-f)"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "bash .claude/hooks/branch-protection.sh check-push --force",
+                                                               "description":  "Block force push to main/master/production"
+                                                           }
+                                                       ],
+                                             "block":  true
+                                         },
+                                         {
+                                             "description":  "Branch deletion protection - Prevent deletion of protected branches",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Bash"
+                                                                     ],
+                                                           "pattern":  "git\\s+branch\\s+-D\\s+(main|master|production|release|develop)"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "bash .claude/hooks/branch-protection.sh check-delete $BRANCH",
+                                                               "description":  "Block deletion of protected branches"
+                                                           }
+                                                       ],
+                                             "block":  true
+                                         },
+                                         {
+                                             "description":  "Destructive operation warning - Warn before reset --hard, clean -fd, etc.",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Bash"
+                                                                     ],
+                                                           "pattern":  "git\\s+(reset\\s+--hard|clean\\s+-fd|filter-branch)"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "bash .claude/hooks/branch-protection.sh check-command",
+                                                               "description":  "Warn before destructive git operations"
+                                                           }
+                                                       ]
+                                         }
+                                     ]
+              },
+    "sandbox":  {
+                    "enabled":  false
+                }
 }

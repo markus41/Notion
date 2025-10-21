@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-    from meta_agents.api.main import app; import json; print(json.dumps(app.openapi(), indent=2))
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\MarkusAhling\Project-Ascension\src\python\meta_agents\__init__.py", line 7, in <module>
-    from meta_agents.architect_agent import ArchitectAgent
-  File "C:\Users\MarkusAhling\Project-Ascension\src\python\meta_agents\architect_agent.py", line 15, in <module>
-    from pydantic import BaseModel, Field
-ModuleNotFoundError: No module named 'pydantic'
