@@ -1,10 +1,76 @@
 {
+  "cleanupPeriodDays": 90,
+  "env": {
+    "AZURE_TENANT_ID": "2930489e-9d8a-456b-9de9-e4787faeab9c",
+    "AZURE_SUBSCRIPTION_ID": "cfacbbe8-a2a3-445f-a188-68b3b35f0c84"
+  },
+  "includeCoAuthoredBy": true,
   "permissions": {
     "allow": [
-      "Bash(claude mcp add:*)",
-      "Read(//c/Users/MarkusAhling/**)"
+      "Bash(claude mcp:*)",
+      "Read(//c/Users/MarkusAhling/.claude/**)",
+      "Read(//c/Users/MarkusAhling/**)",
+      "Bash(az:*)",
+      "Bash(npx @modelcontextprotocol/server-azure:*)",
+      "Bash(mkdir:*)",
+      "WebSearch",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\Users\\MarkusAhling\\Notion\\scripts\\Get-KeyVaultSecret.ps1\" -SecretName \"github-personal-access-token\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx -y @azure/mcp@latest --version)",
+      "Bash(npx:*)",
+      "Bash(Select-Object -First 20)",
+      "Bash(powershell -Command \"npx -y @azure/mcp@latest server start 2>&1 | Select-Object -First 10\")",
+      "Bash(Select-Object -First 10)",
+      "Bash(powershell:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(Select-String -Pattern \"\\.json$|\\.claude\")",
+      "mcp__notion__notion-search",
+      "Bash(where.exe npx)",
+      "mcp__notion__notion-fetch",
+      "mcp__notion__notion-create-pages",
+      "mcp__notion__notion-get-users",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "model": "claude-sonnet-4-5-20250929",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify System Generic.wav').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify Messaging.wav').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"[System.Media.SoundPlayer]::new('C:\\Windows\\Media\\Windows Notify Calendar.wav').PlaySync()\""
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "enabled": false
   }
 }
