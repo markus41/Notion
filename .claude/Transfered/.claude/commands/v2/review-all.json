@@ -1,0 +1,498 @@
+{
+  "version": "2.0.0",
+  "name": "/review-all",
+  "description": "Comprehensive code review across 5 dimensions with parallel execution (59% faster than v1.0)",
+  "pattern": "Fan-Out Parallel Analysis",
+  "metadata": {
+    "estimatedTime": 1020000,
+    "estimatedTimeReadable": "17 minutes",
+    "maxParallelism": 5,
+    "improvementVsV1": "59% faster (17 min vs 41 min)",
+    "timeSavings": "24 minutes",
+    "author": "Claude Agent System",
+    "createdDate": "2025-10-08",
+    "category": "Code Quality",
+    "tags": ["review", "quality", "security", "performance", "documentation", "accessibility", "parallel"]
+  },
+  "phases": [
+    {
+      "name": "Analysis",
+      "description": "Initial codebase analysis to gather structure and metrics",
+      "parallel": false,
+      "estimatedTime": 300000,
+      "agents": [
+        {
+          "id": "analyzer",
+          "type": "codebase-analyzer",
+          "description": "Analyze codebase structure, file organization, and complexity metrics",
+          "input": {
+            "scope": "full",
+            "includeMetrics": true,
+            "includeStructure": true,
+            "includeDependencies": true
+          },
+          "context": {
+            "outputs": [
+              {
+                "key": "codebase_structure",
+                "description": "Directory structure, file organization, module boundaries",
+                "ttl": 3600
+              },
+              {
+                "key": "file_list",
+                "description": "Complete list of files with metadata (size, language, complexity)",
+                "ttl": 3600
+              },
+              {
+                "key": "complexity_metrics",
+                "description": "Cyclomatic complexity, code churn, technical debt metrics",
+                "ttl": 3600
+              },
+              {
+                "key": "dependency_graph",
+                "description": "Module dependencies, coupling metrics, circular dependencies",
+                "ttl": 3600
+              },
+              {
+                "key": "hotspots",
+                "description": "High-change, high-complexity files requiring attention",
+                "ttl": 3600
+              }
+            ]
+          },
+          "timeout": 360000,
+          "estimatedTime": 300000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0,
+            "retryableErrors": ["timeout", "network_error", "rate_limit"]
+          },
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "description": "Parallel execution of 5 specialized reviewers",
+      "parallel": true,
+      "estimatedTime": 360000,
+      "agents": [
+        {
+          "id": "quality-reviewer",
+          "type": "senior-reviewer",
+          "description": "Code quality review focusing on best practices, patterns, and maintainability",
+          "input": {
+            "focus": "code_quality",
+            "checkReadability": true,
+            "checkMaintainability": true,
+            "checkSOLID": true,
+            "checkDesignPatterns": true,
+            "severityLevels": ["Critical", "High", "Medium", "Low"]
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "codebase_structure",
+                "required": true,
+                "description": "Used to assess architectural organization"
+              },
+              {
+                "key": "complexity_metrics",
+                "required": true,
+                "description": "Used to identify high-complexity areas"
+              },
+              {
+                "key": "dependency_graph",
+                "required": false,
+                "description": "Used to assess coupling and cohesion"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "quality_report",
+                "description": "Code quality findings with severity levels and recommendations",
+                "ttl": 1800
+              },
+              {
+                "key": "refactoring_priorities",
+                "description": "Prioritized list of refactoring opportunities",
+                "ttl": 1800
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": ["analyzer"]
+        },
+        {
+          "id": "security-reviewer",
+          "type": "security-specialist",
+          "description": "Security vulnerability scan covering OWASP Top 10, secrets, and authentication patterns",
+          "input": {
+            "focus": "security",
+            "checkOWASP": true,
+            "checkSecrets": true,
+            "checkAuthentication": true,
+            "checkAuthorization": true,
+            "checkInputValidation": true,
+            "severityLevels": ["Critical", "High", "Medium", "Low", "Informational"]
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "codebase_structure",
+                "required": true,
+                "description": "Used to identify API endpoints and entry points"
+              },
+              {
+                "key": "file_list",
+                "required": true,
+                "description": "Used to scan for secrets and sensitive files"
+              },
+              {
+                "key": "dependency_graph",
+                "required": false,
+                "description": "Used to assess attack surface"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "security_report",
+                "description": "Security findings with CVSS scores and remediation steps",
+                "ttl": 1800
+              },
+              {
+                "key": "vulnerability_list",
+                "description": "Categorized vulnerabilities by OWASP category",
+                "ttl": 1800
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": ["analyzer"]
+        },
+        {
+          "id": "performance-reviewer",
+          "type": "performance-optimizer",
+          "description": "Performance analysis identifying bottlenecks, inefficient algorithms, and optimization opportunities",
+          "input": {
+            "focus": "performance",
+            "checkAlgorithms": true,
+            "checkDatabaseQueries": true,
+            "checkCaching": true,
+            "checkMemoryUsage": true,
+            "checkFrontendPerformance": true,
+            "severityLevels": ["Critical", "High", "Medium", "Low"]
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "codebase_structure",
+                "required": true,
+                "description": "Used to identify performance-critical paths"
+              },
+              {
+                "key": "complexity_metrics",
+                "required": true,
+                "description": "Used to identify algorithmic complexity issues"
+              },
+              {
+                "key": "hotspots",
+                "required": false,
+                "description": "Used to prioritize high-change areas"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "performance_report",
+                "description": "Performance findings with metrics and optimization recommendations",
+                "ttl": 1800
+              },
+              {
+                "key": "bottleneck_list",
+                "description": "Identified bottlenecks with estimated impact",
+                "ttl": 1800
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": ["analyzer"]
+        },
+        {
+          "id": "accessibility-reviewer",
+          "type": "frontend-engineer",
+          "description": "Accessibility review covering WCAG 2.1 compliance, semantic HTML, and assistive technology support",
+          "input": {
+            "focus": "accessibility",
+            "checkWCAG": true,
+            "checkSemanticHTML": true,
+            "checkARIA": true,
+            "checkKeyboardNavigation": true,
+            "checkColorContrast": true,
+            "severityLevels": ["Critical", "High", "Medium", "Low"]
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "codebase_structure",
+                "required": true,
+                "description": "Used to identify frontend components"
+              },
+              {
+                "key": "file_list",
+                "required": true,
+                "description": "Used to locate HTML, JSX, and component files"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "accessibility_report",
+                "description": "Accessibility findings with WCAG level and remediation steps",
+                "ttl": 1800
+              },
+              {
+                "key": "wcag_violations",
+                "description": "Categorized WCAG violations by level (A, AA, AAA)",
+                "ttl": 1800
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": ["analyzer"]
+        },
+        {
+          "id": "documentation-reviewer",
+          "type": "documentation-expert",
+          "description": "Documentation completeness review covering inline comments, API docs, README, and guides",
+          "input": {
+            "focus": "documentation",
+            "checkInlineComments": true,
+            "checkAPIDocumentation": true,
+            "checkREADME": true,
+            "checkGuides": true,
+            "checkExamples": true,
+            "severityLevels": ["Critical", "High", "Medium", "Low"]
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "codebase_structure",
+                "required": true,
+                "description": "Used to assess documentation organization"
+              },
+              {
+                "key": "file_list",
+                "required": true,
+                "description": "Used to locate documentation files"
+              },
+              {
+                "key": "complexity_metrics",
+                "required": false,
+                "description": "Used to identify complex code needing documentation"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "documentation_report",
+                "description": "Documentation findings with coverage metrics and recommendations",
+                "ttl": 1800
+              },
+              {
+                "key": "documentation_gaps",
+                "description": "List of undocumented or poorly documented areas",
+                "ttl": 1800
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": ["analyzer"]
+        }
+      ]
+    },
+    {
+      "name": "Synthesis",
+      "description": "Aggregate all review findings into comprehensive report with prioritized recommendations",
+      "parallel": false,
+      "estimatedTime": 360000,
+      "agents": [
+        {
+          "id": "synthesis",
+          "type": "senior-reviewer",
+          "description": "Synthesize all review findings into actionable roadmap with cross-cutting concerns",
+          "input": {
+            "aggregateFindings": true,
+            "prioritizeByImpact": true,
+            "identifyPatterns": true,
+            "createRoadmap": true,
+            "estimateEffort": true
+          },
+          "context": {
+            "inputs": [
+              {
+                "key": "quality_report",
+                "required": true,
+                "description": "Quality findings from senior-reviewer"
+              },
+              {
+                "key": "security_report",
+                "required": true,
+                "description": "Security findings from security-specialist"
+              },
+              {
+                "key": "performance_report",
+                "required": true,
+                "description": "Performance findings from performance-optimizer"
+              },
+              {
+                "key": "accessibility_report",
+                "required": true,
+                "description": "Accessibility findings from frontend-engineer"
+              },
+              {
+                "key": "documentation_report",
+                "required": true,
+                "description": "Documentation findings from documentation-expert"
+              },
+              {
+                "key": "refactoring_priorities",
+                "required": false,
+                "description": "Refactoring priorities from quality review"
+              },
+              {
+                "key": "vulnerability_list",
+                "required": false,
+                "description": "Vulnerability list from security review"
+              },
+              {
+                "key": "bottleneck_list",
+                "required": false,
+                "description": "Performance bottlenecks"
+              }
+            ],
+            "outputs": [
+              {
+                "key": "comprehensive_report",
+                "description": "Complete review report with all findings and recommendations",
+                "ttl": 7200
+              },
+              {
+                "key": "prioritized_roadmap",
+                "description": "Actionable roadmap prioritized by severity and impact",
+                "ttl": 7200
+              },
+              {
+                "key": "quick_wins",
+                "description": "High-impact, low-effort improvements for immediate implementation",
+                "ttl": 7200
+              },
+              {
+                "key": "critical_issues",
+                "description": "Critical issues requiring immediate attention",
+                "ttl": 7200
+              }
+            ]
+          },
+          "timeout": 420000,
+          "estimatedTime": 360000,
+          "retry": {
+            "maxAttempts": 2,
+            "initialDelay": 1000,
+            "backoffMultiplier": 2.0
+          },
+          "dependencies": [
+            "quality-reviewer",
+            "security-reviewer",
+            "performance-reviewer",
+            "accessibility-reviewer",
+            "documentation-reviewer"
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "requiredOutputs": [
+      "comprehensive_report",
+      "prioritized_roadmap",
+      "critical_issues"
+    ],
+    "successCriteria": [
+      "All 5 reviewer reports completed successfully",
+      "No critical errors during analysis phase",
+      "Synthesis produces actionable recommendations",
+      "All findings categorized by severity"
+    ]
+  },
+  "errorHandling": {
+    "onAnalyzerFailure": "Abort entire workflow - cannot proceed without codebase analysis",
+    "onReviewerFailure": "Continue with remaining reviewers - partial results still valuable",
+    "onSynthesisFailure": "Return individual reports - synthesis is enhancement not requirement"
+  },
+  "outputFormat": {
+    "primaryOutput": "comprehensive_report",
+    "format": "markdown",
+    "sections": [
+      "Executive Summary",
+      "Critical Issues (Immediate Action Required)",
+      "Quick Wins (High Impact, Low Effort)",
+      "Quality Findings",
+      "Security Vulnerabilities",
+      "Performance Bottlenecks",
+      "Accessibility Issues",
+      "Documentation Gaps",
+      "Prioritized Roadmap",
+      "Metrics and Statistics"
+    ]
+  },
+  "performance": {
+    "v1_sequential": {
+      "phase1_analysis": 300000,
+      "phase2_reviews": 1800000,
+      "phase3_synthesis": 360000,
+      "total": 2460000,
+      "totalReadable": "41 minutes"
+    },
+    "v2_parallel": {
+      "phase1_analysis": 300000,
+      "phase2_reviews": 360000,
+      "phase3_synthesis": 360000,
+      "total": 1020000,
+      "totalReadable": "17 minutes"
+    },
+    "improvement": {
+      "percentageFaster": "59%",
+      "timeSaved": 1440000,
+      "timeSavedReadable": "24 minutes"
+    }
+  }
+}

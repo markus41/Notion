@@ -1,0 +1,95 @@
+%% Basic Azure Deployment Topology
+%% Shows single-region deployment for development/staging environments
+%% Designed to streamline initial cloud deployment with essential services
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Azure Subscription"
+        subgraph "Resource Group: agstudio-dev-rg"
+            subgraph "Compute Services"
+                app_service["App Service Plan<br/>---<br/>B2 (2 vCPU, 3.5GB RAM)<br/>Linux Container"]
+                webapp_container["Web App<br/>---<br/>React Frontend<br/>Container Instance"]
+                api_container["Web App<br/>---<br/>Orchestration API<br/>Container Instance"]
+                agent_container["Web App<br/>---<br/>Agent Service<br/>Container Instance"]
+            end
+
+            subgraph "Data Services"
+                cosmos["Cosmos DB<br/>---<br/>Serverless Mode<br/>Multi-region writes disabled"]
+                redis["Redis Cache<br/>---<br/>Basic C1 (1GB)<br/>Single node"]
+                storage["Storage Account<br/>---<br/>Standard LRS<br/>Blob containers"]
+            end
+
+            subgraph "AI Services"
+                openai["Azure OpenAI<br/>---<br/>GPT-4 (10 TPM)<br/>GPT-3.5-Turbo (30 TPM)"]
+                ai_search["Azure AI Search<br/>---<br/>Basic tier<br/>Vector search enabled"]
+            end
+
+            subgraph "Supporting Services"
+                keyvault["Key Vault<br/>---<br/>Standard tier<br/>Secrets & certificates"]
+                acr["Container Registry<br/>---<br/>Basic tier<br/>10GB storage"]
+                insights["Application Insights<br/>---<br/>5GB/month retention<br/>Distributed tracing"]
+                signalr["SignalR Service<br/>---<br/>Free tier<br/>20 connections"]
+            end
+
+            subgraph "Networking"
+                app_gateway["Application Gateway<br/>---<br/>WAF_v2<br/>Public IP"]
+                dns_zone["DNS Zone<br/>---<br/>agstudio.dev<br/>A records"]
+            end
+        end
+    end
+
+    subgraph "External Users"
+        users["End Users<br/>---<br/>HTTPS Traffic"]
+    end
+
+    subgraph "Developer Access"
+        devs["Developers<br/>---<br/>Azure Portal<br/>Azure CLI"]
+    end
+
+    %% User connections
+    users -->|HTTPS| app_gateway
+    app_gateway -->|Route /| webapp_container
+    app_gateway -->|Route /api| api_container
+    app_gateway -->|Route /agents| agent_container
+
+    %% Service connections
+    webapp_container -->|REST API| api_container
+    webapp_container -->|WebSocket| signalr
+    api_container -->|HTTP| agent_container
+    api_container -->|SDK| cosmos
+    api_container -->|Client| redis
+    agent_container -->|SDK| cosmos
+    agent_container -->|Client| redis
+    agent_container -->|SDK| storage
+    agent_container -->|REST| openai
+    agent_container -->|SDK| ai_search
+
+    %% Infrastructure connections
+    api_container -->|Managed Identity| keyvault
+    agent_container -->|Managed Identity| keyvault
+    app_service -->|Pull| acr
+    api_container -->|Telemetry| insights
+    agent_container -->|Telemetry| insights
+    webapp_container -->|Telemetry| insights
+
+    %% Management connections
+    devs -->|Deploy| acr
+    devs -->|Configure| keyvault
+    devs -->|Monitor| insights
+    dns_zone -->|Points to| app_gateway
+
+    %% Apply semantic color coding
+    classDef compute fill:#0078d4,stroke:#005a9e,color:#fff,stroke-width:2px
+    classDef data fill:#336791,stroke:#254a6b,color:#fff,stroke-width:2px
+    classDef ai fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef support fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef network fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef user fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+
+    class app_service,webapp_container,api_container,agent_container compute
+    class cosmos,redis,storage data
+    class openai,ai_search ai
+    class keyvault,acr,insights,signalr support
+    class app_gateway,dns_zone network
+    class users,devs user

@@ -1,0 +1,109 @@
+flowchart TB
+    Start([Git Push]) --> Trigger{Branch?}
+
+    Trigger -->|main| MainPipeline[Main Pipeline]
+    Trigger -->|feature/*| FeaturePipeline[Feature Pipeline]
+    Trigger -->|release/*| ReleasePipeline[Release Pipeline]
+
+    subgraph "Feature Branch Pipeline"
+        FeaturePipeline --> FCheckout[Checkout Code]
+        FCheckout --> FRestore[Restore Dependencies<br/>---<br/>npm install<br/>dotnet restore<br/>pip install]
+        FRestore --> FBuild[Build<br/>---<br/>npm run build<br/>dotnet build<br/>docker build]
+        FBuild --> FLint[Linting & Formatting<br/>---<br/>eslint, prettier<br/>dotnet format<br/>black, flake8]
+        FLint --> FTest[Unit Tests<br/>---<br/>Vitest, Jest<br/>xUnit, NUnit<br/>pytest]
+        FTest --> FTestResult{Tests<br/>Pass?}
+        FTestResult -->|Yes| FSuccess[✓ PR Checks Pass]
+        FTestResult -->|No| FFail[✗ PR Checks Fail]
+        FSuccess --> FEnd([Ready for Review])
+        FFail --> FNotify[Notify Developer]
+        FNotify --> FEnd
+    end
+
+    subgraph "Main Branch Pipeline"
+        MainPipeline --> MCheckout[Checkout Code]
+        MCheckout --> MRestore[Restore Dependencies]
+        MRestore --> MBuild[Build All Services]
+        MBuild --> MTest[Full Test Suite<br/>---<br/>Unit + Integration + E2E]
+
+        MTest --> MTestResult{Tests<br/>Pass?}
+        MTestResult -->|No| MFail[✗ Build Failed]
+        MTestResult -->|Yes| MSecurity[Security Scanning<br/>---<br/>Snyk, Trivy<br/>SAST, Dependency Check]
+
+        MSecurity --> MSecResult{Vulnerabilities?}
+        MSecResult -->|Critical| MFail
+        MSecResult -->|None/Low| MContainer[Build Containers<br/>---<br/>docker build<br/>Tag: {git-sha}]
+
+        MContainer --> MPushACR[Push to ACR<br/>---<br/>Azure Container Registry]
+        MPushACR --> MDeployDev[Deploy to Dev<br/>---<br/>Azure Container Apps<br/>Update revision]
+
+        MDeployDev --> MHealthDev{Health<br/>Check?}
+        MHealthDev -->|Fail| MRollback1[Rollback Dev]
+        MHealthDev -->|Pass| MSmokeDev[Smoke Tests<br/>---<br/>API availability<br/>Critical paths]
+
+        MSmokeDev --> MSmokeResult{Smoke<br/>Pass?}
+        MSmokeResult -->|No| MRollback1
+        MSmokeResult -->|Yes| MDeployStaging[Deploy to Staging<br/>---<br/>Blue-Green deployment]
+
+        MDeployStaging --> MHealthStaging{Health<br/>Check?}
+        MHealthStaging -->|Fail| MRollback2[Rollback Staging]
+        MHealthStaging -->|Pass| MIntegrationTest[Integration Tests<br/>---<br/>Full test suite<br/>Performance tests]
+
+        MIntegrationTest --> MIntResult{Tests<br/>Pass?}
+        MIntResult -->|No| MRollback2
+        MIntResult -->|Yes| MApprovalNeeded{Auto-deploy<br/>to Prod?}
+
+        MApprovalNeeded -->|Yes| MDeployProd
+        MApprovalNeeded -->|No| MWaitApproval[Wait for Manual Approval<br/>---<br/>Notify: DevOps team<br/>Review: Staging results]
+
+        MWaitApproval --> MApproved{Approved?}
+        MApproved -->|No| MCancelled[Deployment Cancelled]
+        MApproved -->|Yes| MDeployProd[Deploy to Production<br/>---<br/>Canary deployment<br/>10% -> 50% -> 100%]
+
+        MDeployProd --> MCanary10[Canary 10%<br/>---<br/>Route 10% traffic<br/>Monitor 15 minutes]
+        MCanary10 --> MCanary10Health{Error rate<br/>< 1%?}
+        MCanary10Health -->|No| MRollback3[Rollback Production]
+        MCanary10Health -->|Yes| MCanary50[Canary 50%<br/>---<br/>Route 50% traffic<br/>Monitor 15 minutes]
+
+        MCanary50 --> MCanary50Health{Error rate<br/>< 1%?}
+        MCanary50Health -->|No| MRollback3
+        MCanary50Health -->|Yes| MCanary100[Canary 100%<br/>---<br/>Route 100% traffic<br/>Monitor 30 minutes]
+
+        MCanary100 --> MFinalHealth{All metrics<br/>green?}
+        MFinalHealth -->|No| MRollback3
+        MFinalHealth -->|Yes| MSuccess[✓ Deployment Complete]
+
+        MFail --> MNotify1[Notify Team<br/>---<br/>Slack, Email<br/>Create incident]
+        MRollback1 --> MNotify1
+        MRollback2 --> MNotify1
+        MRollback3 --> MNotify1
+        MCancelled --> MNotify1
+
+        MSuccess --> MTag[Create Git Tag<br/>---<br/>v{semver}]
+        MTag --> MRelease[Create GitHub Release<br/>---<br/>Release notes<br/>Changelog]
+        MRelease --> MNotify2[Notify Success<br/>---<br/>Slack, Teams<br/>Dashboard update]
+
+        MNotify1 --> MEnd([Pipeline End])
+        MNotify2 --> MEnd
+    end
+
+    subgraph "Release Branch Pipeline"
+        ReleasePipeline --> RCheckout[Checkout Code]
+        RCheckout --> RNote[Release preparation<br/>---<br/>Follows main pipeline<br/>with additional steps]
+        RNote --> REnd([Release Process])
+    end
+
+    classDef start fill:#3b82f6,stroke:#2563eb,color:#fff,stroke-width:2px
+    classDef build fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef test fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef deploy fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef decision fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef success fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef failure fill:#ef4444,stroke:#dc2626,color:#fff,stroke-width:2px
+
+    class Start,FCheckout,MCheckout,RCheckout start
+    class FBuild,FRestore,MBuild,MRestore,MContainer,MPushACR build
+    class FTest,FLint,MTest,MSecurity,MSmokeDev,MIntegrationTest test
+    class MDeployDev,MDeployStaging,MDeployProd,MCanary10,MCanary50,MCanary100 deploy
+    class Trigger,FTestResult,MTestResult,MSecResult,MHealthDev,MSmokeResult,MHealthStaging,MIntResult,MApprovalNeeded,MApproved,MCanary10Health,MCanary50Health,MFinalHealth decision
+    class FSuccess,MSuccess success
+    class FFail,MFail,MRollback1,MRollback2,MRollback3,MCancelled failure

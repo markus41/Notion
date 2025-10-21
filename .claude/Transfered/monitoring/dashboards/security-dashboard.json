@@ -1,0 +1,52 @@
+{
+  "dashboard": {
+    "title": "AI Orchestrator - Security Dashboard",
+    "description": "Security monitoring and threat detection",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Authentication Failures",
+        "type": "graph",
+        "targets": [{"expr": "rate(auth_failures_total[5m])", "legendFormat": "{{reason}}"}]
+      },
+      {
+        "id": 2,
+        "title": "Suspicious Activity",
+        "type": "stat",
+        "targets": [{"expr": "sum(security_events_total{severity='high'})"}],
+        "options": {"colorMode": "background"}
+      },
+      {
+        "id": 3,
+        "title": "Rate Limit Violations",
+        "type": "graph",
+        "targets": [{"expr": "rate(rate_limit_exceeded_total[5m])", "legendFormat": "{{endpoint}}"}]
+      },
+      {
+        "id": 4,
+        "title": "Blocked IPs",
+        "type": "table",
+        "targets": [{"expr": "topk(20, security_blocked_ips)", "format": "table"}]
+      },
+      {
+        "id": 5,
+        "title": "API Key Usage",
+        "type": "graph",
+        "targets": [{"expr": "sum(api_requests_total) by (api_key_id)"}]
+      },
+      {
+        "id": 6,
+        "title": "SSL Certificate Expiry",
+        "type": "stat",
+        "targets": [{"expr": "(ssl_certificate_expiry_timestamp - time()) / 86400"}],
+        "options": {"unit": "days"}
+      },
+      {
+        "id": 7,
+        "title": "Security Alerts",
+        "type": "logs",
+        "targets": [{"expr": "{job='ai-orchestrator', category='security'}"}]
+      }
+    ]
+  }
+}

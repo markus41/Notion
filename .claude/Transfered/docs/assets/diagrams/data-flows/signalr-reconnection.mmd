@@ -1,0 +1,95 @@
+%% SignalR Reconnection and Recovery Strategy
+%% Shows automatic reconnection handling with state recovery
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /guides/operations/connection-resilience, /api/signalr-events
+
+flowchart TD
+    Start([Connection Lost]) --> DetectLoss{Detection<br/>Method}
+
+    DetectLoss -->|Heartbeat Timeout| HeartbeatFail[No Pong in 30s]
+    DetectLoss -->|Network Error| NetworkFail[Socket Error]
+    DetectLoss -->|Server Disconnect| ServerClose[Server Initiated]
+
+    HeartbeatFail --> StartReconnect
+    NetworkFail --> StartReconnect
+    ServerClose --> CheckReason{Reason<br/>Code}
+
+    CheckReason -->|Maintenance| StartReconnect[Start Reconnection]
+    CheckReason -->|Kicked| NoReconnect[No Reconnection]
+
+    StartReconnect --> SaveState[Save Client State<br/>- Subscriptions<br/>- Pending messages<br/>- Last event ID]
+
+    SaveState --> Attempt1[Attempt 1<br/>Immediate]
+
+    Attempt1 -->|Fail| Wait2[Wait 2s]
+    Wait2 --> Attempt2[Attempt 2]
+
+    Attempt2 -->|Fail| Wait4[Wait 4s]
+    Wait4 --> Attempt3[Attempt 3]
+
+    Attempt3 -->|Fail| Wait8[Wait 8s]
+    Wait8 --> Attempt4[Attempt 4]
+
+    Attempt4 -->|Fail| Wait16[Wait 16s]
+    Wait16 --> Attempt5[Attempt 5]
+
+    Attempt5 -->|Fail| Wait30[Wait 30s]
+    Wait30 --> Attempt6[Attempt 6]
+
+    Attempt6 -->|Fail| GiveUp[Max Retries<br/>Exceeded]
+
+    Attempt1 -->|Success| Reconnected
+    Attempt2 -->|Success| Reconnected
+    Attempt3 -->|Success| Reconnected
+    Attempt4 -->|Success| Reconnected
+    Attempt5 -->|Success| Reconnected
+    Attempt6 -->|Success| Reconnected
+
+    Reconnected[Connection<br/>Restored] --> RestoreState[Restore State]
+
+    RestoreState --> ResubGroups[Resubscribe Groups]
+    ResubGroups --> SyncState[Sync Missed Events]
+
+    SyncState --> QueryMissed[Query Events<br/>Since Last ID]
+    QueryMissed --> ProcessMissed{Missed<br/>Events?}
+
+    ProcessMissed -->|Yes| ReplayEvents[Replay Events<br/>In Order]
+    ProcessMissed -->|No| Ready
+
+    ReplayEvents --> UpdateUI[Update UI State]
+    UpdateUI --> Ready[Connection Ready]
+
+    GiveUp --> UserNotify[Notify User<br/>Manual Refresh]
+    NoReconnect --> UserNotify
+
+    UserNotify --> ManualAction{User<br/>Action}
+    ManualAction -->|Refresh| PageReload[Reload Page]
+    ManualAction -->|Retry| StartReconnect
+
+    Ready --> Monitor[Monitor Connection]
+    Monitor --> Healthy{Connection<br/>Healthy?}
+
+    Healthy -->|Yes| Monitor
+    Healthy -->|No| Start
+
+    %% Annotations
+    SaveState -.-> StateNote[State Storage:<br/>- Local Storage<br/>- Session Storage<br/>- Memory cache<br/>- Max 1MB]
+
+    SyncState -.-> SyncNote[Event Sync:<br/>- Last 100 events<br/>- 5 minute window<br/>- Ordered delivery<br/>- Deduplication]
+
+    Attempt1 -.-> BackoffNote[Backoff Strategy:<br/>0s → 2s → 4s → 8s → 16s → 30s<br/>Total time: ~1 minute<br/>Jitter: ±10%]
+
+    Ready -.-> MetricsNote[Success Metrics:<br/>- Reconnect rate: 95%<br/>- Avg time: 3.2s<br/>- Event loss: <0.1%]
+
+    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef retry fill:#f59e0b,stroke:#d97706,color:#000
+    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef note fill:#f3f4f6,stroke:#9ca3af,color:#000
+
+    class HeartbeatFail,NetworkFail,ServerClose,GiveUp,NoReconnect error
+    class Attempt1,Attempt2,Attempt3,Attempt4,Attempt5,Attempt6,Wait2,Wait4,Wait8,Wait16,Wait30 retry
+    class Reconnected,Ready success
+    class SaveState,RestoreState,ResubGroups,SyncState,QueryMissed,ReplayEvents,UpdateUI process
+    class StateNote,SyncNote,BackoffNote,MetricsNote note

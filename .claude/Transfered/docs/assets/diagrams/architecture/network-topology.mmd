@@ -1,0 +1,155 @@
+%% Network Architecture and Topology
+%% Shows VNet design, subnets, NSGs, and network security zones
+%% Establishes secure network boundaries for enterprise deployments
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Internet"
+        internet["Public Internet<br/>---<br/>External users<br/>Untrusted traffic"]
+        cdn_pop["CDN PoPs<br/>---<br/>Edge locations<br/>Cached content"]
+    end
+
+    subgraph "Azure Network Perimeter"
+        ddos["DDoS Protection<br/>---<br/>Standard tier<br/>Automatic mitigation"]
+        waf["Web Application Firewall<br/>---<br/>OWASP rules<br/>Custom policies"]
+        firewall["Azure Firewall<br/>---<br/>Premium tier<br/>TLS inspection"]
+    end
+
+    subgraph "Hub VNet (10.0.0.0/16)"
+        subgraph "Gateway Subnet (10.0.1.0/24)"
+            vpn_gw["VPN Gateway<br/>---<br/>Site-to-Site<br/>P2S connections"]
+            express_route["ExpressRoute<br/>---<br/>Private connectivity<br/>Dedicated bandwidth"]
+        end
+
+        subgraph "Firewall Subnet (10.0.2.0/24)"
+            fw_instance["Firewall Instance<br/>---<br/>Stateful inspection<br/>Threat intelligence"]
+        end
+
+        subgraph "Management Subnet (10.0.3.0/24)"
+            bastion["Azure Bastion<br/>---<br/>RDP/SSH access<br/>No public IPs"]
+            mgmt_vms["Management VMs<br/>---<br/>Jump boxes<br/>Admin tools"]
+        end
+    end
+
+    subgraph "Production Spoke VNet (10.1.0.0/16)"
+        subgraph "App Gateway Subnet (10.1.1.0/24)"
+            app_gw["Application Gateway<br/>---<br/>Layer 7 LB<br/>SSL offload"]
+            app_gw_nsg["NSG: AppGateway<br/>---<br/>Allow 443/80<br/>GatewayManager"]
+        end
+
+        subgraph "AKS Subnet (10.1.2.0/22)"
+            aks_cluster["AKS Cluster<br/>---<br/>Kubernetes nodes<br/>CNI networking"]
+            aks_nsg["NSG: AKS<br/>---<br/>Managed by AKS<br/>Dynamic rules"]
+        end
+
+        subgraph "Data Subnet (10.1.6.0/24)"
+            cosmos_pe["Cosmos DB PE<br/>---<br/>Private endpoint<br/>No public access"]
+            redis_pe["Redis PE<br/>---<br/>Private endpoint<br/>Internal only"]
+            storage_pe["Storage PE<br/>---<br/>Private endpoint<br/>Secure access"]
+            data_nsg["NSG: Data<br/>---<br/>Deny all inbound<br/>Allow AKS subnet"]
+        end
+
+        subgraph "Integration Subnet (10.1.7.0/24)"
+            api_mgmt["API Management<br/>---<br/>Internal mode<br/>Policy enforcement"]
+            service_bus["Service Bus PE<br/>---<br/>Message queuing<br/>Event streaming"]
+            integration_nsg["NSG: Integration<br/>---<br/>Controlled access<br/>Service tags"]
+        end
+    end
+
+    subgraph "Development Spoke VNet (10.2.0.0/16)"
+        subgraph "Dev AKS Subnet (10.2.1.0/22)"
+            dev_aks["Dev AKS Cluster<br/>---<br/>Development pods<br/>Lower security"]
+            dev_nsg["NSG: DevAKS<br/>---<br/>Relaxed rules<br/>Dev access"]
+        end
+
+        subgraph "Dev Data Subnet (10.2.5.0/24)"
+            dev_cosmos["Dev Cosmos PE<br/>---<br/>Test data<br/>Isolated"]
+            dev_storage["Dev Storage PE<br/>---<br/>Dev artifacts<br/>Temporary"]
+        end
+    end
+
+    subgraph "Shared Services Spoke VNet (10.3.0.0/16)"
+        subgraph "Monitoring Subnet (10.3.1.0/24)"
+            log_analytics["Log Analytics<br/>---<br/>Central logging<br/>SIEM integration"]
+            app_insights["App Insights<br/>---<br/>APM data<br/>Telemetry"]
+        end
+
+        subgraph "Security Subnet (10.3.2.0/24)"
+            key_vault_pe["Key Vault PE<br/>---<br/>Secrets management<br/>HSM backed"]
+            security_center["Security Center<br/>---<br/>Threat detection<br/>Compliance"]
+        end
+    end
+
+    subgraph "On-Premises Network"
+        corp_network["Corporate Network<br/>---<br/>192.168.0.0/16<br/>Internal users"]
+        ad_dc["AD Domain Controllers<br/>---<br/>Authentication<br/>Group policies"]
+    end
+
+    %% Internet connectivity
+    internet --> ddos
+    ddos --> waf
+    waf --> firewall
+    cdn_pop --> app_gw
+
+    %% Hub connections
+    firewall --> fw_instance
+    fw_instance --> app_gw
+    vpn_gw --> corp_network
+    express_route --> corp_network
+    bastion --> mgmt_vms
+
+    %% Spoke peering
+    fw_instance -->|Peering| aks_cluster
+    fw_instance -->|Peering| dev_aks
+    fw_instance -->|UDR| cosmos_pe
+    fw_instance -->|UDR| redis_pe
+
+    %% Application flow
+    app_gw --> aks_cluster
+    aks_cluster --> cosmos_pe
+    aks_cluster --> redis_pe
+    aks_cluster --> storage_pe
+    aks_cluster --> api_mgmt
+    api_mgmt --> service_bus
+
+    %% Dev flow
+    dev_aks --> dev_cosmos
+    dev_aks --> dev_storage
+
+    %% Shared services
+    aks_cluster --> log_analytics
+    aks_cluster --> app_insights
+    aks_cluster --> key_vault_pe
+    dev_aks --> log_analytics
+
+    %% On-premises integration
+    corp_network --> ad_dc
+    vpn_gw --> bastion
+    express_route --> fw_instance
+
+    %% NSG associations
+    app_gw -.-> app_gw_nsg
+    aks_cluster -.-> aks_nsg
+    cosmos_pe -.-> data_nsg
+    api_mgmt -.-> integration_nsg
+    dev_aks -.-> dev_nsg
+
+    %% Apply semantic color coding
+    classDef internet fill:#ef4444,stroke:#dc2626,color:#fff,stroke-width:2px
+    classDef perimeter fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:3px
+    classDef hub fill:#3eaf7c,stroke:#2d8659,color:#fff,stroke-width:2px
+    classDef prod fill:#0078d4,stroke:#005a9e,color:#fff,stroke-width:2px
+    classDef dev fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef shared fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef onprem fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+    classDef nsg fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:1px,stroke-dasharray: 5 5
+
+    class internet,cdn_pop internet
+    class ddos,waf,firewall perimeter
+    class vpn_gw,express_route,fw_instance,bastion,mgmt_vms hub
+    class app_gw,aks_cluster,cosmos_pe,redis_pe,storage_pe,api_mgmt,service_bus prod
+    class dev_aks,dev_cosmos,dev_storage dev
+    class log_analytics,app_insights,key_vault_pe,security_center shared
+    class corp_network,ad_dc onprem
+    class app_gw_nsg,aks_nsg,data_nsg,integration_nsg,dev_nsg nsg

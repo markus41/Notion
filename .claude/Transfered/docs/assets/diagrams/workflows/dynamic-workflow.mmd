@@ -1,0 +1,66 @@
+flowchart TB
+    Start([Workflow Start]) --> LoadDef[Load Workflow Definition]
+    LoadDef --> InitContext[Initialize Context<br/>---<br/>Input parameters<br/>Environment variables<br/>Workspace context]
+
+    InitContext --> EvalCondition{Evaluate<br/>Initial<br/>Condition?}
+
+    EvalCondition -->|Condition A| PathA[Execute Task A<br/>---<br/>Agent: frontend-engineer<br/>Task: Build React UI]
+    EvalCondition -->|Condition B| PathB[Execute Task B<br/>---<br/>Agent: code-generator-python<br/>Task: Build API]
+    EvalCondition -->|Condition C| PathC[Execute Task C<br/>---<br/>Agent: database-architect<br/>Task: Design Schema]
+
+    PathA --> CheckResults{Analyze<br/>Results}
+    PathB --> CheckResults
+    PathC --> CheckResults
+
+    CheckResults -->|Success<br/>Quality High| DirectComplete[Complete Successfully]
+    CheckResults -->|Success<br/>Quality Medium| AdditionalWork[Generate Additional Tasks<br/>---<br/>• Code review<br/>• Performance testing<br/>• Documentation]
+    CheckResults -->|Partial Success| Iteration{Iteration<br/>Count<br/>< Max?}
+    CheckResults -->|Failure| HandleError[Error Handling<br/>---<br/>Retry or compensate]
+
+    AdditionalWork --> DynamicTask1[Dynamic Task 1<br/>---<br/>Generated at runtime<br/>Based on context]
+    AdditionalWork --> DynamicTask2[Dynamic Task 2<br/>---<br/>Adaptive to results]
+
+    DynamicTask1 --> Aggregate[Aggregate Results]
+    DynamicTask2 --> Aggregate
+
+    Aggregate --> FinalValidation{Meets<br/>Acceptance<br/>Criteria?}
+
+    FinalValidation -->|Yes| DirectComplete
+    FinalValidation -->|No| Iteration
+
+    Iteration -->|Yes| ModifyContext[Update Context<br/>---<br/>• Increment iteration<br/>• Adjust parameters<br/>• Add feedback]
+    Iteration -->|No| MaxIterReached[Max Iterations Reached<br/>---<br/>Manual intervention needed]
+
+    ModifyContext --> EvalCondition
+
+    HandleError --> RetryLogic{Retryable?}
+    RetryLogic -->|Yes| PathA
+    RetryLogic -->|No| Compensate[Execute Compensation]
+
+    Compensate --> End([Workflow Failed])
+    DirectComplete --> End
+    MaxIterReached --> End
+
+    subgraph "Dynamic Behavior"
+        note1["Context Variables:<br/>• iteration_count<br/>• quality_score<br/>• error_history<br/>• runtime_metrics"]
+        note2["Task Generation Rules:<br/>• IF quality_score < 80 THEN add review<br/>• IF performance < threshold THEN optimize<br/>• IF coverage < 85% THEN add tests"]
+    end
+
+    subgraph "Example: Agent Handoff"
+        handoff1["Task Output:<br/>{<br/>  'agent_suggestion': 'security-specialist',<br/>  'reason': 'security_vulnerability_detected',<br/>  'priority': 'high'<br/>}"]
+        handoff2["Dynamic Task Generated:<br/>Execute security-specialist<br/>with vulnerability context"]
+    end
+
+    classDef start fill:#3b82f6,stroke:#2563eb,color:#fff,stroke-width:2px
+    classDef process fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef dynamic fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef complete fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef error fill:#ef4444,stroke:#dc2626,color:#fff,stroke-width:2px
+
+    class Start,End start
+    class LoadDef,InitContext,PathA,PathB,PathC,Aggregate,ModifyContext process
+    class EvalCondition,CheckResults,Iteration,FinalValidation,RetryLogic decision
+    class AdditionalWork,DynamicTask1,DynamicTask2 dynamic
+    class DirectComplete complete
+    class HandleError,Compensate,MaxIterReached error

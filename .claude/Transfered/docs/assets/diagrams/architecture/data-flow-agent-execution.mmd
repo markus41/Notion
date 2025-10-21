@@ -1,0 +1,202 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#3eaf7c', 'primaryTextColor':'#fff', 'primaryBorderColor':'#2d8659', 'lineColor':'#5c5c5c', 'secondaryColor':'#512bd4', 'tertiaryColor':'#336791', 'quaternaryColor':'#dc382d', 'background':'#ffffff', 'mainBkg':'#3eaf7c', 'secondBkg':'#512bd4', 'tertiaryBkg':'#336791', 'primaryBorderColor':'#2d8659', 'secondaryBorderColor':'#3a1f9d', 'tertiaryBorderColor':'#254a6b'}}}%%
+
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant WA as Web Application<br/>(React SPA)
+    participant API as Orchestration API<br/>(.NET 8)
+    participant SR as SignalR Hub<br/>(WebSocket)
+    participant OM as Orchestrator<br/>Manager
+    participant CM as Context Manager<br/>(Cache Layer)
+    participant AS as Agent Service<br/>(Python)
+    participant LLM as Azure OpenAI<br/>(GPT-4/Claude)
+    participant DB as Cosmos DB<br/>(State Store)
+    participant RC as Redis Cache<br/>(Distributed)
+    participant BS as Blob Storage<br/>(Artifacts)
+    participant KV as Key Vault<br/>(Secrets)
+    participant AI as App Insights<br/>(Telemetry)
+
+    Note over U,AI: Workflow Initialization Phase
+
+    U->>WA: Create New Workflow<br/>(Define tasks, agents)
+    activate WA
+    WA->>API: POST /api/workflows<br/>{definition, config}
+    activate API
+
+    API->>KV: Get API Keys<br/>(Managed Identity)
+    activate KV
+    KV-->>API: Encrypted Secrets
+    deactivate KV
+
+    API->>OM: Initialize Workflow<br/>(Parse, validate)
+    activate OM
+    OM->>DB: Create Workflow Record<br/>(Initial state: pending)
+    activate DB
+    DB-->>OM: Workflow ID
+    deactivate DB
+
+    OM->>CM: Initialize Context<br/>(Empty cache)
+    activate CM
+    CM->>RC: Create Cache Entry<br/>(TTL: 1 hour)
+    activate RC
+    RC-->>CM: Cache Key
+    deactivate RC
+    deactivate CM
+
+    OM-->>API: Workflow Created<br/>(ID, status)
+    deactivate OM
+    API-->>WA: 201 Created<br/>{workflowId}
+    deactivate API
+    deactivate WA
+
+    Note over U,AI: Real-time Connection Setup
+
+    WA->>SR: Connect WebSocket<br/>(workflowId)
+    activate SR
+    SR->>SR: Create Hub Group<br/>(workflow subscribers)
+    SR-->>WA: Connection Established
+    deactivate SR
+
+    Note over U,AI: Task Execution Phase (Parallel)
+
+    U->>WA: Start Workflow<br/>(Execute button)
+    activate WA
+    WA->>API: POST /api/workflows/{id}/execute
+    activate API
+
+    API->>OM: Begin Execution<br/>(Load DAG)
+    activate OM
+
+    OM->>DB: Load Workflow Definition<br/>(Get task graph)
+    activate DB
+    DB-->>OM: Task Dependencies DAG
+    deactivate DB
+
+    OM->>OM: Topological Sort<br/>(Identify parallel levels)
+
+    loop For Each Execution Level
+        Note over OM,AS: Parallel Task Execution
+
+        par Task A Execution
+            OM->>AS: Execute Agent Task A<br/>(Context, prompt)
+            activate AS
+
+            AS->>CM: Load Shared Context<br/>(Previous results)
+            activate CM
+            CM->>RC: Get Cached Data<br/>(Read-through cache)
+            activate RC
+            RC-->>CM: Context Data
+            deactivate RC
+            CM-->>AS: Merged Context
+            deactivate CM
+
+            AS->>LLM: Generate Completion<br/>(System + User prompt)
+            activate LLM
+            LLM-->>AS: AI Response<br/>(Text, tokens used)
+            deactivate LLM
+
+            AS->>BS: Store Artifacts<br/>(Generated files)
+            activate BS
+            BS-->>AS: Blob URLs
+            deactivate BS
+
+            AS->>CM: Update Context<br/>(Task results)
+            activate CM
+            CM->>RC: Write to Cache<br/>(Deduplicated)
+            RC-->>CM: Cached
+            deactivate CM
+
+            AS->>DB: Create Checkpoint<br/>(State snapshot)
+            activate DB
+            DB-->>AS: Checkpoint ID
+            deactivate DB
+
+            AS-->>OM: Task A Complete<br/>(Success, results)
+            deactivate AS
+        and Task B Execution
+            OM->>AS: Execute Agent Task B<br/>(Context, prompt)
+            activate AS
+            AS->>CM: Load Shared Context
+            CM->>RC: Get Cached Data
+            AS->>LLM: Generate Completion
+            AS->>BS: Store Artifacts
+            AS->>CM: Update Context
+            AS->>DB: Create Checkpoint
+            AS-->>OM: Task B Complete
+            deactivate AS
+        and Progress Updates
+            OM->>SR: Send Progress Event<br/>(Task status)
+            activate SR
+            SR-->>WA: Real-time Update<br/>(WebSocket push)
+            WA-->>U: UI Progress Bar<br/>(Visual feedback)
+            deactivate SR
+        end
+
+        Note over OM,DB: Checkpoint After Level
+        OM->>DB: Save Level Checkpoint<br/>(All task states)
+        activate DB
+        DB-->>OM: Checkpoint Saved
+        deactivate DB
+    end
+
+    Note over U,AI: Error Handling & Recovery
+
+    alt Task Failure Scenario
+        AS->>AS: Task Fails<br/>(Exception, timeout)
+        AS->>OM: Report Failure<br/>(Error details)
+
+        OM->>OM: Check Retry Policy<br/>(Max 3 attempts)
+
+        alt Retry Available
+            OM->>AS: Retry Task<br/>(Exponential backoff)
+            AS->>LLM: Retry with Context
+            LLM-->>AS: New Response
+            AS-->>OM: Retry Success
+        else Max Retries Exceeded
+            OM->>OM: Initiate Rollback<br/>(Saga pattern)
+            OM->>DB: Load Last Checkpoint
+            DB-->>OM: Previous State
+            OM->>AS: Execute Compensation<br/>(Undo actions)
+            AS-->>OM: Compensated
+        end
+    end
+
+    Note over U,AI: Workflow Completion
+
+    OM->>DB: Update Final State<br/>(Status: completed)
+    activate DB
+    DB-->>OM: State Updated
+    deactivate DB
+
+    OM->>BS: Archive Workflow Data<br/>(Move to cold storage)
+    activate BS
+    BS-->>OM: Archived
+    deactivate BS
+
+    OM->>AI: Send Metrics<br/>(Duration, tokens, cost)
+    activate AI
+    AI-->>OM: Metrics Recorded
+    deactivate AI
+
+    OM-->>API: Workflow Complete<br/>(Final results)
+    deactivate OM
+
+    API->>SR: Send Completion Event<br/>(Final status)
+    activate SR
+    SR-->>WA: Workflow Finished<br/>(WebSocket)
+    deactivate SR
+
+    API-->>WA: 200 OK<br/>{results, metrics}
+    deactivate API
+
+    WA-->>U: Display Results<br/>(UI update)
+    deactivate WA
+
+    Note over U,AI: Observability & Monitoring
+
+    AI->>AI: Process Telemetry<br/>(Aggregate metrics)
+    AI->>AI: Generate Alerts<br/>(Threshold violations)
+    AI->>API: Alert: High Latency<br/>(P95 > 500ms)
+    API->>SR: Broadcast Alert
+    SR-->>WA: System Alert
+    WA-->>U: Warning Notification

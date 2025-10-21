@@ -1,0 +1,82 @@
+sequenceDiagram
+    actor User
+    participant Browser as Web App<br/>(React SPA)
+    participant AD as Azure AD<br/>(OAuth 2.0 + OIDC)
+    participant API as Orchestration API<br/>(.NET)
+    participant KV as Key Vault<br/>(Managed Identity)
+    participant Redis as Redis Cache<br/>(Session Store)
+
+    Note over User,Redis: Authentication Flow (OAuth 2.0 with PKCE)
+
+    User->>Browser: Click "Login"
+    Browser->>Browser: Generate code_verifier<br/>Generate code_challenge
+    Browser->>AD: Authorization Request<br/>+ code_challenge + scope
+
+    AD->>User: Login Challenge<br/>(Email + MFA)
+    User->>AD: Credentials + MFA Code
+
+    AD-->>Browser: Authorization Code
+    Browser->>AD: Token Request<br/>+ code_verifier
+
+    AD->>AD: Verify code_challenge
+    AD-->>Browser: Access Token + ID Token + Refresh Token
+
+    Browser->>Browser: Store tokens securely<br/>(memory, not localStorage)
+
+    Note over User,Redis: API Request Flow
+
+    Browser->>API: API Request<br/>Authorization: Bearer {access_token}
+
+    API->>API: Extract JWT token
+    API->>AD: Validate token<br/>(Check signature, expiry, issuer)
+    AD-->>API: Token valid + claims
+
+    API->>API: Extract user claims<br/>(sub, roles, permissions)
+
+    API->>Redis: Check session<br/>GET session:{user_id}
+
+    alt Session exists
+        Redis-->>API: Session data
+        API->>API: Validate session<br/>(not expired, not revoked)
+    else No session
+        API->>Redis: Create session<br/>SET session:{user_id}<br/>EX 3600
+        Redis-->>API: Session created
+    end
+
+    API->>API: Check authorization<br/>(RBAC + claims)
+
+    alt Authorized
+        API->>KV: Get secrets<br/>(via Managed Identity)
+        KV-->>API: Secrets
+        API->>API: Execute business logic
+        API-->>Browser: 200 OK + Response
+        Browser-->>User: Display result
+    else Unauthorized
+        API-->>Browser: 403 Forbidden
+        Browser-->>User: Access denied
+    end
+
+    Note over User,Redis: Token Refresh Flow
+
+    Browser->>Browser: Detect token expiry<br/>(exp claim < now + 5min)
+    Browser->>AD: Refresh Token Request<br/>grant_type=refresh_token
+    AD-->>Browser: New Access Token + ID Token
+    Browser->>Browser: Update tokens in memory
+
+    Note over User,Redis: Logout Flow
+
+    User->>Browser: Click "Logout"
+    Browser->>API: Revoke session<br/>POST /api/auth/logout
+    API->>Redis: Delete session<br/>DEL session:{user_id}
+    Redis-->>API: Deleted
+    API-->>Browser: 204 No Content
+    Browser->>Browser: Clear tokens
+    Browser-->>User: Logged out
+
+    rect rgb(255, 240, 240)
+        Note over Browser,AD: Security Features:<br/>• PKCE prevents authorization code interception<br/>• Tokens stored in memory (not localStorage)<br/>• MFA enforced (Azure AD Conditional Access)<br/>• Short-lived access tokens (1 hour)<br/>• Refresh token rotation
+    end
+
+    rect rgb(240, 255, 240)
+        Note over API,KV: Zero-Trust Security:<br/>• Managed Identity (no credentials)<br/>• Token validation on every request<br/>• RBAC + Claims-based authorization<br/>• Session tracking and revocation<br/>• Secrets never in code/config
+    end

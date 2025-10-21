@@ -1,0 +1,75 @@
+%% Simple Agent Execution Flow
+%% Shows basic agent task execution without external dependencies
+%% Establishes clear execution patterns for straightforward agent operations
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+sequenceDiagram
+    participant Client as Client Application
+    participant API as Orchestration API
+    participant Queue as Task Queue
+    participant Agent as Agent Service
+    participant State as State Store
+    participant Result as Result Store
+
+    %% Request initiation
+    Client->>API: POST /api/tasks
+    Note over Client,API: {taskType: "analyze", payload: {...}}
+
+    API->>API: Validate request
+    API->>API: Generate task ID
+
+    %% Queue task
+    API->>Queue: Enqueue task
+    Note over Queue: Task ID: TASK-123<br/>Priority: Normal<br/>Created: 2025-10-14
+
+    API-->>Client: 202 Accepted<br/>{taskId: "TASK-123"}
+
+    %% Agent picks up task
+    Agent->>Queue: Poll for tasks
+    Queue-->>Agent: Task TASK-123
+
+    Agent->>State: Update status: "running"
+    Note over State: Status transitions:<br/>queued → running
+
+    %% Process task
+    Agent->>Agent: Load agent configuration
+    Agent->>Agent: Initialize context
+
+    rect rgb(230, 245, 255)
+        Note over Agent: Processing Phase
+        Agent->>Agent: Execute task logic
+        Agent->>Agent: Generate output
+        Agent->>Agent: Validate results
+    end
+
+    %% Store results
+    Agent->>Result: Store output
+    Note over Result: Output format:<br/>- result: JSON<br/>- metadata: execution details<br/>- artifacts: generated files
+
+    Agent->>State: Update status: "completed"
+    Note over State: Final status:<br/>completed<br/>Duration: 45 sec
+
+    %% Client retrieval
+    Client->>API: GET /api/tasks/TASK-123
+    API->>State: Get task status
+    State-->>API: Status: completed
+
+    API->>Result: Get task result
+    Result-->>API: Task output
+
+    API-->>Client: 200 OK<br/>{status: "completed", result: {...}}
+
+    %% Error handling branch
+    alt Task fails
+        Agent->>Agent: Error detected
+        Agent->>State: Update status: "failed"
+        Agent->>Result: Store error details
+        Note over Result: Error info:<br/>- message<br/>- stack trace<br/>- context
+
+        Client->>API: GET /api/tasks/TASK-123
+        API-->>Client: 200 OK<br/>{status: "failed", error: {...}}
+    end
+
+    %% Cleanup
+    Note over Queue,Result: Cleanup after 7 days<br/>Archives to cold storage

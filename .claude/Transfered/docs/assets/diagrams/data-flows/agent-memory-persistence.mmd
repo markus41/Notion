@@ -1,0 +1,102 @@
+%% Agent Memory Persistence and Retrieval
+%% Shows how agent memory is stored, indexed, and retrieved for context-aware operations
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /guides/developer/agent-memory, /architecture/vector-search
+
+graph TB
+    subgraph "Memory Ingestion"
+        Input[Agent Execution Output]
+        Extract[Extract Key Information]
+        Embed[Generate Embeddings]
+        Meta[Add Metadata]
+    end
+
+    subgraph "Storage Layer"
+        Vector[(Azure AI Search<br/>Vector Index)]
+        Document[(Cosmos DB<br/>Document Store)]
+        Graph[(Future: Neo4j<br/>Relationship Graph)]
+    end
+
+    subgraph "Memory Types"
+        Short[Short-term Memory<br/>- Current session<br/>- Last 10 interactions<br/>- TTL: 24 hours]
+        Long[Long-term Memory<br/>- Persistent facts<br/>- Learned patterns<br/>- No expiration]
+        Episode[Episodic Memory<br/>- Complete workflows<br/>- Decision history<br/>- TTL: 30 days]
+    end
+
+    subgraph "Retrieval Process"
+        Query[Query Request]
+        Search[Semantic Search]
+        Rank[Relevance Ranking]
+        Filter[Context Filtering]
+        Merge[Merge Results]
+    end
+
+    subgraph "Memory Management"
+        Compact[Memory Compaction<br/>- Deduplicate<br/>- Summarize<br/>- Archive old]
+        Update[Memory Updates<br/>- Reinforce used<br/>- Decay unused<br/>- Correct errors]
+        Prune[Memory Pruning<br/>- Remove stale<br/>- Clean orphans<br/>- Optimize size]
+    end
+
+    %% Ingestion flow
+    Input --> Extract
+    Extract --> Embed
+    Embed --> Meta
+
+    Meta --> Short
+    Meta --> Long
+    Meta --> Episode
+
+    %% Storage connections
+    Short --> Vector
+    Short --> Document
+
+    Long --> Vector
+    Long --> Document
+    Long -.->|Future| Graph
+
+    Episode --> Document
+    Episode --> Vector
+
+    %% Retrieval flow
+    Query --> Search
+    Search --> Vector
+    Vector --> Rank
+    Rank --> Filter
+    Filter --> Document
+    Document --> Merge
+
+    %% Management processes
+    Document --> Compact
+    Vector --> Compact
+    Compact --> Update
+    Update --> Vector
+    Update --> Document
+
+    Document --> Prune
+    Vector --> Prune
+    Prune -.-> Archive[Archive Storage<br/>Cold Tier]
+
+    %% Annotations
+    Embed -.-> EmbedNote[Embedding Model:<br/>text-embedding-ada-002<br/>1536 dimensions<br/>8K token context]
+
+    Vector -.-> VectorNote[Vector Search:<br/>- Cosine similarity<br/>- k-NN algorithm<br/>- Top 10 results<br/>- Hybrid scoring]
+
+    Filter -.-> FilterNote[Context Filters:<br/>- User/Tenant scope<br/>- Time relevance<br/>- Access control<br/>- Quality threshold]
+
+    Merge -.-> MergeNote[Result Merging:<br/>- Deduplication<br/>- Score weighting<br/>- Context injection<br/>- Token limits]
+
+    %% Performance metrics
+    Search -.-> PerfNote[Performance:<br/>- Search: <100ms<br/>- Embedding: <200ms<br/>- Cache hit: 70%<br/>- Index size: 10GB]
+
+    classDef memory fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    classDef storage fill:#336791,stroke:#254a6b,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef manage fill:#10b981,stroke:#059669,color:#fff
+    classDef note fill:#f3f4f6,stroke:#9ca3af,color:#000
+
+    class Short,Long,Episode memory
+    class Vector,Document,Graph,Archive storage
+    class Input,Extract,Embed,Meta,Query,Search,Rank,Filter,Merge process
+    class Compact,Update,Prune manage
+    class EmbedNote,VectorNote,FilterNote,MergeNote,PerfNote note

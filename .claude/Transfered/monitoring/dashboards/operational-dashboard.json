@@ -1,0 +1,69 @@
+{
+  "dashboard": {
+    "title": "AI Orchestrator - Operational Dashboard",
+    "description": "System health and operational metrics",
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Uptime",
+        "type": "stat",
+        "targets": [{"expr": "time() - process_start_time_seconds{job='ai-orchestrator'}"}],
+        "options": {"unit": "s"}
+      },
+      {
+        "id": 2,
+        "title": "Request Rate (req/s)",
+        "type": "graph",
+        "targets": [{"expr": "rate(http_requests_total[1m])"}]
+      },
+      {
+        "id": 3,
+        "title": "Response Time P50/P95/P99",
+        "type": "graph",
+        "targets": [
+          {"expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "P50"},
+          {"expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "P95"},
+          {"expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "P99"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [{"expr": "rate(errors_total[5m])", "legendFormat": "{{type}}"}]
+      },
+      {
+        "id": 5,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {"expr": "database_connections_active", "legendFormat": "Active"},
+          {"expr": "database_connections_idle", "legendFormat": "Idle"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "targets": [{"expr": "cache_hits / (cache_hits + cache_misses) * 100"}],
+        "fieldConfig": {"defaults": {"unit": "percent", "max": 100}}
+      },
+      {
+        "id": 7,
+        "title": "Queue Depth",
+        "type": "graph",
+        "targets": [{"expr": "task_queue_size", "legendFormat": "{{priority}}"}]
+      },
+      {
+        "id": 8,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {"expr": "process_resident_memory_bytes / 1024 / 1024", "legendFormat": "RSS (MB)"},
+          {"expr": "nodejs_heap_size_used_bytes / 1024 / 1024", "legendFormat": "Heap Used (MB)"}
+        ]
+      }
+    ]
+  }
+}

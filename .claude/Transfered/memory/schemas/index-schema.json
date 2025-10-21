@@ -1,0 +1,436 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-orchestrator.com/schemas/index-schema.json",
+  "title": "Index Schema",
+  "description": "Indexing and retrieval schemas for memory system",
+  "definitions": {
+    "TemporalIndex": {
+      "type": "object",
+      "description": "Temporal indexing for time-based queries",
+      "properties": {
+        "entityId": {
+          "type": "string",
+          "description": "Entity identifier"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Timestamp",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "description": "Entity type"
+        },
+        "timeframe": {
+          "type": "object",
+          "properties": {
+            "year": {
+              "type": "number",
+              "minimum": 2000,
+              "maximum": 2100
+            },
+            "month": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "day": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 31
+            },
+            "hour": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 23
+            }
+          },
+          "description": "Time components for hierarchical indexing"
+        }
+      },
+      "required": ["entityId", "timestamp", "type", "timeframe"],
+      "additionalProperties": false
+    },
+    "TagIndex": {
+      "type": "object",
+      "description": "Tag-based indexing for categorical queries",
+      "properties": {
+        "tag": {
+          "type": "string",
+          "description": "Tag value"
+        },
+        "entityIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of entity IDs with this tag"
+        },
+        "count": {
+          "type": "number",
+          "description": "Number of entities",
+          "minimum": 0
+        },
+        "lastUpdated": {
+          "type": "number",
+          "description": "Last update timestamp",
+          "minimum": 0
+        }
+      },
+      "required": ["tag", "entityIds", "count", "lastUpdated"],
+      "additionalProperties": false
+    },
+    "VectorIndex": {
+      "type": "object",
+      "description": "Vector indexing for semantic search",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Vector identifier"
+        },
+        "vector": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Embedding vector",
+          "minItems": 1
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Metadata for filtering"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace for partitioning"
+        }
+      },
+      "required": ["id", "vector", "metadata"],
+      "additionalProperties": false
+    },
+    "SimilarityQuery": {
+      "type": "object",
+      "description": "Similarity search query",
+      "properties": {
+        "vector": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Query vector"
+        },
+        "topK": {
+          "type": "number",
+          "description": "Number of results",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 10
+        },
+        "threshold": {
+          "type": "number",
+          "description": "Minimum similarity score",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.7
+        },
+        "filter": {
+          "type": "object",
+          "description": "Metadata filters"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace to search"
+        }
+      },
+      "required": ["vector"],
+      "additionalProperties": false
+    },
+    "SimilarityResult": {
+      "type": "object",
+      "description": "Similarity search result",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Result identifier"
+        },
+        "score": {
+          "type": "number",
+          "description": "Similarity score",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Result metadata"
+        },
+        "vector": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Result vector"
+        }
+      },
+      "required": ["id", "score", "metadata"],
+      "additionalProperties": false
+    },
+    "FullTextIndex": {
+      "type": "object",
+      "description": "Full-text search index",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Document identifier"
+        },
+        "content": {
+          "type": "string",
+          "description": "Indexed content"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tokenized content"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Document metadata"
+        }
+      },
+      "required": ["id", "content", "tokens"],
+      "additionalProperties": false
+    },
+    "FullTextQuery": {
+      "type": "object",
+      "description": "Full-text search query",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields to search"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["AND", "OR"],
+          "description": "Query operator",
+          "default": "OR"
+        },
+        "fuzzy": {
+          "type": "boolean",
+          "description": "Enable fuzzy matching",
+          "default": false
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum results",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 50
+        }
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    },
+    "GraphIndex": {
+      "type": "object",
+      "description": "Graph-based index for relationships",
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "description": "Node identifier"
+        },
+        "nodeType": {
+          "type": "string",
+          "description": "Node type"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "targetId": {
+                "type": "string"
+              },
+              "edgeType": {
+                "type": "string"
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0
+              },
+              "metadata": {
+                "type": "object"
+              }
+            },
+            "required": ["targetId", "edgeType"]
+          },
+          "description": "Outgoing edges"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Node properties"
+        }
+      },
+      "required": ["nodeId", "nodeType", "edges"],
+      "additionalProperties": false
+    },
+    "GraphQuery": {
+      "type": "object",
+      "description": "Graph traversal query",
+      "properties": {
+        "startNodeId": {
+          "type": "string",
+          "description": "Starting node ID"
+        },
+        "traversalType": {
+          "type": "string",
+          "enum": ["bfs", "dfs", "shortest_path", "all_paths"],
+          "description": "Traversal algorithm",
+          "default": "bfs"
+        },
+        "maxDepth": {
+          "type": "number",
+          "description": "Maximum traversal depth",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3
+        },
+        "edgeFilter": {
+          "type": "object",
+          "description": "Filter edges by type or properties"
+        },
+        "nodeFilter": {
+          "type": "object",
+          "description": "Filter nodes by type or properties"
+        }
+      },
+      "required": ["startNodeId"],
+      "additionalProperties": false
+    },
+    "CompositeIndex": {
+      "type": "object",
+      "description": "Composite index combining multiple dimensions",
+      "properties": {
+        "entityId": {
+          "type": "string",
+          "description": "Entity identifier"
+        },
+        "temporal": {
+          "$ref": "#/definitions/TemporalIndex"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags"
+        },
+        "vectorId": {
+          "type": "string",
+          "description": "Associated vector ID"
+        },
+        "graphNodeId": {
+          "type": "string",
+          "description": "Associated graph node ID"
+        },
+        "priority": {
+          "type": "number",
+          "description": "Priority score",
+          "minimum": 0
+        },
+        "accessCount": {
+          "type": "number",
+          "description": "Access frequency",
+          "minimum": 0
+        }
+      },
+      "required": ["entityId", "temporal", "tags", "priority", "accessCount"],
+      "additionalProperties": false
+    },
+    "IndexStatistics": {
+      "type": "object",
+      "description": "Index statistics and metadata",
+      "properties": {
+        "indexName": {
+          "type": "string",
+          "description": "Index name"
+        },
+        "indexType": {
+          "type": "string",
+          "enum": ["temporal", "tag", "vector", "fulltext", "graph", "composite"],
+          "description": "Index type"
+        },
+        "totalEntries": {
+          "type": "number",
+          "description": "Total indexed entries",
+          "minimum": 0
+        },
+        "sizeBytes": {
+          "type": "number",
+          "description": "Index size in bytes",
+          "minimum": 0
+        },
+        "lastUpdated": {
+          "type": "number",
+          "description": "Last update timestamp",
+          "minimum": 0
+        },
+        "queryCount": {
+          "type": "number",
+          "description": "Total queries executed",
+          "minimum": 0
+        },
+        "averageQueryTime": {
+          "type": "number",
+          "description": "Average query time in ms",
+          "minimum": 0
+        }
+      },
+      "required": ["indexName", "indexType", "totalEntries", "sizeBytes", "lastUpdated"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "temporalIndex": {
+      "$ref": "#/definitions/TemporalIndex"
+    },
+    "tagIndex": {
+      "$ref": "#/definitions/TagIndex"
+    },
+    "vectorIndex": {
+      "$ref": "#/definitions/VectorIndex"
+    },
+    "similarityQuery": {
+      "$ref": "#/definitions/SimilarityQuery"
+    },
+    "similarityResult": {
+      "$ref": "#/definitions/SimilarityResult"
+    },
+    "fullTextIndex": {
+      "$ref": "#/definitions/FullTextIndex"
+    },
+    "fullTextQuery": {
+      "$ref": "#/definitions/FullTextQuery"
+    },
+    "graphIndex": {
+      "$ref": "#/definitions/GraphIndex"
+    },
+    "graphQuery": {
+      "$ref": "#/definitions/GraphQuery"
+    },
+    "compositeIndex": {
+      "$ref": "#/definitions/CompositeIndex"
+    },
+    "indexStatistics": {
+      "$ref": "#/definitions/IndexStatistics"
+    }
+  }
+}

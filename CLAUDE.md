@@ -2238,4 +2238,249 @@ This project establishes scalable infrastructure for innovation management with 
 
 **Remember**: You're building an innovation engine designed to streamline workflows and drive measurable outcomes through structured approaches. Focus on learning, reusability, cost transparency, knowledge capture, and secure credential management to support sustainable growth.
 
+## Brookside Repository Analyzer
+
+**Location**: `brookside-repo-analyzer/` subdirectory
+
+### Purpose
+
+Automated GitHub organization repository analysis tool designed to establish comprehensive portfolio visibility and drive measurable outcomes through systematic viability assessment, pattern mining, and Notion integration.
+
+**Key Capabilities:**
+- Multi-dimensional repository viability scoring (0-100 points)
+- Claude Code integration maturity detection
+- Cross-repository pattern extraction
+- Dependency cost calculation and optimization
+- Automated Notion synchronization (Example Builds, Software Tracker, Knowledge Vault)
+
+### Architecture
+
+```
+brookside-repo-analyzer/
+├── src/
+│   ├── config.py                # Pydantic settings
+│   ├── auth.py                  # Azure Key Vault integration
+│   ├── models.py                # Data models
+│   ├── github_mcp_client.py     # GitHub API wrapper
+│   ├── notion_client.py         # Notion API wrapper
+│   ├── cli.py                   # Click CLI interface
+│   └── analyzers/
+│       ├── repo_analyzer.py     # Viability scoring
+│       ├── claude_detector.py   # .claude/ parsing
+│       ├── pattern_miner.py     # Pattern extraction
+│       └── cost_calculator.py   # Cost analysis
+├── tests/
+│   ├── unit/                    # Unit tests (mocked)
+│   ├── integration/             # Integration tests (real APIs)
+│   └── e2e/                     # End-to-end CLI tests
+├── deployment/
+│   ├── azure_function/          # Serverless weekly scans
+│   └── github_actions/          # CI/CD workflows
+└── docs/
+    ├── README.md                # Quick start guide
+    ├── ARCHITECTURE.md          # System design
+    ├── API.md                   # CLI/Python/HTTP API docs
+    └── CONTRIBUTING.md          # Developer guide
+```
+
+### Claude Code Integration
+
+**Agent**: `@repo-analyzer`
+- Orchestrates full organization scans
+- Performs viability scoring and Claude detection
+- Syncs results to Notion databases
+
+**Slash Commands**:
+- `/repo:scan-org [--sync] [--deep]` - Full organization scan
+- `/repo:analyze <repo-name> [--sync]` - Single repository analysis
+- `/repo:extract-patterns [--min-usage 3]` - Pattern mining
+- `/repo:calculate-costs [--detailed]` - Portfolio cost analysis
+
+### Viability Scoring Algorithm
+
+```
+Total Score (0-100) = Test Coverage + Activity + Documentation + Dependencies
+
+Test Coverage (0-30 points):
+  - 70%+ coverage: 30 points
+  - Tests exist: 10+ points scaled by coverage
+  - No tests: 0 points
+
+Activity (0-20 points):
+  - Commits last 30 days: 20 points
+  - Commits last 90 days: 10 points
+  - No recent commits: 0 points
+
+Documentation (0-25 points):
+  - README + docs + active: 25 points
+  - README exists: 15 points
+  - No README: 0 points
+
+Dependency Health (0-25 points):
+  - 0-10 dependencies: 25 points
+  - 11-30 dependencies: 15 points
+  - 31+ dependencies: 5 points
+
+Ratings:
+  - HIGH (75-100): Production-ready, well-maintained
+  - MEDIUM (50-74): Functional but needs work
+  - LOW (0-49): Reference only or abandoned
+```
+
+### Reusability Assessment
+
+```
+Highly Reusable:
+  ✓ Viability ≥ 75
+  ✓ Has tests
+  ✓ Has documentation
+  ✓ Not a fork
+  ✓ Active (pushed within 90 days)
+
+Partially Reusable:
+  ✓ Viability ≥ 50
+  ✓ Has tests OR documentation
+
+One-Off:
+  All other cases
+```
+
+### Claude Integration Detection
+
+**Maturity Levels:**
+- **EXPERT (80-100)**: Comprehensive agents, commands, MCP servers, project memory
+- **ADVANCED (60-79)**: Multiple agents/commands, some MCP servers
+- **INTERMEDIATE (30-59)**: Basic agents or commands
+- **BASIC (10-29)**: Minimal .claude/ directory
+- **NONE (0-9)**: No meaningful integration
+
+**Scoring Formula:**
+```
+Score = (agents_count × 10) + (commands_count × 5) + (mcp_servers × 10) + (has_claude_md × 15)
+```
+
+### Notion Integration Workflow
+
+**Example Builds Database** (`a1cd1528-971d-4873-a176-5e93b93555f6`):
+1. Search for existing build by repository name
+2. Create or update entry with:
+   - Repository URL and description
+   - Viability score and rating
+   - Reusability assessment
+   - Claude maturity level
+   - GitHub statistics (stars, forks, issues)
+   - Status (Active if pushed within 90 days)
+
+**Software & Cost Tracker** (`13b5e9de-2dd1-45ec-839a-4f3d50cd8d06`):
+1. Extract dependencies from package manifests
+2. Search Software Tracker for each dependency
+3. Create new entries if not found (with costs from database)
+4. Link Software → Build relations
+5. Verify cost rollup calculation
+
+**Knowledge Vault**:
+1. Create pattern library entries for reusable architectural patterns
+2. Document usage statistics and reusability scores
+3. Link to example repositories
+
+### Usage Examples
+
+**Full Organization Scan:**
+```bash
+cd brookside-repo-analyzer/
+poetry run brookside-analyze scan --full --sync
+```
+
+**Single Repository Analysis:**
+```bash
+poetry run brookside-analyze analyze repo-analyzer --deep --sync
+```
+
+**Pattern Extraction:**
+```bash
+poetry run brookside-analyze patterns --min-usage 3 --sync
+```
+
+**Cost Analysis:**
+```bash
+poetry run brookside-analyze costs --detailed
+```
+
+**Using Slash Commands:**
+```bash
+# In Claude Code with Notion repository context
+/repo:scan-org --sync --deep
+/repo:analyze brookside-cost-tracker --sync
+/repo:extract-patterns --sync
+/repo:calculate-costs --detailed
+```
+
+### Deployment Modes
+
+**1. Local CLI** (Current)
+- On-demand execution via Poetry
+- Manual Azure CLI authentication
+- Development and testing
+
+**2. Azure Function** (Planned)
+- Weekly scheduled scans (Sunday midnight UTC)
+- Managed Identity for credentials
+- Automatic Notion sync
+- Application Insights monitoring
+
+**3. GitHub Actions** (Configured)
+- Event-triggered analysis on repository changes
+- CI/CD quality checks on PRs
+- Automated deployment to Azure
+
+### Cost Structure
+
+**Monthly Operating Costs:**
+- Azure Functions (Consumption): ~$5
+- Azure Storage (caching): ~$2
+- **Total**: ~$7/month
+
+**Existing Infrastructure** (no additional cost):
+- Azure Key Vault
+- GitHub Enterprise
+- Notion API
+
+### Key Files and Documentation
+
+**For Developers:**
+- `README.md` - Quick start and usage guide
+- `ARCHITECTURE.md` - System design and data models
+- `API.md` - CLI/Python SDK/HTTP API reference
+- `CONTRIBUTING.md` - Development standards and workflows
+
+**For Deployment:**
+- `deployment/azure_function/README.md` - Azure Function setup guide
+- `deployment/github_actions/` - CI/CD workflow configurations
+- `.pre-commit-config.yaml` - Code quality automation
+
+**For Configuration:**
+- `.env.example` - Environment variable template
+- `pyproject.toml` - Poetry dependencies and settings
+- `src/data/cost_database.json` - Dependency cost mappings (to be created)
+
+### Integration with Parent Repository
+
+The repository analyzer is a **subdirectory project** within the main Notion Innovation Nexus repository. All Claude Code integration (agents, commands, MCP configuration) resides in the **parent `.claude/`** directory, not in `brookside-repo-analyzer/.claude/`.
+
+**This design ensures:**
+- Single source of truth for Claude Code configuration
+- Shared agents across all Innovation Nexus tools
+- Consistent Notion MCP integration
+- Unified credential management via parent Azure Key Vault setup
+
+### Best Practices
+
+1. **Run Weekly**: Schedule Sunday scans to track portfolio evolution over time
+2. **Review Results**: Check Notion Example Builds for new/updated repository entries
+3. **Cost Monitoring**: Track total monthly cost trends, identify optimization opportunities
+4. **Pattern Adoption**: Encourage reuse of high-scoring patterns (90+ reusability)
+5. **Claude Integration**: Promote Agent/MCP adoption to reach Expert maturity level
+6. **Viability Tracking**: Monitor and improve low-viability repositories quarterly
+7. **Microsoft-First**: Prioritize Microsoft service alternatives when optimizing costs
+
 **Brookside BI Innovation Nexus - Where Ideas Become Examples, and Examples Become Knowledge - Secured by Azure.**

@@ -1,0 +1,126 @@
+{
+  "name": "Blackboard Pattern State Machine",
+  "description": "State machine for blackboard-based collaborative problem solving",
+  "initialState": "initialized",
+  "states": [
+    {
+      "name": "initialized",
+      "description": "Blackboard initialized with problem state",
+      "type": "initial"
+    },
+    {
+      "name": "building_agenda",
+      "description": "Building agenda of knowledge sources ready to contribute",
+      "type": "intermediate"
+    },
+    {
+      "name": "executing_knowledge_source",
+      "description": "Executing top-priority knowledge source",
+      "type": "intermediate"
+    },
+    {
+      "name": "checking_solution",
+      "description": "Checking if solution has been found",
+      "type": "intermediate"
+    },
+    {
+      "name": "resolving_conflicts",
+      "description": "Resolving conflicts in knowledge base",
+      "type": "intermediate"
+    },
+    {
+      "name": "synthesizing",
+      "description": "Synthesizing patterns from knowledge",
+      "type": "intermediate"
+    },
+    {
+      "name": "solved",
+      "description": "Problem solved successfully",
+      "type": "final"
+    },
+    {
+      "name": "unsolved",
+      "description": "Problem unsolved after max iterations",
+      "type": "final"
+    },
+    {
+      "name": "failed",
+      "description": "Problem solving failed with error",
+      "type": "final"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "initialized",
+      "to": "building_agenda",
+      "event": "START_SOLVING",
+      "guard": "hasProblem",
+      "action": "initializeIteration"
+    },
+    {
+      "from": "building_agenda",
+      "to": "executing_knowledge_source",
+      "event": "AGENDA_BUILT",
+      "guard": "agendaNotEmpty",
+      "action": "selectTopKS"
+    },
+    {
+      "from": "building_agenda",
+      "to": "unsolved",
+      "event": "AGENDA_EMPTY",
+      "guard": "noKSCanContribute",
+      "action": "recordNoSolution"
+    },
+    {
+      "from": "executing_knowledge_source",
+      "to": "checking_solution",
+      "event": "KS_EXECUTED",
+      "guard": null,
+      "action": "updateKnowledge"
+    },
+    {
+      "from": "executing_knowledge_source",
+      "to": "failed",
+      "event": "KS_FAILED",
+      "guard": "criticalError",
+      "action": "abortSolving"
+    },
+    {
+      "from": "checking_solution",
+      "to": "solved",
+      "event": "SOLUTION_FOUND",
+      "guard": "solutionMeetsThreshold || problemIsSolved",
+      "action": "recordSolution"
+    },
+    {
+      "from": "checking_solution",
+      "to": "resolving_conflicts",
+      "event": "NO_SOLUTION_YET",
+      "guard": "!maxIterationsReached",
+      "action": "detectConflicts"
+    },
+    {
+      "from": "checking_solution",
+      "to": "unsolved",
+      "event": "MAX_ITERATIONS_REACHED",
+      "guard": "maxIterationsReached",
+      "action": "returnBestAttempt"
+    },
+    {
+      "from": "resolving_conflicts",
+      "to": "synthesizing",
+      "event": "CONFLICTS_RESOLVED",
+      "guard": null,
+      "action": "prepareForSynthesis"
+    },
+    {
+      "from": "synthesizing",
+      "to": "building_agenda",
+      "event": "SYNTHESIS_COMPLETE",
+      "guard": null,
+      "action": "incrementIteration"
+    }
+  ],
+  "errorStates": ["failed", "unsolved"],
+  "recoveryTransitions": []
+}

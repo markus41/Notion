@@ -1,0 +1,107 @@
+%% Agent Context Passing and State Management
+%% Demonstrates how context flows between agents in multi-step workflows
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /guides/developer/context-management, /architecture/state-management
+
+flowchart LR
+    subgraph "Initial Context"
+        UC[User Context<br/>- User ID<br/>- Tenant ID<br/>- Preferences]
+        WC[Workflow Context<br/>- Workflow ID<br/>- Execution ID<br/>- Pattern Type]
+        SC[System Context<br/>- Environment<br/>- Feature Flags<br/>- Limits]
+    end
+
+    subgraph "Agent A: Architect"
+        A1[Receive Context]
+        A2[Process Task]
+        A3[Generate Output]
+        A4[Enrich Context]
+    end
+
+    subgraph "Context Store"
+        CS[(Cosmos DB<br/>Context Store)]
+        Cache[(Redis Cache<br/>Hot Context)]
+    end
+
+    subgraph "Agent B: Builder"
+        B1[Load Context]
+        B2[Merge Contexts]
+        B3[Execute Task]
+        B4[Update Context]
+    end
+
+    subgraph "Agent C: Validator"
+        C1[Retrieve Full Context]
+        C2[Validate Against Context]
+        C3[Generate Report]
+        C4[Finalize Context]
+    end
+
+    subgraph "Context Transformation"
+        T1[Filter Sensitive Data]
+        T2[Compress Large Objects]
+        T3[Add Metadata]
+        T4[Version Context]
+    end
+
+    %% Initial flow to Agent A
+    UC --> A1
+    WC --> A1
+    SC --> A1
+
+    %% Agent A processing
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+
+    %% Context persistence
+    A4 --> T1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+
+    T4 --> CS
+    T4 --> Cache
+
+    %% Agent B receives context
+    CS --> B1
+    Cache --> B1
+    B1 --> B2
+    A4 -.->|Direct Pass| B2
+    B2 --> B3
+    B3 --> B4
+
+    %% Agent B updates context
+    B4 --> T1
+
+    %% Agent C full context access
+    CS --> C1
+    B4 -.->|Accumulated| C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+
+    %% Final context storage
+    C4 --> CS
+
+    %% Annotations
+    CS -.-> Ann1[Context Features:<br/>- Versioned snapshots<br/>- Immutable history<br/>- Audit trail<br/>- 30-day retention]
+
+    Cache -.-> Ann2[Cache Strategy:<br/>- TTL: 1 hour<br/>- LRU eviction<br/>- 100MB max size<br/>- Gzip compression]
+
+    T1 -.-> Ann3[Security:<br/>- Remove PII<br/>- Mask secrets<br/>- Encrypt sensitive<br/>- Hash identifiers]
+
+    %% Context schema example
+    A4 -.-> Schema[Context Schema:<br/>{<br/>  executionId: uuid,<br/>  version: number,<br/>  timestamp: ISO8601,<br/>  agent: string,<br/>  input: object,<br/>  output: object,<br/>  metadata: {<br/>    duration: ms,<br/>    tokens: number,<br/>    cost: decimal<br/>  },<br/>  previous: uuid<br/>}]
+
+    classDef context fill:#3eaf7c,stroke:#2d8659,color:#fff
+    classDef agent fill:#512bd4,stroke:#3a1f9d,color:#fff
+    classDef storage fill:#336791,stroke:#254a6b,color:#fff
+    classDef transform fill:#f59e0b,stroke:#d97706,color:#000
+    classDef annotation fill:#f3f4f6,stroke:#9ca3af,color:#000
+
+    class UC,WC,SC context
+    class A1,A2,A3,A4,B1,B2,B3,B4,C1,C2,C3,C4 agent
+    class CS,Cache storage
+    class T1,T2,T3,T4 transform
+    class Ann1,Ann2,Ann3,Schema annotation

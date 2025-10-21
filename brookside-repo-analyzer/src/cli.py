@@ -71,6 +71,11 @@ def cli(log_level: str) -> None:
     help="GitHub organization (defaults to brookside-bi)",
 )
 @click.option(
+    "--all-orgs/--single-org",
+    default=False,
+    help="Scan all organizations user has access to",
+)
+@click.option(
     "--full/--quick",
     default=False,
     help="Full deep analysis or quick scan",
@@ -80,19 +85,21 @@ def cli(log_level: str) -> None:
     default=True,
     help="Sync results to Notion",
 )
-def scan(org: str | None, full: bool, sync: bool) -> None:
+def scan(org: str | None, all_orgs: bool, full: bool, sync: bool) -> None:
     """
     Scan entire GitHub organization
 
     Analyzes all repositories in the organization and optionally syncs to Notion.
 
-    Example:
+    Examples:
       brookside-analyze scan --full --sync
+      brookside-analyze scan --org my-org --full
+      brookside-analyze scan --all-orgs --full
     """
-    asyncio.run(_scan_organization(org, full, sync))
+    asyncio.run(_scan_organization(org, all_orgs, full, sync))
 
 
-async def _scan_organization(org: str | None, full: bool, sync: bool) -> None:
+async def _scan_organization(org: str | None, all_orgs: bool, full: bool, sync: bool) -> None:
     """Async implementation of organization scan"""
     console.print("\n[bold blue]Brookside BI Repository Analyzer[/bold blue]")
     console.print("[dim]Scanning GitHub organization...[/dim]\n")
@@ -116,13 +123,41 @@ async def _scan_organization(org: str | None, full: bool, sync: bool) -> None:
             console.print("[yellow]WARN[/yellow] Notion credentials not found (--sync disabled)")
             sync = False
 
-        # Scan organization
+        # Scan organization(s)
         async with GitHubMCPClient(settings, credentials) as github_client:
-            console.print(f"\n[yellow]Scanning organization: {org or settings.github.organization}[/yellow]")
+            # Determine which organizations to scan
+            orgs_to_scan = []
 
-            repos = await github_client.list_organization_repos(org)
+            if all_orgs:
+                # Discover all organizations
+                console.print("\n[yellow]Discovering organizations...[/yellow]")
+                discovered_orgs = await github_client.list_user_organizations()
 
-            console.print(f"[green]Found {len(repos)} repositories[/green]\n")
+                if not discovered_orgs:
+                    console.print("[yellow]No organizations found, scanning personal repos[/yellow]")
+                    token_info = await github_client.check_token_scopes()
+                    orgs_to_scan = [token_info.get("user")]
+                else:
+                    orgs_to_scan = [org_data["login"] for org_data in discovered_orgs]
+                    console.print(f"[green]Found {len(orgs_to_scan)} organizations[/green]")
+            else:
+                # Single organization scan
+                orgs_to_scan = [org or settings.github.organization]
+
+            # Aggregate all repositories across organizations
+            all_repos = []
+
+            for idx, org_name in enumerate(orgs_to_scan, 1):
+                if len(orgs_to_scan) > 1:
+                    console.print(f"\n[yellow]Scanning organization {idx}/{len(orgs_to_scan)}: {org_name}[/yellow]")
+                else:
+                    console.print(f"\n[yellow]Scanning organization: {org_name}[/yellow]")
+
+                repos = await github_client.list_organization_repos(org_name)
+                all_repos.extend(repos)
+                console.print(f"[green]Found {len(repos)} repositories in {org_name}[/green]")
+
+            console.print(f"\n[bold green]Total repositories to analyze: {len(all_repos)}[/bold green]\n")
 
             # Analyze repositories
             analyzer = RepositoryAnalyzer(github_client)
@@ -131,10 +166,10 @@ async def _scan_organization(org: str | None, full: bool, sync: bool) -> None:
             analyses = []
 
             # Analyze repositories without spinner to avoid Windows encoding issues
-            console.print(f"\n[yellow]Analyzing {len(repos)} repositories...[/yellow]")
+            console.print(f"\n[yellow]Analyzing {len(all_repos)} repositories...[/yellow]")
 
-            for idx, repo in enumerate(repos, 1):
-                console.print(f"  [{idx}/{len(repos)}] {repo.name}...")
+            for idx, repo in enumerate(all_repos, 1):
+                console.print(f"  [{idx}/{len(all_repos)}] {repo.name}...")
 
                 # Analyze repository
                 analysis = await analyzer.analyze_repository(repo, deep_analysis=full)
@@ -226,6 +261,83 @@ async def _analyze_single_repo(repo_name: str, deep: bool) -> None:
 
     except Exception as e:
         console.print(f"\n[bold red]Error:[/bold red] {str(e)}")
+        sys.exit(1)
+
+
+@cli.command()
+def organizations() -> None:
+    """
+    List all GitHub organizations the user belongs to
+
+    Shows organizations with repository counts and access information.
+    Useful for discovering which orgs to scan with --all-orgs flag.
+
+    Example:
+      brookside-analyze organizations
+    """
+    asyncio.run(_list_organizations())
+
+
+async def _list_organizations() -> None:
+    """Async implementation of organization listing"""
+    console.print("\n[bold blue]GitHub Organizations[/bold blue]\n")
+
+    try:
+        settings = get_settings()
+        credentials = CredentialManager(settings)
+
+        async with GitHubMCPClient(settings, credentials) as github_client:
+            # Check token scopes
+            console.print("[yellow]Checking token permissions...[/yellow]")
+            token_info = await github_client.check_token_scopes()
+
+            if not token_info["valid"]:
+                console.print("[bold red]ERROR[/bold red] Invalid GitHub token")
+                sys.exit(1)
+
+            console.print(f"[green]OK[/green] Authenticated as: {token_info['user']}")
+            console.print(f"[dim]Scopes: {', '.join(token_info['scopes'])}[/dim]\n")
+
+            # Warn if missing required scopes
+            if not token_info["has_org_access"]:
+                console.print("[yellow]WARNING[/yellow] Token missing 'read:org' scope")
+                console.print("[dim]Organization repositories may not be accessible[/dim]\n")
+
+            # List organizations
+            console.print("[yellow]Discovering organizations...[/yellow]")
+            orgs = await github_client.list_user_organizations()
+
+            if not orgs:
+                console.print("[yellow]No organizations found[/yellow]")
+                console.print(f"[dim]Scanning personal repos for: {token_info['user']}[/dim]\n")
+                return
+
+            # Display organizations table
+            table = Table(title=f"Organizations for {token_info['user']}")
+            table.add_column("Organization", style="cyan")
+            table.add_column("Description", style="white")
+            table.add_column("URL", style="blue", no_wrap=True)
+
+            for org in orgs:
+                table.add_row(
+                    org["login"],
+                    org.get("description") or "[dim]No description[/dim]",
+                    org.get("url") or "",
+                )
+
+            console.print()
+            console.print(table)
+            console.print()
+
+            console.print(f"[green]Found {len(orgs)} organizations[/green]")
+            console.print("\n[dim]To scan all organizations:[/dim]")
+            console.print("[cyan]  brookside-analyze scan --all-orgs --full[/cyan]")
+            console.print("\n[dim]To scan specific organization:[/dim]")
+            console.print("[cyan]  brookside-analyze scan --org <org-name> --full[/cyan]\n")
+
+    except Exception as e:
+        console.print(f"\n[bold red]Error:[/bold red] {str(e)}")
+        logger.exception("Failed to list organizations")
         sys.exit(1)
 
 

@@ -1,0 +1,102 @@
+%% Agent Execution Error Handling and Recovery
+%% Comprehensive error handling patterns for resilient agent execution
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /guides/operations/error-handling, /architecture/resilience
+
+flowchart TD
+    Start([Agent Task Execution]) --> Validate{Input<br/>Validation}
+
+    Validate -->|Invalid| ValidationError[Validation Error]
+    ValidationError --> ReturnError[Return Error to User]
+
+    Validate -->|Valid| ExecuteAgent[Execute Agent Logic]
+
+    ExecuteAgent --> CheckLLM{LLM Call<br/>Required?}
+
+    CheckLLM -->|No| ProcessLocal[Process Locally]
+    ProcessLocal --> Success([Task Complete])
+
+    CheckLLM -->|Yes| CallLLM[Call Azure OpenAI]
+
+    CallLLM --> LLMResponse{LLM<br/>Response}
+
+    LLMResponse -->|Success| ParseResponse[Parse Response]
+    ParseResponse --> ValidateOutput{Output<br/>Valid?}
+
+    ValidateOutput -->|Yes| Success
+    ValidateOutput -->|No| OutputError[Output Validation Error]
+
+    LLMResponse -->|Rate Limited| RateLimit[Rate Limit Error]
+    LLMResponse -->|Timeout| TimeoutError[Timeout Error]
+    LLMResponse -->|Network Error| NetworkError[Network Error]
+    LLMResponse -->|Token Limit| TokenError[Token Limit Error]
+
+    RateLimit --> CheckRetry{Retry<br/>Available?}
+    TimeoutError --> CheckRetry
+    NetworkError --> CheckRetry
+
+    CheckRetry -->|Yes<br/>Count < 3| BackoffRetry[Exponential Backoff]
+    BackoffRetry --> CallLLM
+    Note over BackoffRetry: Delay: 2^attempt seconds<br/>Max: 16 seconds
+
+    CheckRetry -->|No<br/>Count >= 3| CircuitBreaker{Circuit<br/>Breaker}
+
+    CircuitBreaker -->|Open| BreakCircuit[Open Circuit]
+    BreakCircuit --> Fallback{Fallback<br/>Available?}
+
+    CircuitBreaker -->|Closed| CallLLM
+
+    TokenError --> ReduceContext[Reduce Context Size]
+    ReduceContext --> CheckMinContext{Context<br/>Sufficient?}
+
+    CheckMinContext -->|Yes| CallLLM
+    CheckMinContext -->|No| ContextError[Insufficient Context]
+
+    OutputError --> RegeneratePrompt[Adjust Prompt]
+    RegeneratePrompt --> CheckRegenCount{Regen<br/>Count < 2?}
+
+    CheckRegenCount -->|Yes| CallLLM
+    CheckRegenCount -->|No| GenerationError[Generation Failed]
+
+    Fallback -->|Yes| UseFallback[Use Cached/Default]
+    UseFallback --> DegradedSuccess([Degraded Success])
+
+    Fallback -->|No| RecordFailure[Record Failure]
+
+    ContextError --> RecordFailure
+    GenerationError --> RecordFailure
+    RecordFailure --> CheckCompensation{Compensation<br/>Required?}
+
+    CheckCompensation -->|Yes| TriggerCompensation[Trigger Compensation]
+    TriggerCompensation --> CompensationComplete[Rollback State]
+    CompensationComplete --> FailureLogged
+
+    CheckCompensation -->|No| FailureLogged[Log to Telemetry]
+
+    FailureLogged --> NotifyOps{Critical<br/>Error?}
+
+    NotifyOps -->|Yes| AlertOps[Send Alert]
+    AlertOps --> ReturnError
+
+    NotifyOps -->|No| ReturnError
+
+    ReturnError --> End([End])
+    Success --> End
+    DegradedSuccess --> End
+
+    %% Styling
+    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef warning fill:#f59e0b,stroke:#d97706,color:#000
+    classDef retry fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+
+    class Success,DegradedSuccess success
+    class ValidationError,TimeoutError,NetworkError,TokenError,ContextError,GenerationError,OutputError error
+    class RateLimit,CheckRetry,BackoffRetry,CircuitBreaker warning
+    class ReduceContext,RegeneratePrompt,UseFallback retry
+    class ExecuteAgent,CallLLM,ProcessLocal,ParseResponse process
+
+    %% Add legend
+    Start -.-> Legend[Legend:<br/>🟢 Success Path<br/>🔴 Error Path<br/>🟡 Retry/Recovery<br/>🟣 Mitigation<br/>🔵 Normal Process]

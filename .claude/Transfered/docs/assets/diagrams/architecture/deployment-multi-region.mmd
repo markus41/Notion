@@ -1,0 +1,126 @@
+%% Multi-Region Global Deployment Topology
+%% Shows worldwide distribution for global scale operations
+%% Designed to support enterprise operations across geographic boundaries
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Global Traffic Management"
+        cdn["Azure CDN<br/>---<br/>200+ PoPs globally<br/>Static asset caching"]
+        traffic_mgr["Traffic Manager<br/>---<br/>Performance routing<br/>Automatic failover"]
+        front_door["Azure Front Door<br/>---<br/>Layer 7 LB<br/>SSL termination"]
+    end
+
+    subgraph "North America (Primary)"
+        subgraph "US East"
+            use_aks["AKS Cluster<br/>---<br/>Production workloads<br/>50 nodes"]
+            use_cosmos["Cosmos DB<br/>---<br/>Write region<br/>Strong consistency"]
+            use_services["Supporting Services<br/>---<br/>OpenAI, Redis, Storage"]
+        end
+
+        subgraph "US West"
+            usw_aks["AKS Cluster<br/>---<br/>DR standby<br/>20 nodes"]
+            usw_cosmos["Cosmos DB<br/>---<br/>Read region<br/>Eventual consistency"]
+            usw_services["Supporting Services<br/>---<br/>Replicated config"]
+        end
+
+        subgraph "Canada Central"
+            ca_aks["AKS Cluster<br/>---<br/>Compliance workloads<br/>15 nodes"]
+            ca_cosmos["Cosmos DB<br/>---<br/>Data residency<br/>Local writes"]
+            ca_services["Supporting Services<br/>---<br/>Sovereign cloud"]
+        end
+    end
+
+    subgraph "Europe (Secondary)"
+        subgraph "West Europe"
+            weu_aks["AKS Cluster<br/>---<br/>GDPR compliant<br/>30 nodes"]
+            weu_cosmos["Cosmos DB<br/>---<br/>Write region EU<br/>Data sovereignty"]
+            weu_services["Supporting Services<br/>---<br/>EU data residency"]
+        end
+
+        subgraph "North Europe"
+            neu_aks["AKS Cluster<br/>---<br/>Backup region<br/>15 nodes"]
+            neu_cosmos["Cosmos DB<br/>---<br/>Read replica<br/>Cross-region backup"]
+            neu_services["Supporting Services<br/>---<br/>Disaster recovery"]
+        end
+    end
+
+    subgraph "Asia Pacific (Tertiary)"
+        subgraph "Southeast Asia"
+            sea_aks["AKS Cluster<br/>---<br/>APAC primary<br/>25 nodes"]
+            sea_cosmos["Cosmos DB<br/>---<br/>Write region APAC<br/>Low latency"]
+            sea_services["Supporting Services<br/>---<br/>Regional compliance"]
+        end
+
+        subgraph "Japan East"
+            jpe_aks["AKS Cluster<br/>---<br/>Japan workloads<br/>20 nodes"]
+            jpe_cosmos["Cosmos DB<br/>---<br/>Local regulations<br/>Data isolation"]
+            jpe_services["Supporting Services<br/>---<br/>Japanese compliance"]
+        end
+
+        subgraph "Australia East"
+            aue_aks["AKS Cluster<br/>---<br/>ANZ region<br/>15 nodes"]
+            aue_cosmos["Cosmos DB<br/>---<br/>Australian data<br/>Privacy Act"]
+            aue_services["Supporting Services<br/>---<br/>Local sovereignty"]
+        end
+    end
+
+    subgraph "Global Shared Services"
+        global_acr["Container Registry<br/>---<br/>Geo-replicated<br/>All regions"]
+        global_monitor["Azure Monitor<br/>---<br/>Global dashboards<br/>Unified alerting"]
+        global_backup["Backup Services<br/>---<br/>Cross-region backup<br/>Compliance archives"]
+        global_security["Security Center<br/>---<br/>Threat protection<br/>Compliance monitoring"]
+    end
+
+    %% Traffic routing
+    cdn -->|Static| front_door
+    traffic_mgr -->|Route NA| use_aks
+    traffic_mgr -->|Route EU| weu_aks
+    traffic_mgr -->|Route APAC| sea_aks
+    front_door -->|Primary| use_aks
+    front_door -->|Failover| usw_aks
+
+    %% Regional connections
+    use_aks --> use_cosmos
+    use_aks --> use_services
+    usw_aks --> usw_cosmos
+    ca_aks --> ca_cosmos
+
+    weu_aks --> weu_cosmos
+    weu_aks --> weu_services
+    neu_aks --> neu_cosmos
+
+    sea_aks --> sea_cosmos
+    jpe_aks --> jpe_cosmos
+    aue_aks --> aue_cosmos
+
+    %% Data replication
+    use_cosmos <-->|Multi-master| weu_cosmos
+    use_cosmos <-->|Multi-master| sea_cosmos
+    use_cosmos -->|Read replica| usw_cosmos
+    weu_cosmos -->|Read replica| neu_cosmos
+    sea_cosmos -->|Read replica| jpe_cosmos
+    sea_cosmos -->|Read replica| aue_cosmos
+    ca_cosmos -.->|Isolated| ca_cosmos
+
+    %% Shared services
+    use_aks -->|Pull| global_acr
+    weu_aks -->|Pull| global_acr
+    sea_aks -->|Pull| global_acr
+    use_cosmos -->|Backup| global_backup
+    use_aks -->|Metrics| global_monitor
+    weu_aks -->|Security| global_security
+
+    %% Apply semantic color coding
+    classDef global fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:3px
+    classDef primary fill:#0078d4,stroke:#005a9e,color:#fff,stroke-width:3px
+    classDef secondary fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef tertiary fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef shared fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef data fill:#336791,stroke:#254a6b,color:#fff,stroke-width:2px
+
+    class cdn,traffic_mgr,front_door global
+    class use_aks,use_cosmos,use_services,usw_aks,usw_cosmos,usw_services,ca_aks,ca_cosmos,ca_services primary
+    class weu_aks,weu_cosmos,weu_services,neu_aks,neu_cosmos,neu_services secondary
+    class sea_aks,sea_cosmos,sea_services,jpe_aks,jpe_cosmos,jpe_services,aue_aks,aue_cosmos,aue_services tertiary
+    class global_acr,global_monitor,global_backup,global_security shared

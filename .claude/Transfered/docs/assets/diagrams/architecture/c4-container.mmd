@@ -1,0 +1,69 @@
+graph TB
+    subgraph "Browser"
+        webapp["<b>Web Application</b><br/>(React 19 + TypeScript)<br/>---<br/>Single-page application<br/>for managing agents,<br/>workflows, and monitoring"]
+    end
+
+    subgraph "Agent Studio Platform"
+        subgraph "API Layer"
+            api["<b>Orchestration API</b><br/>(.NET 8 ASP.NET Core)<br/>---<br/>Workflow orchestration,<br/>task scheduling,<br/>quality gates"]
+            signalr["<b>SignalR Hub</b><br/>(.NET 8)<br/>---<br/>Real-time updates,<br/>agent communication,<br/>event streaming"]
+        end
+
+        subgraph "Agent Runtime"
+            agents["<b>Agent Service</b><br/>(Python 3.12 FastAPI)<br/>---<br/>Agent execution,<br/>LLM integration,<br/>tool invocation"]
+        end
+
+        subgraph "Data Layer"
+            cosmos[("<b>Cosmos DB</b><br/>(Azure NoSQL)<br/>---<br/>State management,<br/>metadata storage,<br/>checkpoints")]
+            redis[("<b>Redis Cache</b><br/>(Azure)<br/>---<br/>Distributed cache,<br/>session state,<br/>rate limiting")]
+            storage[("<b>Blob Storage</b><br/>(Azure)<br/>---<br/>Artifacts,<br/>attachments,<br/>logs")]
+        end
+
+        subgraph "Observability"
+            insights["<b>Application Insights</b><br/>(Azure)<br/>---<br/>Distributed tracing,<br/>metrics collection,<br/>log aggregation"]
+        end
+    end
+
+    subgraph "External Services"
+        openai["<b>Azure OpenAI</b><br/>(External)<br/>---<br/>GPT-4, Claude,<br/>embeddings"]
+        keyvault["<b>Key Vault</b><br/>(Azure)<br/>---<br/>Secrets management,<br/>certificate storage"]
+        aad["<b>Azure AD</b><br/>(Azure)<br/>---<br/>Authentication,<br/>authorization"]
+    end
+
+    webapp -->|HTTPS/REST<br/>API calls| api
+    webapp -->|WebSocket<br/>Real-time events| signalr
+
+    api -->|HTTP<br/>Task execution| agents
+    api -->|Read/Write<br/>State| cosmos
+    api -->|Cache<br/>Get/Set| redis
+    api -->|Store<br/>Artifacts| storage
+    api -->|Get<br/>Secrets| keyvault
+    api -->|Telemetry| insights
+
+    signalr -->|Events<br/>Notifications| agents
+    signalr -->|Telemetry| insights
+
+    agents -->|Query/Update<br/>State| cosmos
+    agents -->|Cache<br/>Results| redis
+    agents -->|Store<br/>Files| storage
+    agents -->|Inference<br/>API calls| openai
+    agents -->|Get<br/>Secrets| keyvault
+    agents -->|Telemetry| insights
+
+    webapp -->|OAuth2<br/>Login| aad
+
+    classDef frontend fill:#61dafb,stroke:#4fa8c5,color:#000,stroke-width:2px
+    classDef backend fill:#512bd4,stroke:#3a1f9d,color:#fff,stroke-width:2px
+    classDef database fill:#336791,stroke:#254a6b,color:#fff,stroke-width:2px
+    classDef cache fill:#dc382d,stroke:#a32820,color:#fff,stroke-width:2px
+    classDef storage fill:#42b983,stroke:#2d8659,color:#fff,stroke-width:2px
+    classDef observability fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef external fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+
+    class webapp frontend
+    class api,signalr,agents backend
+    class cosmos database
+    class redis cache
+    class storage storage
+    class insights observability
+    class openai,keyvault,aad external

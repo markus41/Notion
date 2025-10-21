@@ -1,0 +1,55 @@
+{
+  "dashboard": {
+    "title": "AI Orchestrator - Cost Dashboard",
+    "description": "Resource utilization and cost tracking",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Estimated Monthly Cost",
+        "type": "stat",
+        "targets": [{"expr": "sum(resource_cost_per_hour) * 730"}],
+        "options": {"unit": "currencyUSD", "decimals": 2}
+      },
+      {
+        "id": 2,
+        "title": "Cost by Resource Type",
+        "type": "pie",
+        "targets": [{"expr": "sum(resource_cost_per_hour) by (resource_type)"}]
+      },
+      {
+        "id": 3,
+        "title": "Compute Cost Trend",
+        "type": "graph",
+        "targets": [{"expr": "rate(compute_cost_total[1h])"}]
+      },
+      {
+        "id": 4,
+        "title": "Storage Cost",
+        "type": "graph",
+        "targets": [
+          {"expr": "storage_used_bytes * storage_cost_per_gb / 1024 / 1024 / 1024", "legendFormat": "Database"},
+          {"expr": "cache_used_bytes * cache_cost_per_gb / 1024 / 1024 / 1024", "legendFormat": "Cache"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "API Call Costs",
+        "type": "table",
+        "targets": [{"expr": "topk(10, sum(api_calls_total * api_cost_per_call) by (api_name))", "format": "table"}]
+      },
+      {
+        "id": 6,
+        "title": "Cost per Agent",
+        "type": "graph",
+        "targets": [{"expr": "sum(agent_resource_cost) by (agent_type)"}]
+      },
+      {
+        "id": 7,
+        "title": "Efficiency Score",
+        "type": "gauge",
+        "targets": [{"expr": "(tasks_completed_total / resource_cost_total) * 100"}],
+        "fieldConfig": {"defaults": {"max": 100, "unit": "percent"}}
+      }
+    ]
+  }
+}

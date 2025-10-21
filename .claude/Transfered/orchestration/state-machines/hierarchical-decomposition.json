@@ -1,0 +1,173 @@
+{
+  "name": "Hierarchical Decomposition State Machine",
+  "description": "State machine for recursive task breakdown and execution",
+  "initialState": "pending",
+  "states": [
+    {
+      "name": "pending",
+      "description": "Task waiting to be processed",
+      "type": "initial"
+    },
+    {
+      "name": "analyzing",
+      "description": "Analyzing task complexity and decomposability",
+      "type": "intermediate"
+    },
+    {
+      "name": "decomposing",
+      "description": "Breaking down task into subtasks",
+      "type": "intermediate"
+    },
+    {
+      "name": "parallelizing",
+      "description": "Identifying independent subtasks for parallel execution",
+      "type": "intermediate"
+    },
+    {
+      "name": "executing_parallel",
+      "description": "Executing independent subtasks concurrently",
+      "type": "intermediate"
+    },
+    {
+      "name": "executing_sequential",
+      "description": "Executing dependent subtasks sequentially",
+      "type": "intermediate"
+    },
+    {
+      "name": "executing_atomic",
+      "description": "Executing atomic (non-decomposable) task",
+      "type": "intermediate"
+    },
+    {
+      "name": "aggregating",
+      "description": "Aggregating results from subtasks",
+      "type": "intermediate"
+    },
+    {
+      "name": "completed",
+      "description": "Task completed successfully",
+      "type": "final"
+    },
+    {
+      "name": "failed",
+      "description": "Task execution failed",
+      "type": "final"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "pending",
+      "to": "analyzing",
+      "event": "START",
+      "guard": null,
+      "action": "beginAnalysis"
+    },
+    {
+      "from": "analyzing",
+      "to": "decomposing",
+      "event": "SHOULD_DECOMPOSE",
+      "guard": "complexityAboveThreshold && depthBelowMax && hasDecomposer",
+      "action": "initiateDecomposition"
+    },
+    {
+      "from": "analyzing",
+      "to": "executing_atomic",
+      "event": "EXECUTE_ATOMIC",
+      "guard": "isAtomic || complexityBelowThreshold || depthAtMax",
+      "action": "executeTask"
+    },
+    {
+      "from": "decomposing",
+      "to": "parallelizing",
+      "event": "DECOMPOSITION_COMPLETE",
+      "guard": "hasSubtasks",
+      "action": "analyzeSubtaskDependencies"
+    },
+    {
+      "from": "decomposing",
+      "to": "executing_atomic",
+      "event": "NO_SUBTASKS",
+      "guard": "!hasSubtasks",
+      "action": "fallbackToAtomic"
+    },
+    {
+      "from": "parallelizing",
+      "to": "executing_parallel",
+      "event": "PARALLEL_TASKS_IDENTIFIED",
+      "guard": "hasParallelTasks",
+      "action": "executeParallel"
+    },
+    {
+      "from": "parallelizing",
+      "to": "executing_sequential",
+      "event": "ONLY_SEQUENTIAL_TASKS",
+      "guard": "!hasParallelTasks && hasSequentialTasks",
+      "action": "executeSequential"
+    },
+    {
+      "from": "executing_parallel",
+      "to": "executing_sequential",
+      "event": "PARALLEL_COMPLETE",
+      "guard": "hasRemainingSequentialTasks",
+      "action": "continueWithSequential"
+    },
+    {
+      "from": "executing_parallel",
+      "to": "aggregating",
+      "event": "PARALLEL_COMPLETE",
+      "guard": "!hasRemainingSequentialTasks",
+      "action": "beginAggregation"
+    },
+    {
+      "from": "executing_sequential",
+      "to": "aggregating",
+      "event": "SEQUENTIAL_COMPLETE",
+      "guard": null,
+      "action": "beginAggregation"
+    },
+    {
+      "from": "executing_atomic",
+      "to": "completed",
+      "event": "EXECUTION_SUCCESS",
+      "guard": null,
+      "action": "recordResult"
+    },
+    {
+      "from": "executing_atomic",
+      "to": "failed",
+      "event": "EXECUTION_FAILED",
+      "guard": null,
+      "action": "recordError"
+    },
+    {
+      "from": "aggregating",
+      "to": "completed",
+      "event": "AGGREGATION_SUCCESS",
+      "guard": null,
+      "action": "storeAggregatedResult"
+    },
+    {
+      "from": "aggregating",
+      "to": "failed",
+      "event": "AGGREGATION_FAILED",
+      "guard": null,
+      "action": "recordAggregationError"
+    },
+    {
+      "from": "executing_parallel",
+      "to": "failed",
+      "event": "SUBTASK_FAILED",
+      "guard": "!canRecover",
+      "action": "propagateFailure"
+    },
+    {
+      "from": "executing_sequential",
+      "to": "failed",
+      "event": "SUBTASK_FAILED",
+      "guard": "!canRecover",
+      "action": "propagateFailure"
+    }
+  ],
+  "errorStates": ["failed"],
+  "recoveryTransitions": []
+}

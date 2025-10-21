@@ -1,0 +1,150 @@
+%% Sequential Workflow with Checkpoint Recovery
+%% Shows sequential execution with checkpoint creation and recovery points
+%% Establishes resilient workflow execution with failure recovery
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+stateDiagram-v2
+    [*] --> CheckExisting: Start/Resume
+
+    CheckExisting --> LoadCheckpoint: Checkpoint Exists
+    CheckExisting --> InitializeNew: No Checkpoint
+
+    state LoadCheckpoint {
+        [*] --> ReadState
+        ReadState --> ValidateCheckpoint
+        ValidateCheckpoint --> RestoreContext
+        RestoreContext --> [*]
+    }
+    note right of LoadCheckpoint
+        Recovery from failure
+        State restoration
+        Context rebuild
+    end note
+
+    InitializeNew --> Task1: New Workflow
+
+    LoadCheckpoint --> Task1: Resume at Task1
+    LoadCheckpoint --> Task2: Resume at Task2
+    LoadCheckpoint --> Task3: Resume at Task3
+    LoadCheckpoint --> Task4: Resume at Task4
+
+    Task1 --> Checkpoint1: Complete
+    note right of Task1
+        Agent: Architect
+        Duration: 10 min
+        Retry: 3 attempts
+    end note
+
+    state Checkpoint1 {
+        [*] --> SaveState1
+        SaveState1 --> PersistContext1
+        PersistContext1 --> VersionState1
+        VersionState1 --> [*]
+    }
+    note left of Checkpoint1
+        Checkpoint Type: Major
+        Storage: Cosmos DB
+        TTL: 7 days
+        Version: Incremental
+    end note
+
+    Checkpoint1 --> Task2: Continue
+
+    Task2 --> Checkpoint2: Complete
+    note right of Task2
+        Agent: Builder
+        Duration: 20 min
+        Idempotent: Yes
+    end note
+
+    state Checkpoint2 {
+        [*] --> SaveState2
+        SaveState2 --> PersistContext2
+        PersistContext2 --> VersionState2
+        VersionState2 --> [*]
+    }
+    note left of Checkpoint2
+        Checkpoint Type: Major
+        Includes artifacts
+        Compressed storage
+    end note
+
+    Checkpoint2 --> Task3: Continue
+
+    Task3 --> MinorCheckpoint: Progress Update
+    MinorCheckpoint --> Task3: Continue Processing
+    Task3 --> Checkpoint3: Complete
+    note right of Task3
+        Agent: Validator
+        Long-running task
+        Progress tracking
+    end note
+
+    state MinorCheckpoint {
+        [*] --> QuickSave
+        QuickSave --> UpdateProgress
+        UpdateProgress --> [*]
+    }
+    note left of MinorCheckpoint
+        Checkpoint Type: Minor
+        Progress only
+        No full state
+    end note
+
+    Checkpoint3 --> Task4: Continue
+
+    Task4 --> FinalCheckpoint: Complete
+    note right of Task4
+        Agent: Scribe
+        Documentation
+        Final validation
+    end note
+
+    state FinalCheckpoint {
+        [*] --> SaveFinal
+        SaveFinal --> ArchiveState
+        ArchiveState --> CleanupOld
+        CleanupOld --> [*]
+    }
+    note left of FinalCheckpoint
+        Checkpoint Type: Final
+        Archive state
+        Cleanup old checkpoints
+    end note
+
+    FinalCheckpoint --> Success: All Complete
+    Success --> [*]: Workflow Complete
+
+    Task1 --> ErrorRecovery: Failure
+    Task2 --> ErrorRecovery: Failure
+    Task3 --> ErrorRecovery: Failure
+    Task4 --> ErrorRecovery: Failure
+
+    state ErrorRecovery {
+        [*] --> LogError
+        LogError --> SaveErrorState
+        SaveErrorState --> DetermineRetry
+        DetermineRetry --> RetryTask: Can Retry
+        DetermineRetry --> FailWorkflow: Max Retries
+    }
+    note right of ErrorRecovery
+        Automatic retry logic
+        Exponential backoff
+        Dead letter queue
+    end note
+
+    ErrorRecovery --> LoadCheckpoint: Retry from Last
+    ErrorRecovery --> [*]: Fatal Error
+
+    state CheckpointMaintenance {
+        [*] --> ListCheckpoints
+        ListCheckpoints --> RemoveExpired
+        RemoveExpired --> CompactStorage
+        CompactStorage --> [*]
+    }
+    note right of CheckpointMaintenance
+        Runs every 6 hours
+        Removes expired
+        Compacts storage
+    end note

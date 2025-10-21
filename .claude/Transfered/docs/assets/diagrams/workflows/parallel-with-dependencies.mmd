@@ -1,0 +1,86 @@
+%% Parallel Workflow with Task Dependencies
+%% Shows complex parallel execution with dependency management
+%% Establishes efficient execution while respecting task dependencies
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Initialization Phase"
+        start[Start Workflow] --> init[Initialize Context]
+        init --> dep_analysis[Analyze Dependencies]
+        dep_analysis --> schedule[Create Schedule]
+    end
+
+    subgraph "Wave 1 - Independent Tasks"
+        schedule --> wave1_start{Wave 1 Start}
+        wave1_start -->|Parallel| task_1a[Task 1A: Load Data<br/>Duration: 5 min]
+        wave1_start -->|Parallel| task_1b[Task 1B: Validate Config<br/>Duration: 3 min]
+        wave1_start -->|Parallel| task_1c[Task 1C: Setup Environment<br/>Duration: 4 min]
+    end
+
+    subgraph "Wave 2 - First Dependencies"
+        task_1a --> wave2_wait1{Wait}
+        task_1b --> wave2_wait1
+        wave2_wait1 --> task_2a[Task 2A: Process Data<br/>Duration: 10 min<br/>Depends: 1A, 1B]
+
+        task_1c --> task_2b[Task 2B: Deploy Base<br/>Duration: 8 min<br/>Depends: 1C]
+
+        wave2_wait1 -->|Parallel| task_2c[Task 2C: Run Analysis<br/>Duration: 7 min<br/>Depends: 1A, 1B]
+    end
+
+    subgraph "Wave 3 - Complex Dependencies"
+        task_2a --> wave3_wait1{Wait}
+        task_2b --> wave3_wait1
+        wave3_wait1 --> task_3a[Task 3A: Build Models<br/>Duration: 15 min<br/>Depends: 2A, 2B]
+
+        task_2c --> task_3b[Task 3B: Generate Reports<br/>Duration: 5 min<br/>Depends: 2C]
+
+        task_2a -->|Parallel| task_3c[Task 3C: Validate Results<br/>Duration: 6 min<br/>Depends: 2A]
+    end
+
+    subgraph "Wave 4 - Convergence"
+        task_3a --> wave4_wait{Wait All}
+        task_3b --> wave4_wait
+        task_3c --> wave4_wait
+
+        wave4_wait --> task_4a[Task 4A: Integration Test<br/>Duration: 12 min<br/>Depends: 3A, 3B, 3C]
+        wave4_wait -->|Parallel| task_4b[Task 4B: Performance Test<br/>Duration: 10 min<br/>Depends: 3A, 3C]
+    end
+
+    subgraph "Final Phase"
+        task_4a --> final_wait{Wait}
+        task_4b --> final_wait
+        final_wait --> aggregate[Aggregate Results]
+        aggregate --> complete[Complete Workflow]
+    end
+
+    subgraph "Dependency Matrix"
+        matrix["Dependencies:<br/>1A → 2A, 2C<br/>1B → 2A, 2C<br/>1C → 2B<br/>2A → 3A, 3C<br/>2B → 3A<br/>2C → 3B<br/>3A → 4A, 4B<br/>3B → 4A<br/>3C → 4A, 4B"]
+    end
+
+    subgraph "Resource Allocation"
+        resources["Resource Pool:<br/>8 CPU cores total<br/>Task 1A: 2 cores<br/>Task 1B: 1 core<br/>Task 1C: 1 core<br/>Task 2A: 4 cores<br/>Task 2B: 2 cores<br/>Task 2C: 2 cores<br/>Task 3A: 6 cores<br/>Task 3B: 2 cores<br/>Task 3C: 2 cores<br/>Task 4A: 4 cores<br/>Task 4B: 4 cores"]
+    end
+
+    subgraph "Execution Timeline"
+        timeline["Timeline:<br/>0-5 min: Wave 1<br/>5-15 min: Wave 2<br/>15-30 min: Wave 3<br/>30-42 min: Wave 4<br/>Total: ~42 min<br/>(Sequential: ~83 min)<br/>Speedup: 1.98x"]
+    end
+
+    %% Apply semantic color coding
+    classDef init fill:#3eaf7c,stroke:#2d8659,color:#fff,stroke-width:2px
+    classDef wave1 fill:#0078d4,stroke:#005a9e,color:#fff,stroke-width:2px
+    classDef wave2 fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef wave3 fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef wave4 fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef final fill:#10b981,stroke:#059669,color:#fff,stroke-width:3px
+    classDef wait fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:1px,stroke-dasharray: 5 5
+    classDef info fill:#fef3c7,stroke:#f59e0b,color:#000,stroke-width:1px
+
+    class start,init,dep_analysis,schedule init
+    class task_1a,task_1b,task_1c wave1
+    class task_2a,task_2b,task_2c wave2
+    class task_3a,task_3b,task_3c wave3
+    class task_4a,task_4b wave4
+    class aggregate,complete final
+    class wave1_start,wave2_wait1,wave3_wait1,wave4_wait,final_wait wait
+    class matrix,resources,timeline info

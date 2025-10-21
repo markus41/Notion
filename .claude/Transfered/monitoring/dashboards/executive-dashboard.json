@@ -1,0 +1,262 @@
+{
+  "dashboard": {
+    "title": "AI Orchestrator - Executive Dashboard",
+    "description": "High-level KPIs and business metrics",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "tags": ["executive", "kpi", "business"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job='ai-orchestrator'}",
+            "legendFormat": "Status"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Status" },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                    { "options": { "1": { "text": "UP", "color": "green" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Agents",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(ai_orchestrator_agent_total)",
+            "legendFormat": "Total Agents"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Active Agents",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "ai_orchestrator_agent_active",
+            "legendFormat": "Active"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 10, "color": "yellow" },
+                { "value": 20, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Tasks Completed (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(ai_orchestrator_task_total{status='completed'}[24h]))",
+            "legendFormat": "Completed"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Success Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "sum(rate(ai_orchestrator_task_total{status='completed'}[5m])) / sum(rate(ai_orchestrator_task_total[5m])) * 100",
+            "legendFormat": "Success %"
+          }
+        ],
+        "options": {
+          "unit": "percent"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 95, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Average Task Duration",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(ai_orchestrator_task_duration_seconds)",
+            "legendFormat": "Avg Duration"
+          }
+        ],
+        "options": {
+          "unit": "s",
+          "decimals": 2
+        }
+      },
+      {
+        "id": 7,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(ai_orchestrator_errors_total[5m])) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "options": {
+          "legend": {
+            "show": true,
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(ai_orchestrator_http_requests_total[5m])) by (method, path)",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "P95 Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ai_orchestrator_http_request_duration_seconds_bucket[5m])) by (le, path))",
+            "legendFormat": "{{path}}"
+          }
+        ],
+        "options": {
+          "unit": "s"
+        }
+      },
+      {
+        "id": 10,
+        "title": "Resource Utilization",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ai_orchestrator_memory_usage_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "Memory (GB)"
+          },
+          {
+            "expr": "ai_orchestrator_cpu_usage_percent",
+            "legendFormat": "CPU (%)"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Top Agents by Task Volume",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum(ai_orchestrator_task_total) by (agent_id))",
+            "format": "table"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Recent Errors",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job='ai-orchestrator', level='error'}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "wrapLogMessage": true
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "query": "label_values(ai_orchestrator_agent_total, environment)",
+          "current": {
+            "text": "production",
+            "value": "production"
+          }
+        },
+        {
+          "name": "agent_type",
+          "type": "query",
+          "query": "label_values(ai_orchestrator_agent_total, type)",
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(ai_orchestrator_build_info[5m]) > 0",
+          "titleFormat": "Deployment",
+          "tagKeys": "version",
+          "iconColor": "blue"
+        }
+      ]
+    }
+  }
+}

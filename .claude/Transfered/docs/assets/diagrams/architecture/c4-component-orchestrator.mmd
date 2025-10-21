@@ -1,0 +1,86 @@
+%% C4 Component Diagram - .NET Orchestrator Deep Dive
+%% Shows internal components of the Orchestration Service
+%% Establishes clear boundaries for sustainable component design
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Orchestration API (.NET 8)"
+        subgraph "API Layer"
+            workflow_controller["WorkflowController<br/>---<br/>REST endpoints<br/>for workflow operations"]
+            agent_controller["AgentController<br/>---<br/>Agent management<br/>endpoints"]
+            health_controller["HealthController<br/>---<br/>Health checks and<br/>readiness probes"]
+        end
+
+        subgraph "Core Services"
+            orchestrator["MetaAgentOrchestrator<br/>---<br/>Workflow coordination<br/>and scheduling"]
+            executor["WorkflowExecutor<br/>---<br/>Task execution engine<br/>with pattern support"]
+            state_manager["StateManager<br/>---<br/>State persistence<br/>and recovery"]
+            checkpoint_manager["CheckpointManager<br/>---<br/>Checkpoint creation<br/>and restoration"]
+        end
+
+        subgraph "Agent Integration"
+            python_client["PythonAgentClient<br/>---<br/>HTTP client for<br/>Python agents"]
+            retry_policy["RetryPolicy<br/>---<br/>Exponential backoff<br/>and circuit breaker"]
+            agent_registry["AgentRegistry<br/>---<br/>Agent discovery<br/>and routing"]
+        end
+
+        subgraph "Event Processing"
+            event_sourcing["EventSourcing<br/>---<br/>Event capture<br/>and replay"]
+            event_publisher["EventPublisher<br/>---<br/>Event distribution<br/>to subscribers"]
+            event_store["EventStore<br/>---<br/>Event persistence<br/>and querying"]
+        end
+
+        subgraph "Real-time Communication"
+            signalr_hub["MetaAgentHub<br/>---<br/>SignalR hub for<br/>real-time updates"]
+            connection_manager["ConnectionManager<br/>---<br/>Client connection<br/>lifecycle"]
+            group_manager["GroupManager<br/>---<br/>Workflow subscription<br/>groups"]
+        end
+
+        subgraph "Cross-Cutting Concerns"
+            auth_middleware["AuthMiddleware<br/>---<br/>JWT validation<br/>and authorization"]
+            telemetry["TelemetryService<br/>---<br/>OpenTelemetry<br/>instrumentation"]
+            exception_handler["ExceptionHandler<br/>---<br/>Global error<br/>handling"]
+        end
+    end
+
+    %% Internal connections
+    workflow_controller --> orchestrator
+    agent_controller --> agent_registry
+    health_controller --> state_manager
+
+    orchestrator --> executor
+    orchestrator --> state_manager
+    executor --> python_client
+    executor --> checkpoint_manager
+
+    python_client --> retry_policy
+    python_client --> agent_registry
+
+    state_manager --> event_sourcing
+    event_sourcing --> event_store
+    event_sourcing --> event_publisher
+
+    orchestrator --> signalr_hub
+    signalr_hub --> connection_manager
+    signalr_hub --> group_manager
+
+    workflow_controller --> auth_middleware
+    agent_controller --> auth_middleware
+    orchestrator --> telemetry
+    executor --> exception_handler
+
+    %% Apply semantic color coding
+    classDef api fill:#61dafb,stroke:#4fa8c5,color:#000,stroke-width:2px
+    classDef core fill:#3eaf7c,stroke:#2d8659,color:#fff,stroke-width:3px
+    classDef integration fill:#512bd4,stroke:#3a1f9d,color:#fff,stroke-width:2px
+    classDef event fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef realtime fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef crosscut fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+
+    class workflow_controller,agent_controller,health_controller api
+    class orchestrator,executor,state_manager,checkpoint_manager core
+    class python_client,retry_policy,agent_registry integration
+    class event_sourcing,event_publisher,event_store event
+    class signalr_hub,connection_manager,group_manager realtime
+    class auth_middleware,telemetry,exception_handler crosscut

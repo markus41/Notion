@@ -1,0 +1,37 @@
+{
+  "agent": {
+    "name": "OrchestratorAgent",
+    "type": "AIAgent",
+    "description": "Orchestrates multi-agent workflows and coordinates handoffs",
+    "capabilities": [
+      "workflow_management",
+      "agent_coordination",
+      "decision_making"
+    ],
+    "configuration": {
+      "model": "gpt-4",
+      "temperature": 0.3,
+      "max_tokens": 3000
+    },
+    "managed_agents": [
+      "analyzer-agent",
+      "processor-agent",
+      "validator-agent"
+    ],
+    "handoff_rules": [
+      {
+        "condition": "analysis_required",
+        "target_agent": "analyzer-agent"
+      },
+      {
+        "condition": "processing_required",
+        "target_agent": "processor-agent"
+      }
+    ],
+    "guardrails": {
+      "max_retries": 5,
+      "timeout_seconds": 120,
+      "max_concurrent_agents": 10
+    }
+  }
+}

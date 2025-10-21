@@ -1,0 +1,82 @@
+%% Agent Execution with LLM Integration
+%% Shows complete agent execution lifecycle including Azure OpenAI calls
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /guides/developer/agent-development, /architecture/integrations
+
+sequenceDiagram
+    participant User
+    participant API as Orchestration API
+    participant Orch as Orchestrator
+    participant Agent as Agent Runtime
+    participant LLM as Azure OpenAI
+    participant Cache as Redis Cache
+    participant DB as Cosmos DB
+    participant Telemetry as Application Insights
+
+    User->>API: POST /api/workflows/execute
+    Note over User,API: Request includes workflow ID, context
+
+    API->>Orch: Schedule Workflow
+    activate Orch
+
+    Orch->>DB: Load Workflow Definition
+    DB-->>Orch: Workflow Config + Tasks
+
+    Orch->>DB: Initialize Execution State
+    DB-->>Orch: Execution ID
+
+    loop For Each Task
+        Orch->>Agent: Execute Task (context, prompt)
+        activate Agent
+
+        Agent->>Cache: Check Response Cache
+        alt Cache Hit
+            Cache-->>Agent: Cached Response
+            Agent->>Telemetry: Log Cache Hit
+        else Cache Miss
+            Agent->>LLM: Generate Completion
+            Note over Agent,LLM: Prompt Engineering:<br/>System + Context + User
+
+            LLM->>LLM: Process with GPT-4
+            Note over LLM: Token Processing:<br/>Max 8192 tokens<br/>Temperature: 0.7
+
+            LLM-->>Agent: AI Response (streaming)
+
+            Agent->>Cache: Store Response
+            Note over Cache: TTL: 1 hour<br/>Key: hash(prompt+context)
+
+            Agent->>Telemetry: Log Token Usage
+        end
+
+        Agent->>DB: Save Checkpoint
+        Note over DB: Version: incremental<br/>State: snapshot
+
+        Agent-->>Orch: Task Result
+        deactivate Agent
+
+        Orch->>API: Progress Update
+        API-->>User: SSE Event (SignalR)
+        Note over User,API: Real-time progress
+    end
+
+    Orch->>DB: Mark Execution Complete
+    deactivate Orch
+
+    API-->>User: Final Result
+
+    Note over User,DB: End-to-End Latency:<br/>Simple: 200-500ms<br/>Complex: 2-5s
+
+    rect rgb(240, 248, 255)
+        Note over Agent,LLM: LLM Integration Details:<br/>- Retry with exponential backoff<br/>- Circuit breaker at 5 failures<br/>- Timeout: 30s per request<br/>- Streaming for long responses
+    end
+
+    classDef success fill:#10b981,stroke:#059669,color:#fff
+    classDef processing fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef external fill:#0078d4,stroke:#005a9e,color:#fff
+    classDef cache fill:#dc382d,stroke:#a32820,color:#fff
+
+    class Agent,Orch processing
+    class LLM,DB external
+    class Cache cache
+    class Telemetry success

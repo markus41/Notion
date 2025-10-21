@@ -1,0 +1,155 @@
+%% Publish-Subscribe Pattern Architecture
+%% Shows pub-sub messaging for decoupled communication
+%% Streamlines asynchronous message distribution across services
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+graph TB
+    subgraph "Publishers"
+        workflow_pub["Workflow Publisher<br/>---<br/>State transitions<br/>Progress updates"]
+        agent_pub["Agent Publisher<br/>---<br/>Task results<br/>Status changes"]
+        monitor_pub["Monitor Publisher<br/>---<br/>Health metrics<br/>Alert events"]
+        audit_pub["Audit Publisher<br/>---<br/>Security events<br/>Compliance data"]
+    end
+
+    subgraph "Message Broker Layer"
+        subgraph "Topic Management"
+            topic_registry["Topic Registry<br/>---<br/>Topic catalog<br/>Access control"]
+            topic_lifecycle["Topic Lifecycle<br/>---<br/>Creation/deletion<br/>Retention policies"]
+        end
+
+        subgraph "Core Topics"
+            workflow_topic_ps["workflow-events<br/>---<br/>Partitioned: 8<br/>Retention: 7d"]
+            agent_topic_ps["agent-events<br/>---<br/>Partitioned: 16<br/>Retention: 3d"]
+            system_topic_ps["system-events<br/>---<br/>Partitioned: 4<br/>Retention: 30d"]
+            audit_topic_ps["audit-events<br/>---<br/>Partitioned: 2<br/>Retention: 90d"]
+        end
+
+        subgraph "Message Router"
+            content_router["Content Router<br/>---<br/>Message filtering<br/>Rule evaluation"]
+            partition_selector["Partition Selector<br/>---<br/>Hash/Round-robin<br/>Key-based routing"]
+            priority_handler["Priority Handler<br/>---<br/>Message ordering<br/>QoS levels"]
+        end
+
+        subgraph "Reliability Features"
+            message_store["Message Store<br/>---<br/>Durable storage<br/>Replay capability"]
+            ack_tracker["ACK Tracker<br/>---<br/>Delivery confirmation<br/>Retry management"]
+            dlq_handler["DLQ Handler<br/>---<br/>Failed messages<br/>Poison queue"]
+        end
+    end
+
+    subgraph "Subscription Management"
+        subgraph "Subscription Types"
+            durable_sub["Durable Subscriptions<br/>---<br/>Survives restarts<br/>Cursor position"]
+            ephemeral_sub["Ephemeral Subscriptions<br/>---<br/>Temporary consumers<br/>No state"]
+            shared_sub["Shared Subscriptions<br/>---<br/>Load balancing<br/>Consumer groups"]
+            exclusive_sub["Exclusive Subscriptions<br/>---<br/>Single consumer<br/>Ordered delivery"]
+        end
+
+        subgraph "Delivery Modes"
+            push_delivery["Push Delivery<br/>---<br/>Server push<br/>WebSocket/SSE"]
+            pull_delivery["Pull Delivery<br/>---<br/>Client poll<br/>Batch fetch"]
+            stream_delivery["Stream Delivery<br/>---<br/>Continuous flow<br/>Backpressure"]
+        end
+    end
+
+    subgraph "Subscribers"
+        subgraph "Processing Subscribers"
+            analytics_sub["Analytics Service<br/>---<br/>Aggregation<br/>Real-time metrics"]
+            notification_sub["Notification Service<br/>---<br/>Multi-channel<br/>User preferences"]
+            storage_sub["Storage Service<br/>---<br/>Data lake ingestion<br/>Archive"]
+        end
+
+        subgraph "Integration Subscribers"
+            webhook_sub["Webhook Service<br/>---<br/>External delivery<br/>Retry logic"]
+            database_sub["Database Writer<br/>---<br/>Persistence<br/>Transactional"]
+            cache_sub["Cache Updater<br/>---<br/>Cache warming<br/>Invalidation"]
+        end
+
+        subgraph "Monitoring Subscribers"
+            logger_sub["Logger Service<br/>---<br/>Structured logging<br/>Log shipping"]
+            metrics_sub["Metrics Collector<br/>---<br/>Prometheus export<br/>Time series"]
+            alerting_sub["Alerting Service<br/>---<br/>Threshold detection<br/>Escalation"]
+        end
+    end
+
+    subgraph "Message Processing Patterns"
+        fanout["Fan-out Pattern<br/>---<br/>1-to-many<br/>Broadcast"]
+        filter["Filter Pattern<br/>---<br/>Selective delivery<br/>Content-based"]
+        aggregate["Aggregator Pattern<br/>---<br/>Combine messages<br/>Time windows"]
+        splitter["Splitter Pattern<br/>---<br/>Message splitting<br/>Batch processing"]
+    end
+
+    %% Publisher connections
+    workflow_pub -->|Publish| workflow_topic_ps
+    agent_pub -->|Publish| agent_topic_ps
+    monitor_pub -->|Publish| system_topic_ps
+    audit_pub -->|Publish| audit_topic_ps
+
+    %% Topic management
+    topic_registry --> workflow_topic_ps
+    topic_registry --> agent_topic_ps
+    topic_lifecycle --> system_topic_ps
+    topic_lifecycle --> audit_topic_ps
+
+    %% Message routing
+    workflow_topic_ps --> content_router
+    agent_topic_ps --> partition_selector
+    system_topic_ps --> priority_handler
+    content_router --> message_store
+    partition_selector --> ack_tracker
+
+    %% Subscription setup
+    content_router --> durable_sub
+    partition_selector --> shared_sub
+    priority_handler --> exclusive_sub
+
+    durable_sub --> push_delivery
+    shared_sub --> pull_delivery
+    exclusive_sub --> stream_delivery
+
+    %% Subscriber connections
+    push_delivery --> analytics_sub
+    push_delivery --> notification_sub
+    pull_delivery --> storage_sub
+
+    stream_delivery --> webhook_sub
+    stream_delivery --> database_sub
+    push_delivery --> cache_sub
+
+    pull_delivery --> logger_sub
+    push_delivery --> metrics_sub
+    stream_delivery --> alerting_sub
+
+    %% Pattern applications
+    workflow_topic_ps -.->|Apply| fanout
+    agent_topic_ps -.->|Apply| filter
+    system_topic_ps -.->|Apply| aggregate
+    audit_topic_ps -.->|Apply| splitter
+
+    fanout -.->|Broadcast| notification_sub
+    filter -.->|Selective| webhook_sub
+    aggregate -.->|Window| analytics_sub
+    splitter -.->|Batch| storage_sub
+
+    %% Reliability handling
+    ack_tracker -->|Failed| dlq_handler
+    dlq_handler --> logger_sub
+    message_store -->|Replay| ephemeral_sub
+
+    %% Apply semantic color coding
+    classDef publisher fill:#3eaf7c,stroke:#2d8659,color:#fff,stroke-width:2px
+    classDef topic fill:#0078d4,stroke:#005a9e,color:#fff,stroke-width:3px
+    classDef router fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef subscription fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+    classDef subscriber fill:#ec4899,stroke:#db2777,color:#fff,stroke-width:2px
+    classDef pattern fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px,stroke-dasharray: 5 5
+    classDef reliability fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+
+    class workflow_pub,agent_pub,monitor_pub,audit_pub publisher
+    class workflow_topic_ps,agent_topic_ps,system_topic_ps,audit_topic_ps topic
+    class content_router,partition_selector,priority_handler router
+    class durable_sub,ephemeral_sub,shared_sub,exclusive_sub,push_delivery,pull_delivery,stream_delivery subscription
+    class analytics_sub,notification_sub,storage_sub,webhook_sub,database_sub,cache_sub,logger_sub,metrics_sub,alerting_sub subscriber
+    class fanout,filter,aggregate,splitter pattern
+    class message_store,ack_tracker,dlq_handler,topic_registry,topic_lifecycle reliability

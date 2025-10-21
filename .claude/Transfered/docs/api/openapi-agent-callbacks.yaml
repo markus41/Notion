@@ -1,0 +1,1103 @@
+openapi: 3.1.0
+info:
+  title: Agent Callback API
+  version: 1.0.0
+  description: |
+    REST API for Python Agents to send callbacks to the .NET Orchestrator.
+
+    This API enables agents to:
+    - Report progress updates during task execution
+    - Send completion notifications with results
+    - Report errors and request retries
+    - Request handoff to other agents
+    - Send heartbeat signals for health monitoring
+
+    ## Callback Patterns
+    - **Push Model**: Agents proactively send updates to the orchestrator
+    - **Idempotent**: All callbacks support idempotency to handle retries
+    - **Async**: Orchestrator acknowledges receipt immediately
+    - **Reliable**: Failed callbacks are retried with exponential backoff
+
+  contact:
+    name: Agent Studio Team
+    email: support@agentstudio.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://orchestrator.agentstudio.dev/callbacks/v1
+    description: Production orchestrator
+  - url: https://staging-orchestrator.agentstudio.dev/callbacks/v1
+    description: Staging orchestrator
+  - url: http://localhost:5001/callbacks/v1
+    description: Local development orchestrator
+
+security:
+  - agentAuth: []
+
+tags:
+  - name: Progress
+    description: Task progress updates
+  - name: Completion
+    description: Task completion notifications
+  - name: Errors
+    description: Error reporting and recovery
+  - name: Handoffs
+    description: Agent handoff requests
+  - name: Heartbeat
+    description: Health monitoring signals
+
+paths:
+  /progress:
+    post:
+      tags:
+        - Progress
+      summary: Report task progress
+      description: |
+        Agents call this endpoint to report progress updates during task execution.
+
+        Progress updates should be sent:
+        - At regular intervals (recommended: every 5-10 seconds for long-running tasks)
+        - After completing significant milestones
+        - When progress percentage changes by >5%
+
+        Updates are idempotent - sending the same update multiple times has no adverse effect.
+      operationId: reportProgress
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Idempotency key to prevent duplicate processing
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        - name: X-Agent-ID
+          in: header
+          description: Identifier of the reporting agent
+          required: true
+          schema:
+            type: string
+          example: "analyst-agent-01"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressUpdate'
+            examples:
+              simpleProgress:
+                summary: Simple percentage update
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:31:00Z"
+                  progress:
+                    percentage: 45
+                    message: "Processing item 450 of 1000"
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+              detailedProgress:
+                summary: Detailed progress with metrics
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:31:00Z"
+                  progress:
+                    percentage: 65
+                    current_step: "Analyzing sentiment"
+                    total_steps: 5
+                    completed_steps: 3
+                    message: "Analyzed 6500 documents"
+                    estimated_completion: "2025-10-07T10:35:00Z"
+                  metrics:
+                    items_processed: 6500
+                    items_total: 10000
+                    throughput_per_second: 125
+                    cpu_usage_percent: 78.5
+                    memory_usage_mb: 1024
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+      responses:
+        '200':
+          description: Progress update acknowledged
+          headers:
+            X-Request-ID:
+              description: Request identifier for tracking
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallbackAck'
+              example:
+                acknowledged: true
+                task_id: "task_xyz789"
+                timestamp: "2025-10-07T10:31:00.123Z"
+                request_id: "req_abc123"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Task state conflict (e.g., task already completed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /completion:
+    post:
+      tags:
+        - Completion
+      summary: Report task completion
+      description: |
+        Agents call this endpoint when task execution completes successfully.
+
+        The completion notification should include:
+        - Final execution results
+        - Output artifacts (or references to them)
+        - Execution metrics and statistics
+        - OpenTelemetry trace context
+
+        This is a terminal state - after completion is acknowledged, the agent
+        should not send further updates for this task.
+      operationId: reportCompletion
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Idempotency key to prevent duplicate processing
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Agent-ID
+          in: header
+          description: Identifier of the reporting agent
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletionNotification'
+            examples:
+              successfulCompletion:
+                summary: Successful task completion
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:35:30Z"
+                  status: "completed"
+                  execution_time_seconds: 330
+                  result:
+                    analysis:
+                      sentiment: "positive"
+                      confidence: 0.87
+                      key_themes: ["innovation", "growth", "success"]
+                    recommendations:
+                      - action: "Increase investment"
+                        priority: "high"
+                        confidence: 0.92
+                  artifacts:
+                    - name: "detailed_report.pdf"
+                      storage_url: "s3://results/task_xyz789/report.pdf"
+                      size_bytes: 245760
+                      content_type: "application/pdf"
+                      checksum: "sha256:abc123..."
+                  metrics:
+                    total_items_processed: 10000
+                    average_processing_time_ms: 33
+                    peak_memory_usage_mb: 1536
+                    total_api_calls: 450
+                    total_tokens_consumed: 125000
+                  metadata:
+                    model_version: "v2.1.0"
+                    confidence_threshold: 0.75
+                    processing_mode: "batch"
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+      responses:
+        '200':
+          description: Completion acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallbackAck'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /error:
+    post:
+      tags:
+        - Errors
+      summary: Report task error
+      description: |
+        Agents call this endpoint to report errors during task execution.
+
+        Error types:
+        - **Transient**: Temporary failures that may succeed on retry (network, rate limits)
+        - **Permanent**: Failures that will not succeed on retry (validation, logic errors)
+        - **Fatal**: Critical failures requiring immediate attention
+
+        The orchestrator will decide whether to retry based on the error type,
+        retry policy, and remaining retry attempts.
+      operationId: reportError
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Agent-ID
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorNotification'
+            examples:
+              transientError:
+                summary: Transient error (will retry)
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:32:15Z"
+                  error:
+                    code: "RATE_LIMIT_EXCEEDED"
+                    message: "API rate limit exceeded"
+                    type: "transient"
+                    severity: "warning"
+                    retry_recommended: true
+                    retry_after_seconds: 60
+                  context:
+                    api_endpoint: "https://api.example.com/v1/analyze"
+                    http_status_code: 429
+                    attempt_number: 2
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+              permanentError:
+                summary: Permanent error (will not retry)
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:32:15Z"
+                  error:
+                    code: "INVALID_INPUT"
+                    message: "Input data validation failed: 'email' field is not a valid email address"
+                    type: "permanent"
+                    severity: "error"
+                    retry_recommended: false
+                  validation_errors:
+                    - field: "email"
+                      message: "Invalid email format"
+                      provided_value: "not-an-email"
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+              fatalError:
+                summary: Fatal error (requires intervention)
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:32:15Z"
+                  error:
+                    code: "OUT_OF_MEMORY"
+                    message: "Agent ran out of memory during execution"
+                    type: "fatal"
+                    severity: "critical"
+                    retry_recommended: false
+                  context:
+                    memory_limit_mb: 4096
+                    memory_used_mb: 4095
+                    agent_health_status: "degraded"
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+      responses:
+        '200':
+          description: Error acknowledged
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CallbackAck'
+                  - type: object
+                    properties:
+                      action:
+                        type: string
+                        enum: [retry, fail, escalate]
+                        description: Action the agent should take
+                      retry_after_seconds:
+                        type: integer
+                        description: Delay before retry (if action is 'retry')
+              example:
+                acknowledged: true
+                task_id: "task_xyz789"
+                timestamp: "2025-10-07T10:32:15.123Z"
+                request_id: "req_abc123"
+                action: "retry"
+                retry_after_seconds: 60
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /handoff:
+    post:
+      tags:
+        - Handoffs
+      summary: Request agent handoff
+      description: |
+        Agents call this endpoint to request a handoff to another agent.
+
+        Handoffs occur when:
+        - Current agent lacks capabilities for the next step
+        - Task requires specialized expertise
+        - Load balancing across agents
+        - Workflow orchestration requires routing
+
+        The orchestrator evaluates the handoff request and decides whether to:
+        - Approve and route to the requested agent
+        - Suggest an alternative agent
+        - Reject and request continuation by current agent
+      operationId: requestHandoff
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Agent-ID
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HandoffRequest'
+            examples:
+              capabilityHandoff:
+                summary: Handoff due to missing capability
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:33:00Z"
+                  reason: "requires_capability"
+                  target_agent_id: "specialist-agent-02"
+                  required_capability: "advanced_nlp"
+                  context:
+                    current_step: "sentiment_analysis"
+                    progress_percentage: 60
+                    intermediate_results:
+                      basic_sentiment: "positive"
+                      confidence: 0.65
+                    next_step: "emotion_detection"
+                  message: "Task requires advanced NLP capabilities for emotion detection"
+                  preserve_state: true
+                  trace_context:
+                    trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+                    span_id: "00f067aa0ba902b7"
+              loadBalancingHandoff:
+                summary: Handoff for load balancing
+                value:
+                  task_id: "task_xyz789"
+                  workflow_id: "wf_abc123"
+                  timestamp: "2025-10-07T10:33:00Z"
+                  reason: "load_balancing"
+                  target_agent_id: "analyst-agent-03"
+                  context:
+                    current_load_percent: 95
+                    queue_depth: 25
+                  message: "Current agent overloaded, requesting handoff to less busy agent"
+                  preserve_state: true
+      responses:
+        '200':
+          description: Handoff request evaluated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffResponse'
+              examples:
+                approved:
+                  summary: Handoff approved
+                  value:
+                    acknowledged: true
+                    task_id: "task_xyz789"
+                    timestamp: "2025-10-07T10:33:00.123Z"
+                    request_id: "req_abc123"
+                    decision: "approved"
+                    target_agent_id: "specialist-agent-02"
+                    message: "Handoff approved. Transferring task to specialist-agent-02"
+                    instructions:
+                      - "Preserve current state in checkpoint"
+                      - "Transfer context to target agent"
+                      - "Monitor handoff completion"
+                rejected:
+                  summary: Handoff rejected
+                  value:
+                    acknowledged: true
+                    task_id: "task_xyz789"
+                    timestamp: "2025-10-07T10:33:00.123Z"
+                    request_id: "req_abc123"
+                    decision: "rejected"
+                    message: "Target agent unavailable. Please continue with current agent"
+                    alternative_action: "continue"
+                alternative:
+                  summary: Alternative agent suggested
+                  value:
+                    acknowledged: true
+                    task_id: "task_xyz789"
+                    timestamp: "2025-10-07T10:33:00.123Z"
+                    request_id: "req_abc123"
+                    decision: "alternative_suggested"
+                    target_agent_id: "specialist-agent-04"
+                    message: "Suggested alternative agent with required capabilities"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /heartbeat:
+    post:
+      tags:
+        - Heartbeat
+      summary: Send agent heartbeat
+      description: |
+        Agents send periodic heartbeats to indicate they are alive and healthy.
+
+        Heartbeats should be sent:
+        - Every 30-60 seconds during idle state
+        - Every 10-30 seconds during active task execution
+        - Immediately after recovering from degraded state
+
+        Heartbeats include current health status and resource metrics.
+        Missing heartbeats trigger alerts and may cause task reassignment.
+      operationId: sendHeartbeat
+      parameters:
+        - name: X-Agent-ID
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Heartbeat'
+            examples:
+              healthyHeartbeat:
+                summary: Healthy agent heartbeat
+                value:
+                  agent_id: "analyst-agent-01"
+                  timestamp: "2025-10-07T10:30:00Z"
+                  status: "healthy"
+                  active_tasks:
+                    - task_id: "task_xyz789"
+                      started_at: "2025-10-07T10:28:00Z"
+                      progress_percentage: 35
+                  metrics:
+                    cpu_usage_percent: 45.2
+                    memory_usage_mb: 1024
+                    memory_total_mb: 4096
+                    disk_usage_percent: 32.1
+                    network_throughput_mbps: 12.5
+                    active_connections: 8
+                  capabilities:
+                    - "sentiment_analysis"
+                    - "trend_detection"
+                    - "report_generation"
+                  version: "2.1.0"
+              degradedHeartbeat:
+                summary: Degraded agent heartbeat
+                value:
+                  agent_id: "analyst-agent-01"
+                  timestamp: "2025-10-07T10:30:00Z"
+                  status: "degraded"
+                  active_tasks:
+                    - task_id: "task_xyz789"
+                      started_at: "2025-10-07T10:28:00Z"
+                      progress_percentage: 35
+                  metrics:
+                    cpu_usage_percent: 92.8
+                    memory_usage_mb: 3850
+                    memory_total_mb: 4096
+                    disk_usage_percent: 78.4
+                  health_issues:
+                    - code: "HIGH_MEMORY_USAGE"
+                      severity: "warning"
+                      message: "Memory usage above 90% threshold"
+                    - code: "HIGH_CPU_USAGE"
+                      severity: "warning"
+                      message: "CPU usage sustained above 90% for 5 minutes"
+      responses:
+        '200':
+          description: Heartbeat acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+                  timestamp:
+                    type: string
+                    format: date-time
+                  instructions:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional instructions from orchestrator
+              example:
+                acknowledged: true
+                timestamp: "2025-10-07T10:30:00.123Z"
+                instructions:
+                  - "Reduce task load due to high resource usage"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    agentAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token issued to the agent during registration.
+        The token includes the agent ID and authorized capabilities.
+
+  schemas:
+    ProgressUpdate:
+      type: object
+      required:
+        - task_id
+        - timestamp
+        - progress
+      properties:
+        task_id:
+          type: string
+          description: Task identifier
+        workflow_id:
+          type: string
+          description: Workflow identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp of the update
+        progress:
+          $ref: '#/components/schemas/Progress'
+        metrics:
+          $ref: '#/components/schemas/RuntimeMetrics'
+        trace_context:
+          $ref: '#/components/schemas/TraceContext'
+
+    Progress:
+      type: object
+      required:
+        - percentage
+      properties:
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage
+        current_step:
+          type: string
+          description: Description of current step
+        total_steps:
+          type: integer
+          minimum: 1
+          description: Total number of steps
+        completed_steps:
+          type: integer
+          minimum: 0
+          description: Number of completed steps
+        message:
+          type: string
+          description: Human-readable progress message
+        estimated_completion:
+          type: string
+          format: date-time
+          description: Estimated completion time
+
+    RuntimeMetrics:
+      type: object
+      properties:
+        items_processed:
+          type: integer
+          minimum: 0
+        items_total:
+          type: integer
+          minimum: 0
+        throughput_per_second:
+          type: number
+          minimum: 0
+        cpu_usage_percent:
+          type: number
+          minimum: 0
+          maximum: 100
+        memory_usage_mb:
+          type: number
+          minimum: 0
+        api_calls_made:
+          type: integer
+          minimum: 0
+        tokens_consumed:
+          type: integer
+          minimum: 0
+
+    CompletionNotification:
+      type: object
+      required:
+        - task_id
+        - timestamp
+        - status
+        - execution_time_seconds
+      properties:
+        task_id:
+          type: string
+        workflow_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [completed, partial_success]
+          description: Completion status
+        execution_time_seconds:
+          type: number
+          minimum: 0
+        result:
+          type: object
+          description: Task execution results (schema varies by task type)
+          additionalProperties: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artifact'
+        metrics:
+          type: object
+          properties:
+            total_items_processed:
+              type: integer
+            average_processing_time_ms:
+              type: number
+            peak_memory_usage_mb:
+              type: number
+            total_api_calls:
+              type: integer
+            total_tokens_consumed:
+              type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        trace_context:
+          $ref: '#/components/schemas/TraceContext'
+
+    Artifact:
+      type: object
+      required:
+        - name
+        - storage_url
+      properties:
+        name:
+          type: string
+          description: Artifact filename
+        storage_url:
+          type: string
+          format: uri
+          description: Storage location (S3, Azure Blob, etc.)
+        size_bytes:
+          type: integer
+          minimum: 0
+        content_type:
+          type: string
+          description: MIME type
+        checksum:
+          type: string
+          description: Checksum for integrity verification
+        metadata:
+          type: object
+          additionalProperties: true
+
+    ErrorNotification:
+      type: object
+      required:
+        - task_id
+        - timestamp
+        - error
+      properties:
+        task_id:
+          type: string
+        workflow_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        error:
+          $ref: '#/components/schemas/ErrorDetails'
+        context:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+        validation_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+              provided_value:
+                type: string
+        stack_trace:
+          type: string
+          description: Stack trace (optional, for debugging)
+        trace_context:
+          $ref: '#/components/schemas/TraceContext'
+
+    ErrorDetails:
+      type: object
+      required:
+        - code
+        - message
+        - type
+        - severity
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "RATE_LIMIT_EXCEEDED"
+        message:
+          type: string
+          description: Human-readable error message
+        type:
+          type: string
+          enum: [transient, permanent, fatal]
+          description: Error type
+        severity:
+          type: string
+          enum: [info, warning, error, critical]
+          description: Error severity
+        retry_recommended:
+          type: boolean
+          description: Whether retry is recommended
+        retry_after_seconds:
+          type: integer
+          minimum: 0
+          description: Suggested delay before retry
+
+    HandoffRequest:
+      type: object
+      required:
+        - task_id
+        - timestamp
+        - reason
+      properties:
+        task_id:
+          type: string
+        workflow_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          enum: [requires_capability, load_balancing, workflow_routing, error_recovery]
+          description: Reason for handoff
+        target_agent_id:
+          type: string
+          description: Preferred target agent ID (optional)
+        required_capability:
+          type: string
+          description: Required capability for next step
+        context:
+          type: object
+          description: Execution context to transfer
+          additionalProperties: true
+        message:
+          type: string
+          description: Human-readable handoff explanation
+        preserve_state:
+          type: boolean
+          default: true
+          description: Whether to preserve execution state
+        trace_context:
+          $ref: '#/components/schemas/TraceContext'
+
+    HandoffResponse:
+      type: object
+      required:
+        - acknowledged
+        - task_id
+        - timestamp
+        - decision
+      properties:
+        acknowledged:
+          type: boolean
+        task_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+        decision:
+          type: string
+          enum: [approved, rejected, alternative_suggested]
+        target_agent_id:
+          type: string
+          description: Target agent ID (if approved or alternative suggested)
+        message:
+          type: string
+          description: Decision explanation
+        instructions:
+          type: array
+          items:
+            type: string
+          description: Instructions for the requesting agent
+        alternative_action:
+          type: string
+          description: Alternative action if handoff rejected
+
+    Heartbeat:
+      type: object
+      required:
+        - agent_id
+        - timestamp
+        - status
+      properties:
+        agent_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        active_tasks:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                type: string
+              started_at:
+                type: string
+                format: date-time
+              progress_percentage:
+                type: number
+        metrics:
+          type: object
+          properties:
+            cpu_usage_percent:
+              type: number
+            memory_usage_mb:
+              type: number
+            memory_total_mb:
+              type: number
+            disk_usage_percent:
+              type: number
+            network_throughput_mbps:
+              type: number
+            active_connections:
+              type: integer
+        capabilities:
+          type: array
+          items:
+            type: string
+        version:
+          type: string
+          description: Agent version
+        health_issues:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              severity:
+                type: string
+                enum: [info, warning, error, critical]
+              message:
+                type: string
+
+    CallbackAck:
+      type: object
+      required:
+        - acknowledged
+        - task_id
+        - timestamp
+      properties:
+        acknowledged:
+          type: boolean
+        task_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+          description: Unique request identifier
+
+    TraceContext:
+      type: object
+      description: OpenTelemetry trace context for distributed tracing
+      required:
+        - trace_id
+        - span_id
+      properties:
+        trace_id:
+          type: string
+          description: W3C Trace Context trace ID
+          pattern: '^[0-9a-f]{32}$'
+          example: "4bf92f3577b34da6a3ce929d0e0e4736"
+        span_id:
+          type: string
+          description: W3C Trace Context span ID
+          pattern: '^[0-9a-f]{16}$'
+          example: "00f067aa0ba902b7"
+        trace_flags:
+          type: string
+          description: W3C Trace Context trace flags
+          pattern: '^[0-9a-f]{2}$'
+          example: "01"
+
+    ErrorResponse:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type
+        title:
+          type: string
+          description: Short error summary
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Detailed error explanation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific error occurrence
+        trace_id:
+          type: string
+          description: OpenTelemetry trace ID
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid callback data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://orchestrator.agentstudio.dev/errors/bad-request"
+            title: "Bad Request"
+            status: 400
+            detail: "Invalid callback format: missing required field 'task_id'"
+            instance: "/callbacks/v1/progress"
+
+    Unauthorized:
+      description: Authentication failed
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://orchestrator.agentstudio.dev/errors/unauthorized"
+            title: "Unauthorized"
+            status: 401
+            detail: "Invalid agent authentication token"
+            instance: "/callbacks/v1/progress"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://orchestrator.agentstudio.dev/errors/rate-limit"
+            title: "Rate Limit Exceeded"
+            status: 429
+            detail: "Callback rate limit exceeded: 100 per minute"
+            instance: "/callbacks/v1/progress"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://orchestrator.agentstudio.dev/errors/internal"
+            title: "Internal Server Error"
+            status: 500
+            detail: "An unexpected error occurred processing the callback"
+            instance: "/callbacks/v1/progress"
+            trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"

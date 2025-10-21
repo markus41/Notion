@@ -1,0 +1,99 @@
+%% SignalR Event Flow Architecture
+%% Demonstrates how events flow through SignalR hub to connected clients
+%% Version: 1.0
+%% Last Updated: 2025-10-15
+%% Related Docs: /api/signalr-events, /guides/developer/real-time-updates
+
+sequenceDiagram
+    participant Client1 as Client 1<br/>(Browser)
+    participant Client2 as Client 2<br/>(Browser)
+    participant LB as Load Balancer
+    participant Hub1 as SignalR Hub<br/>(Instance 1)
+    participant Hub2 as SignalR Hub<br/>(Instance 2)
+    participant Redis as Redis Backplane
+    participant API as Orchestration API
+    participant Agent as Agent Service
+
+    %% Connection establishment
+    Client1->>LB: Connect WebSocket
+    LB->>Hub1: Route to Instance 1
+    Hub1-->>Client1: Connection ID: abc123
+
+    Client2->>LB: Connect WebSocket
+    LB->>Hub2: Route to Instance 2
+    Hub2-->>Client2: Connection ID: xyz789
+
+    %% Group subscriptions
+    Client1->>Hub1: SubscribeToWorkflow("wf-001")
+    Hub1->>Redis: Add to Group "workflow:wf-001"
+    Redis-->>Hub1: Acknowledged
+
+    Client2->>Hub2: SubscribeToWorkflow("wf-001")
+    Hub2->>Redis: Add to Group "workflow:wf-001"
+    Redis-->>Hub2: Acknowledged
+
+    %% Event broadcasting
+    Agent->>API: Task Started Event
+    API->>Hub1: Broadcast to Group
+
+    Hub1->>Redis: Publish Event
+    Note over Redis: Event: TaskStarted<br/>Group: workflow:wf-001<br/>Payload: {taskId, status}
+
+    Redis-->>Hub1: Distribute to Instance 1
+    Redis-->>Hub2: Distribute to Instance 2
+
+    Hub1-->>Client1: ReceiveTaskStarted
+    Hub2-->>Client2: ReceiveTaskStarted
+
+    %% Progress updates
+    loop Streaming Updates
+        Agent->>API: Progress Update (25%, 50%, 75%)
+        API->>Hub1: Send Progress
+
+        Hub1->>Redis: Publish Progress
+        Redis-->>Hub1: To All Instances
+        Redis-->>Hub2: To All Instances
+
+        Hub1-->>Client1: ReceiveProgress
+        Hub2-->>Client2: ReceiveProgress
+    end
+
+    %% Direct client messaging
+    Client1->>Hub1: SendMessage("custom-event", data)
+    Hub1->>Redis: Route Message
+    Redis-->>Hub2: Deliver to Target
+    Hub2-->>Client2: ReceiveMessage
+
+    %% Error handling
+    Agent->>API: Task Failed
+    API->>Hub1: Broadcast Error
+
+    Hub1->>Redis: Publish Error Event
+    Redis-->>Hub1: Distribute
+    Redis-->>Hub2: Distribute
+
+    Hub1-->>Client1: ReceiveError
+    Hub2-->>Client2: ReceiveError
+
+    %% Connection cleanup
+    Client1->>Hub1: Disconnect
+    Hub1->>Redis: Remove from Groups
+    Redis-->>Hub1: Cleaned Up
+
+    rect rgb(240, 248, 255)
+        Note over Client1,Agent: Event Types:<br/>- WorkflowStarted/Completed<br/>- TaskStarted/Completed/Failed<br/>- AgentThought<br/>- Progress<br/>- StateChanged<br/>- CheckpointCreated
+    end
+
+    rect rgb(255, 245, 235)
+        Note over Redis: Backplane Features:<br/>- Pub/Sub messaging<br/>- Group management<br/>- Sticky sessions<br/>- Connection state<br/>- 1GB cache size
+    end
+
+    classDef client fill:#61dafb,stroke:#4fa8c5,color:#000
+    classDef hub fill:#512bd4,stroke:#3a1f9d,color:#fff
+    classDef redis fill:#dc382d,stroke:#a32820,color:#fff
+    classDef service fill:#3b82f6,stroke:#2563eb,color:#fff
+
+    class Client1,Client2 client
+    class Hub1,Hub2 hub
+    class Redis redis
+    class API,Agent service

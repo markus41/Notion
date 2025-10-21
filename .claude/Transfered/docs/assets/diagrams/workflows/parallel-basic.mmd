@@ -1,0 +1,138 @@
+%% Parallel Workflow - Basic Pattern
+%% Shows parallel task execution with synchronization
+%% Streamlines concurrent operations for improved throughput
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+stateDiagram-v2
+    [*] --> Initialize: Start Workflow
+
+    Initialize --> ForkTasks: Setup Complete
+    note right of Initialize
+        Prepare shared context
+        Initialize semaphores
+        Setup result collection
+    end note
+
+    state ForkTasks <<fork>>
+    ForkTasks --> TaskA: Fork
+    ForkTasks --> TaskB: Fork
+    ForkTasks --> TaskC: Fork
+    ForkTasks --> TaskD: Fork
+
+    state TaskA {
+        [*] --> ProcessA
+        ProcessA --> ValidateA
+        ValidateA --> CompleteA
+        CompleteA --> [*]
+    }
+    note right of TaskA
+        Frontend Testing
+        Agent: Validator
+        Duration: 15 min
+        CPU: 2 cores
+    end note
+
+    state TaskB {
+        [*] --> ProcessB
+        ProcessB --> ValidateB
+        ValidateB --> CompleteB
+        CompleteB --> [*]
+    }
+    note right of TaskB
+        Backend Testing
+        Agent: Validator
+        Duration: 20 min
+        CPU: 4 cores
+    end note
+
+    state TaskC {
+        [*] --> ProcessC
+        ProcessC --> ValidateC
+        ValidateC --> CompleteC
+        CompleteC --> [*]
+    }
+    note right of TaskC
+        Integration Testing
+        Agent: Validator
+        Duration: 25 min
+        CPU: 2 cores
+    end note
+
+    state TaskD {
+        [*] --> ProcessD
+        ProcessD --> ValidateD
+        ValidateD --> CompleteD
+        CompleteD --> [*]
+    }
+    note right of TaskD
+        Performance Testing
+        Agent: Validator
+        Duration: 30 min
+        CPU: 8 cores
+    end note
+
+    state JoinResults <<join>>
+    TaskA --> JoinResults: Complete
+    TaskB --> JoinResults: Complete
+    TaskC --> JoinResults: Complete
+    TaskD --> JoinResults: Complete
+
+    JoinResults --> AggregateResults: All Tasks Complete
+    note left of JoinResults
+        Wait for all tasks
+        Timeout: 45 min
+        Partial results allowed
+    end note
+
+    state AggregateResults {
+        [*] --> CollectOutputs
+        CollectOutputs --> MergeResults
+        MergeResults --> ValidateComplete
+        ValidateComplete --> [*]
+    }
+    note right of AggregateResults
+        Combine test results
+        Generate report
+        Calculate metrics
+    end note
+
+    AggregateResults --> FinalValidation: Results Merged
+
+    FinalValidation --> Success: All Pass
+    FinalValidation --> PartialSuccess: Some Pass
+    FinalValidation --> Failure: All Fail
+
+    Success --> [*]: Complete Successfully
+    PartialSuccess --> [*]: Complete with Warnings
+    Failure --> [*]: Complete with Errors
+
+    TaskA --> ErrorHandlerA: Task Failed
+    TaskB --> ErrorHandlerB: Task Failed
+    TaskC --> ErrorHandlerC: Task Failed
+    TaskD --> ErrorHandlerD: Task Failed
+
+    state ErrorHandlerA {
+        [*] --> LogErrorA
+        LogErrorA --> MarkFailedA
+        MarkFailedA --> [*]
+    }
+
+    ErrorHandlerA --> JoinResults: Continue
+    ErrorHandlerB --> JoinResults: Continue
+    ErrorHandlerC --> JoinResults: Continue
+    ErrorHandlerD --> JoinResults: Continue
+
+    state ResourceManager {
+        [*] --> AllocateResources
+        AllocateResources --> MonitorUsage
+        MonitorUsage --> ScaleIfNeeded
+        ScaleIfNeeded --> ReleaseResources
+        ReleaseResources --> [*]
+    }
+    note left of ResourceManager
+        Dynamic allocation
+        CPU/Memory limits
+        Auto-scaling
+        Resource cleanup
+    end note

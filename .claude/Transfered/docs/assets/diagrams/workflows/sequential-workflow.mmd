@@ -1,0 +1,61 @@
+stateDiagram-v2
+    [*] --> Initialize: Workflow Start
+
+    Initialize --> Task1: Dependencies Resolved
+    Task1 --> Checkpoint1: Task Complete
+    Checkpoint1 --> Task2: State Saved
+    Task2 --> Checkpoint2: Task Complete
+    Checkpoint2 --> Task3: State Saved
+    Task3 --> Checkpoint3: Task Complete
+    Checkpoint3 --> Finalize: All Tasks Complete
+
+    Finalize --> [*]: Success
+
+    Task1 --> ErrorHandler: Task Failed
+    Task2 --> ErrorHandler: Task Failed
+    Task3 --> ErrorHandler: Task Failed
+
+    ErrorHandler --> Retry: Retryable Error
+    ErrorHandler --> Compensate: Non-retryable Error
+
+    Retry --> Task1: Attempt 1-3
+    Retry --> Task2: Attempt 1-3
+    Retry --> Task3: Attempt 1-3
+
+    Compensate --> [*]: Workflow Failed
+
+    note right of Initialize
+        Load workflow definition
+        Validate dependencies
+        Initialize context
+    end note
+
+    note right of Task1
+        Execute: agent-a
+        Task: Analyze Requirements
+        Timeout: 5 minutes
+    end note
+
+    note right of Task2
+        Execute: agent-b
+        Task: Design Solution
+        Timeout: 10 minutes
+    end note
+
+    note right of Task3
+        Execute: agent-c
+        Task: Implement Code
+        Timeout: 15 minutes
+    end note
+
+    note right of Checkpoint1
+        Save state snapshot
+        Publish event
+        Update metrics
+    end note
+
+    note right of ErrorHandler
+        Classify error
+        Check retry policy
+        Determine compensation
+    end note

@@ -1,0 +1,682 @@
+{
+  "$schema": "https://claude-orchestration.dev/schemas/command-v2.json",
+  "version": "2.0.0",
+  "name": "/orchestrate-complex",
+  "description": "Multi-pattern orchestration with dynamic DAG generation based on user-selected execution patterns (Plan-then-Execute, Hierarchical Decomposition, Blackboard, Event Sourcing)",
+  "author": "Claude Orchestration Team",
+  "created": "2025-01-15",
+  "updated": "2025-01-15",
+  "tags": ["orchestration", "multi-pattern", "dynamic", "advanced"],
+
+  "metadata": {
+    "estimatedDuration": "variable",
+    "complexity": "advanced",
+    "requiredAgents": ["master-strategist", "plan-decomposer", "architect-supreme"],
+    "optionalAgents": ["code-generator-typescript", "code-generator-python", "test-strategist"],
+    "minAgents": 3,
+    "maxAgents": 25,
+    "supportedPatterns": [
+      "plan-then-execute",
+      "hierarchical-decomposition",
+      "blackboard",
+      "event-sourcing"
+    ]
+  },
+
+  "configuration": {
+    "enableDynamicDAG": true,
+    "enableConditionalExecution": true,
+    "enableEventSourcing": true,
+    "maxHierarchyDepth": 5,
+    "blackboardEnabled": true,
+    "dynamicReplanning": true
+  },
+
+  "inputs": {
+    "required": {
+      "objective": {
+        "type": "string",
+        "description": "High-level objective to accomplish",
+        "examples": [
+          "Create user authentication microservice with JWT and OAuth2",
+          "Migrate database with zero downtime",
+          "Implement real-time collaborative editing"
+        ]
+      },
+      "requirements": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Specific requirements and constraints",
+        "examples": [
+          ["JWT authentication", "90%+ test coverage", "SOC2 compliance"]
+        ]
+      }
+    },
+    "optional": {
+      "pattern": {
+        "type": "string",
+        "enum": ["plan-then-execute", "hierarchical", "blackboard", "event-sourcing", "auto"],
+        "default": "auto",
+        "description": "Orchestration pattern to use (auto selects based on objective)"
+      },
+      "maxDuration": {
+        "type": "number",
+        "default": 14400000,
+        "description": "Maximum execution time in milliseconds (4 hours default)"
+      },
+      "agentBudget": {
+        "type": "number",
+        "default": 25,
+        "description": "Maximum number of agents to use"
+      },
+      "enableChaosEngineering": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable chaos engineering validation"
+      },
+      "complianceFrameworks": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": [],
+        "description": "Compliance frameworks to validate (SOC2, HIPAA, GDPR, etc.)"
+      }
+    }
+  },
+
+  "phases": [
+    {
+      "name": "Pattern Selection & Analysis",
+      "description": "Analyze requirements and select optimal orchestration pattern",
+      "parallel": false,
+      "agents": [
+        {
+          "id": "pattern-selector",
+          "name": "master-strategist",
+          "task": "Analyze objective and requirements to select optimal orchestration pattern (Plan-then-Execute for sequential complex tasks, Hierarchical for recursive decomposition, Blackboard for collaborative problem-solving, Event Sourcing for audit-critical workflows)",
+          "dependencies": [],
+          "estimatedTime": 120000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "selectedPattern": "string",
+            "rationale": "string",
+            "estimatedAgentCount": "number",
+            "criticalPathEstimate": "number"
+          },
+          "conditional": {
+            "enabled": false
+          }
+        },
+        {
+          "id": "requirement-analyzer",
+          "name": "architect-supreme",
+          "task": "Analyze requirements for technical feasibility, identify constraints, dependencies, and architectural considerations. Output structured analysis with technology recommendations.",
+          "dependencies": ["pattern-selector"],
+          "estimatedTime": 180000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "technicalFeasibility": "string",
+            "constraints": "array",
+            "dependencies": "array",
+            "techStack": "object"
+          }
+        },
+        {
+          "id": "risk-assessment",
+          "name": "risk-assessor",
+          "task": "Identify risks (technical, security, compliance, operational) and propose mitigation strategies. Prioritize by severity and likelihood.",
+          "dependencies": ["requirement-analyzer"],
+          "estimatedTime": 120000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "risks": "array",
+            "mitigations": "array",
+            "overallRiskScore": "number"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Dynamic DAG Construction",
+      "description": "Build execution DAG based on selected pattern and requirements",
+      "conditional": {
+        "enabled": true,
+        "condition": "context.patternSelector.selectedPattern !== 'plan-then-execute'",
+        "description": "Skip for Plan-then-Execute which uses simple sequential flow"
+      },
+      "agents": [
+        {
+          "id": "dag-builder",
+          "name": "plan-decomposer",
+          "task": "Build dynamic execution DAG based on selected pattern. For Hierarchical: recursive task breakdown. For Blackboard: agent contribution network. For Event Sourcing: event dependency graph. Output nodes, edges, and execution levels.",
+          "dependencies": ["risk-assessment"],
+          "estimatedTime": 240000,
+          "resources": ["context-cache", "dag-engine"],
+          "outputs": {
+            "nodes": "array",
+            "edges": "array",
+            "levels": "array",
+            "criticalPath": "array",
+            "parallelizationFactor": "number"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.patternSelector.selectedPattern !== 'plan-then-execute'",
+            "description": "DAG builder only needed for complex patterns"
+          }
+        },
+        {
+          "id": "resource-planner",
+          "name": "resource-allocator",
+          "task": "Allocate agents and resources to DAG nodes. Optimize for parallelism while respecting resource constraints. Identify potential bottlenecks and suggest optimizations.",
+          "dependencies": ["dag-builder"],
+          "estimatedTime": 120000,
+          "resources": ["context-cache", "resource-manager"],
+          "outputs": {
+            "agentAssignments": "object",
+            "resourceAllocations": "object",
+            "bottlenecks": "array"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.patternSelector.selectedPattern !== 'plan-then-execute'",
+            "description": "Resource planner only needed for complex patterns"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Compliance & Security Validation",
+      "description": "Validate compliance requirements and security constraints",
+      "parallel": true,
+      "conditional": {
+        "enabled": true,
+        "condition": "inputs.complianceFrameworks.length > 0 || context.riskAssessment.overallRiskScore > 7",
+        "description": "Execute only if compliance frameworks specified or high risk detected"
+      },
+      "agents": [
+        {
+          "id": "compliance-validator",
+          "name": "compliance-orchestrator",
+          "task": "Validate planned approach against specified compliance frameworks. Identify compliance gaps and recommend controls. Generate compliance checklist.",
+          "dependencies": ["requirement-analyzer"],
+          "estimatedTime": 300000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "complianceStatus": "object",
+            "gaps": "array",
+            "requiredControls": "array",
+            "checklist": "array"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "inputs.complianceFrameworks.length > 0"
+          }
+        },
+        {
+          "id": "security-validator",
+          "name": "vulnerability-hunter",
+          "task": "Perform security threat modeling on planned architecture. Identify potential vulnerabilities in design phase. Recommend security controls and validation tests.",
+          "dependencies": ["requirement-analyzer"],
+          "estimatedTime": 300000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "threats": "array",
+            "vulnerabilities": "array",
+            "securityControls": "array",
+            "testRecommendations": "array"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.riskAssessment.risks.some(r => r.category === 'security')"
+          }
+        },
+        {
+          "id": "crypto-validator",
+          "name": "cryptography-expert",
+          "task": "Review cryptographic requirements (encryption, key management, authentication). Validate crypto algorithms and implementations against best practices.",
+          "dependencies": ["requirement-analyzer"],
+          "estimatedTime": 180000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "cryptoRequirements": "array",
+            "recommendations": "array",
+            "keyManagementStrategy": "object"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.requirementAnalyzer.requirements.some(r => r.includes('encryption') || r.includes('authentication') || r.includes('crypto'))"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Architecture Design",
+      "description": "Design system architecture with ADRs and C4 diagrams",
+      "parallel": false,
+      "agents": [
+        {
+          "id": "architecture-design",
+          "name": "architect-supreme",
+          "task": "Design complete system architecture based on requirements and selected pattern. Create C4 diagrams (Context, Container, Component). Document architectural decisions (ADRs) for key choices. Consider scalability, maintainability, and evolvability.",
+          "dependencies": ["resource-planner", "compliance-validator", "security-validator"],
+          "estimatedTime": 480000,
+          "resources": ["context-cache", "design-tools"],
+          "outputs": {
+            "architecture": "object",
+            "c4Diagrams": "object",
+            "adrs": "array",
+            "techStack": "object"
+          }
+        },
+        {
+          "id": "api-design",
+          "name": "api-designer",
+          "task": "Design API contracts (REST/GraphQL endpoints, request/response schemas, error handling). Create OpenAPI specification. Design versioning strategy.",
+          "dependencies": ["architecture-design"],
+          "estimatedTime": 300000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "openApiSpec": "object",
+            "endpoints": "array",
+            "versioningStrategy": "string"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.architectureDesign.architecture.components.some(c => c.type === 'api' || c.type === 'service')"
+          }
+        },
+        {
+          "id": "database-design",
+          "name": "database-architect",
+          "task": "Design database schema, indexing strategy, and query optimization. Consider data modeling, relationships, constraints, and migration strategy.",
+          "dependencies": ["architecture-design"],
+          "estimatedTime": 300000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "schema": "object",
+            "indexes": "array",
+            "migrations": "array",
+            "queryOptimizations": "array"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "context.architectureDesign.architecture.components.some(c => c.type === 'database' || c.type === 'storage')"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Implementation Planning",
+      "description": "Create detailed implementation plan with task breakdown",
+      "parallel": false,
+      "agents": [
+        {
+          "id": "implementation-planner",
+          "name": "plan-decomposer",
+          "task": "Decompose architecture into atomic implementation tasks. Create dependency graph, estimate effort, identify parallel work opportunities. Generate implementation roadmap with phases.",
+          "dependencies": ["api-design", "database-design"],
+          "estimatedTime": 300000,
+          "resources": ["context-cache", "dag-engine"],
+          "outputs": {
+            "tasks": "array",
+            "dependencyGraph": "object",
+            "phases": "array",
+            "roadmap": "object",
+            "effortEstimate": "object"
+          }
+        },
+        {
+          "id": "test-strategy",
+          "name": "test-strategist",
+          "task": "Design comprehensive test strategy (unit, integration, E2E, performance, security). Define coverage targets, testing tools, and CI/CD integration. Create test plan.",
+          "dependencies": ["implementation-planner"],
+          "estimatedTime": 240000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "testStrategy": "object",
+            "coverageTargets": "object",
+            "testingTools": "array",
+            "testPlan": "object"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Execution Coordination",
+      "description": "Dynamic execution phase - actual implementation tasks run here",
+      "dynamic": true,
+      "description_extended": "This phase is dynamically populated based on the implementation plan. Tasks are executed in parallel where possible, with automatic dependency resolution.",
+      "agents": [
+        {
+          "id": "execution-orchestrator",
+          "name": "master-strategist",
+          "task": "Coordinate execution of implementation tasks. Monitor progress, resolve blockers, trigger re-planning when needed. Maintain execution state and context synchronization.",
+          "dependencies": ["test-strategy"],
+          "estimatedTime": 0,
+          "dynamicDuration": true,
+          "resources": ["context-cache", "state-manager", "event-log"],
+          "outputs": {
+            "executionLog": "array",
+            "completedTasks": "array",
+            "blockers": "array",
+            "replanningEvents": "array"
+          }
+        }
+      ],
+      "dynamicAgents": {
+        "source": "context.implementationPlanner.tasks",
+        "mapping": {
+          "id": "task.id",
+          "name": "task.assignedAgent",
+          "task": "task.description",
+          "dependencies": "task.dependencies",
+          "estimatedTime": "task.estimatedTime",
+          "resources": "task.resources"
+        }
+      }
+    },
+
+    {
+      "name": "Quality Assurance",
+      "description": "Comprehensive testing and validation",
+      "parallel": true,
+      "agents": [
+        {
+          "id": "code-reviewer",
+          "name": "senior-reviewer",
+          "task": "Comprehensive code review of all implementations. Check code quality, best practices, maintainability, and adherence to standards. Provide actionable feedback.",
+          "dependencies": ["execution-orchestrator"],
+          "estimatedTime": 360000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "reviewFindings": "array",
+            "codeQualityScore": "number",
+            "recommendations": "array"
+          }
+        },
+        {
+          "id": "test-executor",
+          "name": "test-engineer",
+          "task": "Execute comprehensive test suite (unit, integration, E2E). Validate coverage targets met. Report test results and identify failures.",
+          "dependencies": ["execution-orchestrator"],
+          "estimatedTime": 480000,
+          "resources": ["test-runner"],
+          "outputs": {
+            "testResults": "object",
+            "coverage": "object",
+            "failures": "array"
+          }
+        },
+        {
+          "id": "security-audit",
+          "name": "security-specialist",
+          "task": "Security audit of implemented code. Scan for vulnerabilities (OWASP Top 10), validate security controls, test authentication/authorization.",
+          "dependencies": ["execution-orchestrator"],
+          "estimatedTime": 420000,
+          "resources": ["security-scanner"],
+          "outputs": {
+            "vulnerabilities": "array",
+            "securityScore": "number",
+            "remediations": "array"
+          }
+        },
+        {
+          "id": "performance-validation",
+          "name": "performance-optimizer",
+          "task": "Performance testing and optimization. Benchmark critical paths, identify bottlenecks, validate performance requirements. Provide optimization recommendations.",
+          "dependencies": ["execution-orchestrator"],
+          "estimatedTime": 360000,
+          "resources": ["performance-profiler"],
+          "outputs": {
+            "benchmarks": "object",
+            "bottlenecks": "array",
+            "optimizations": "array"
+          }
+        },
+        {
+          "id": "chaos-testing",
+          "name": "chaos-engineer",
+          "task": "Chaos engineering validation. Test system resilience under failure conditions. Validate circuit breakers, retry logic, and fallback mechanisms.",
+          "dependencies": ["execution-orchestrator"],
+          "estimatedTime": 480000,
+          "resources": ["chaos-tools"],
+          "outputs": {
+            "chaosExperiments": "array",
+            "resilienceScore": "number",
+            "weaknesses": "array"
+          },
+          "conditional": {
+            "enabled": true,
+            "condition": "inputs.enableChaosEngineering === true"
+          },
+          "compensation": {
+            "enabled": true,
+            "action": "Restore system to stable state after chaos experiments",
+            "rollbackSteps": [
+              "Stop all chaos injections",
+              "Verify system health",
+              "Reset to pre-chaos checkpoint"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Documentation & Deployment",
+      "description": "Generate documentation and deployment plan",
+      "parallel": true,
+      "agents": [
+        {
+          "id": "documentation-generator",
+          "name": "documentation-expert",
+          "task": "Generate comprehensive documentation: API docs, architecture docs, runbooks, deployment guides. Ensure documentation is complete and up-to-date.",
+          "dependencies": ["code-reviewer", "test-executor"],
+          "estimatedTime": 360000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "apiDocs": "object",
+            "architectureDocs": "object",
+            "runbooks": "array",
+            "deploymentGuide": "object"
+          }
+        },
+        {
+          "id": "deployment-planner",
+          "name": "devops-automator",
+          "task": "Create deployment plan with CI/CD pipeline, infrastructure as code, monitoring setup, and rollback strategy. Validate deployment readiness.",
+          "dependencies": ["test-executor", "security-audit"],
+          "estimatedTime": 420000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "deploymentPlan": "object",
+            "cicdPipeline": "object",
+            "infrastructure": "object",
+            "rollbackStrategy": "object"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Final Validation & Sign-off",
+      "description": "Final validation and sign-off",
+      "parallel": false,
+      "agents": [
+        {
+          "id": "validation-orchestrator",
+          "name": "master-strategist",
+          "task": "Final validation: verify all acceptance criteria met, all tests passing, security validated, documentation complete, deployment ready. Generate final report with sign-off recommendations.",
+          "dependencies": ["documentation-generator", "deployment-planner"],
+          "estimatedTime": 180000,
+          "resources": ["context-cache"],
+          "outputs": {
+            "validationReport": "object",
+            "acceptanceCriteria": "object",
+            "signOffStatus": "string",
+            "blockers": "array",
+            "recommendations": "array"
+          }
+        }
+      ]
+    }
+  ],
+
+  "contextSharing": {
+    "enabled": true,
+    "strategy": "incremental",
+    "cachePolicy": {
+      "maxSize": 104857600,
+      "eviction": "LFU",
+      "ttl": 3600000
+    },
+    "sharedContext": [
+      "objective",
+      "requirements",
+      "selectedPattern",
+      "architecture",
+      "implementationPlan",
+      "testStrategy"
+    ]
+  },
+
+  "sagaCompensation": {
+    "enabled": true,
+    "compensationPhases": ["Execution Coordination", "Quality Assurance"],
+    "rollbackStrategy": "reverse-order",
+    "checkpointFrequency": "per-phase"
+  },
+
+  "resourceLocking": {
+    "enabled": true,
+    "resources": [
+      {
+        "id": "dag-engine",
+        "type": "computational",
+        "maxConcurrent": 1,
+        "priority": "high"
+      },
+      {
+        "id": "context-cache",
+        "type": "memory",
+        "maxConcurrent": 10,
+        "priority": "high"
+      },
+      {
+        "id": "state-manager",
+        "type": "storage",
+        "maxConcurrent": 5,
+        "priority": "high"
+      },
+      {
+        "id": "event-log",
+        "type": "storage",
+        "maxConcurrent": 3,
+        "priority": "medium"
+      }
+    ],
+    "deadlockDetection": true,
+    "deadlockResolution": "priority-preemption"
+  },
+
+  "progressTracking": {
+    "enabled": true,
+    "updateFrequency": 10000,
+    "granularity": "task",
+    "todoWriteIntegration": true
+  },
+
+  "eventSourcing": {
+    "enabled": true,
+    "eventLog": {
+      "enabled": true,
+      "persistence": "durable",
+      "retention": 2592000000
+    },
+    "stateReconstruction": true,
+    "timeTravel": true,
+    "replayCapability": true
+  },
+
+  "outputs": {
+    "strategicPlan": {
+      "type": "object",
+      "description": "Comprehensive strategic plan with phases, milestones, and risks"
+    },
+    "architecture": {
+      "type": "object",
+      "description": "System architecture with C4 diagrams and ADRs"
+    },
+    "implementation": {
+      "type": "object",
+      "description": "Complete implementation with code, tests, and documentation"
+    },
+    "testResults": {
+      "type": "object",
+      "description": "Comprehensive test results with coverage metrics"
+    },
+    "securityAudit": {
+      "type": "object",
+      "description": "Security audit report with vulnerabilities and remediations"
+    },
+    "documentation": {
+      "type": "object",
+      "description": "Complete documentation (API, architecture, runbooks)"
+    },
+    "deploymentPlan": {
+      "type": "object",
+      "description": "Deployment plan with CI/CD pipeline and rollback strategy"
+    },
+    "validationReport": {
+      "type": "object",
+      "description": "Final validation report with sign-off status"
+    },
+    "eventLog": {
+      "type": "array",
+      "description": "Complete event log for audit trail and replay"
+    }
+  },
+
+  "validation": {
+    "preExecution": [
+      "Validate objective is clear and achievable",
+      "Validate requirements are specific and testable",
+      "Validate agent budget is sufficient (>=3)",
+      "Validate compliance frameworks are valid"
+    ],
+    "duringExecution": [
+      "Monitor resource utilization",
+      "Detect and resolve deadlocks",
+      "Track progress against estimates",
+      "Validate context consistency"
+    ],
+    "postExecution": [
+      "Validate all phases completed",
+      "Validate all acceptance criteria met",
+      "Validate test coverage targets achieved",
+      "Validate security requirements satisfied",
+      "Validate documentation complete"
+    ]
+  },
+
+  "performance": {
+    "baseline": {
+      "v1Sequential": {
+        "minDuration": 7200000,
+        "maxDuration": 14400000,
+        "avgDuration": 10800000
+      }
+    },
+    "targets": {
+      "dagConstruction": 300000,
+      "parallelSpeedup": 0.4,
+      "cacheHitRate": 0.75,
+      "resourceUtilization": 0.85
+    }
+  }
+}

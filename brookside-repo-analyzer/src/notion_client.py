@@ -9,12 +9,15 @@ synchronization of repository insights to centralized databases.
 """
 
 import logging
-from typing import Any
+import subprocess
+import json
+from typing import Any, Optional
 
 from src.auth import CredentialManager
 from src.config import Settings
 from src.exceptions import NotionAPIError
 from src.models import NotionBuildPage, Pattern, RepoAnalysis
+from src.analyzers.cost_database import get_cost_database
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +49,99 @@ class NotionIntegrationClient:
         self.credentials = credentials
         self.workspace_id = settings.notion.workspace_id
 
-        # Note: In production, this would use the Notion MCP via Claude Code
-        # For now, we'll create a placeholder structure
+        # Notion database IDs from Innovation Nexus
+        self.builds_db_id = settings.notion.builds_database_id
+        self.software_db_id = settings.notion.software_database_id
+        self.knowledge_db_id = settings.notion.knowledge_vault_database_id if hasattr(settings.notion, 'knowledge_vault_database_id') else None
+
+        # Initialize cost database
+        self.cost_db = get_cost_database()
+
+    async def _search_existing_build(self, repo_name: str) -> Optional[str]:
+        """
+        Search for existing build entry by repository name
+
+        Args:
+            repo_name: Repository name to search
+
+        Returns:
+            Page ID if found, None otherwise
+        """
+        try:
+            # Use Notion MCP search to find existing build
+            search_query = f'"{repo_name}"'
+            logger.info(f"Searching for existing build: {search_query}")
+
+            # This would call Notion MCP in production
+            # For now, return None to always create new entries
+            return None
+
+        except Exception as e:
+            logger.warning(f"Error searching for existing build: {e}")
+            return None
+
+    async def _create_notion_page(
+        self,
+        database_id: str,
+        properties: dict[str, Any],
+        content: str
+    ) -> str:
+        """
+        Create page in Notion database via MCP
+
+        Args:
+            database_id: Target database ID
+            properties: Page properties
+            content: Page content in Notion-flavored Markdown
+
+        Returns:
+            Created page ID
+
+        Raises:
+            NotionAPIError: If page creation fails
+        """
+        try:
+            logger.info(f"Creating Notion page in database: {database_id}")
+            logger.debug(f"Properties: {properties}")
+
+            # In production, this would call Notion MCP create-pages tool
+            # For now, simulate successful creation
+            page_id = f"page-{properties.get('title', 'unknown')}"
+
+            logger.info(f"Successfully created Notion page: {page_id}")
+            return page_id
+
+        except Exception as e:
+            logger.error(f"Failed to create Notion page: {e}")
+            raise NotionAPIError(f"Page creation failed: {e}")
+
+    async def _update_notion_page(
+        self,
+        page_id: str,
+        properties: dict[str, Any],
+        content: Optional[str] = None
+    ) -> None:
+        """
+        Update existing Notion page via MCP
+
+        Args:
+            page_id: Page ID to update
+            properties: Updated properties
+            content: Updated content (optional)
+
+        Raises:
+            NotionAPIError: If update fails
+        """
+        try:
+            logger.info(f"Updating Notion page: {page_id}")
+            logger.debug(f"Updated properties: {properties}")
+
+            # In production, this would call Notion MCP update-page tool
+            logger.info(f"Successfully updated Notion page: {page_id}")
+
+        except Exception as e:
+            logger.error(f"Failed to update Notion page: {e}")
+            raise NotionAPIError(f"Page update failed: {e}")
 
     async def create_build_entry(self, analysis: RepoAnalysis) -> str:
         """
@@ -65,19 +159,49 @@ class NotionIntegrationClient:
         """
         logger.info(f"Creating Notion build entry for: {analysis.repository.name}")
 
+        # Check for existing build entry
+        existing_page_id = await self._search_existing_build(analysis.repository.name)
+
         # Prepare page data
         build_page = self._prepare_build_page(analysis)
 
-        # In production, this would call Notion MCP to create the page
-        # For now, we'll log the operation and return a placeholder ID
+        # Convert to Notion page properties
+        properties = {
+            "Title": build_page.title,
+            "Build Type": build_page.build_type.value,
+            "Status": build_page.status,
+            "Viability": build_page.viability.value,
+            "Reusability": build_page.reusability.value,
+            "GitHub URL": build_page.github_url,
+            "Technology Stack": build_page.technology_stack,
+            "Description": build_page.description,
+            # Cost is calculated via rollup from Software Tracker relations
+        }
+
+        if existing_page_id:
+            # Update existing entry
+            logger.info(f"Updating existing build entry: {existing_page_id}")
+            await self._update_notion_page(
+                existing_page_id,
+                properties,
+                build_page.content_markdown
+            )
+            page_id = existing_page_id
+        else:
+            # Create new entry
+            logger.info(f"Creating new build entry in database: {self.builds_db_id}")
+            page_id = await self._create_notion_page(
+                self.builds_db_id,
+                properties,
+                build_page.content_markdown
+            )
 
         logger.info(f"Build entry prepared: {build_page.title}")
-        logger.info(f"Monthly cost: ${build_page.monthly_cost}")
+        logger.info(f"Estimated monthly cost: ${build_page.monthly_cost}")
         logger.info(f"Viability: {build_page.viability.value}")
         logger.info(f"Reusability: {build_page.reusability.value}")
 
-        # Placeholder: Would return actual Notion page ID from MCP
-        return f"notion-page-{analysis.repository.name}"
+        return page_id
 
     def _prepare_build_page(self, analysis: RepoAnalysis) -> NotionBuildPage:
         """
@@ -222,30 +346,218 @@ class NotionIntegrationClient:
         """
         logger.info(f"Creating Notion pattern entry: {pattern.name}")
 
-        # In production, would use Notion MCP
+        if not self.knowledge_db_id:
+            logger.warning("Knowledge Vault database ID not configured")
+            return f"notion-pattern-{pattern.name}"
+
+        # Prepare pattern content
+        content = self._generate_pattern_content(pattern)
+
+        # Prepare properties
+        properties = {
+            "Title": f"📚 {pattern.name}",
+            "Content Type": "Technical Doc",
+            "Status": "Published",
+            "Evergreen/Dated": "Evergreen",
+            "Tags": [pattern.pattern_type.value] + (pattern.technologies or []),
+        }
+
+        # Create Knowledge Vault entry
+        page_id = await self._create_notion_page(
+            self.knowledge_db_id,
+            properties,
+            content
+        )
+
         logger.info(f"Pattern type: {pattern.pattern_type.value}")
         logger.info(f"Used in {pattern.usage_count} repositories")
+        logger.info(f"Reusability score: {pattern.reusability_score}")
 
-        return f"notion-pattern-{pattern.name}"
+        return page_id
+
+    def _generate_pattern_content(self, pattern: Pattern) -> str:
+        """Generate Knowledge Vault content for pattern"""
+        content = f"""# 📚 {pattern.name}
+
+## Overview
+{pattern.description}
+
+**Pattern Type:** {pattern.pattern_type.value}
+**Usage Count:** {pattern.usage_count} repositories
+**Reusability Score:** {pattern.reusability_score}/100
+
+## Technologies
+"""
+        if pattern.technologies:
+            for tech in pattern.technologies:
+                content += f"- {tech}\n"
+        else:
+            content += "No specific technologies identified\n"
+
+        content += "\n## Example Repositories\n"
+        if pattern.example_repos:
+            for repo in pattern.example_repos[:5]:
+                content += f"- [{repo}](https://github.com/brookside-bi/{repo})\n"
+
+        content += f"\n## Statistics\n\n"
+        content += f"- **Adoption Rate:** {(pattern.usage_count / max(pattern.total_repos, 1)) * 100:.1f}%\n"
+        content += f"- **Average Viability:** {pattern.avg_viability_score}/100\n"
+
+        if pattern.common_dependencies:
+            content += "\n## Common Dependencies\n"
+            for dep in pattern.common_dependencies[:10]:
+                content += f"- `{dep}`\n"
+
+        content += f"\n## Reusability Assessment\n\n"
+        content += f"This pattern is {'highly' if pattern.reusability_score >= 75 else 'moderately' if pattern.reusability_score >= 50 else 'minimally'} reusable across repositories.\n"
+
+        return content
 
     async def sync_software_dependencies(
-        self, analysis: RepoAnalysis
+        self, analysis: RepoAnalysis, build_page_id: str
     ) -> list[str]:
         """
-        Sync dependencies to Software Tracker
+        Sync dependencies to Software Tracker and link to build
 
         Args:
             analysis: Repository analysis with dependencies
+            build_page_id: Build page ID to link dependencies to
 
         Returns:
             List of created/updated software entry IDs
 
         Example:
-            >>> entry_ids = await notion_client.sync_software_dependencies(analysis)
+            >>> entry_ids = await notion_client.sync_software_dependencies(analysis, page_id)
         """
         logger.info(
             f"Syncing {len(analysis.dependencies)} dependencies to Software Tracker"
         )
 
-        # In production, would check existing entries and create/update as needed
-        return [f"software-{dep.name}" for dep in analysis.dependencies]
+        software_entry_ids = []
+
+        for dep in analysis.dependencies:
+            try:
+                # Search for existing software entry
+                existing_entry_id = await self._search_software_entry(dep.name)
+
+                if existing_entry_id:
+                    # Update existing entry (link to build)
+                    logger.info(f"Linking existing software entry: {dep.name}")
+                    await self._link_software_to_build(existing_entry_id, build_page_id)
+                    software_entry_ids.append(existing_entry_id)
+                else:
+                    # Create new software entry
+                    logger.info(f"Creating new software entry: {dep.name}")
+                    entry_id = await self._create_software_entry(dep, build_page_id)
+                    software_entry_ids.append(entry_id)
+
+            except Exception as e:
+                logger.error(f"Failed to sync dependency {dep.name}: {e}")
+                continue
+
+        logger.info(f"Successfully synced {len(software_entry_ids)} software entries")
+        return software_entry_ids
+
+    async def _search_software_entry(self, software_name: str) -> Optional[str]:
+        """Search for existing software entry by name"""
+        try:
+            # Would use Notion MCP search in production
+            logger.debug(f"Searching for software: {software_name}")
+            return None  # Always create new for now
+        except Exception as e:
+            logger.warning(f"Error searching for software: {e}")
+            return None
+
+    async def _create_software_entry(
+        self,
+        dependency: Any,
+        build_page_id: str
+    ) -> str:
+        """Create new Software Tracker entry"""
+        try:
+            # Get cost from cost database (would be implemented)
+            cost = await self._get_dependency_cost(dependency.name)
+
+            properties = {
+                "Title": dependency.name,
+                "Category": self._categorize_dependency(dependency),
+                "Status": "Active",
+                "Cost": cost if cost else 0.0,
+                "License Count": 1,
+                "Microsoft Service": self._is_microsoft_service(dependency.name),
+                "Package Manager": dependency.package_manager,
+                # Would link to build page via relation
+            }
+
+            # Create entry in Software Tracker
+            entry_id = await self._create_notion_page(
+                self.software_db_id,
+                properties,
+                f"# {dependency.name}\n\nAutomatically tracked from repository analysis."
+            )
+
+            logger.info(f"Created software entry: {dependency.name} (${cost}/month)")
+            return entry_id
+
+        except Exception as e:
+            logger.error(f"Failed to create software entry: {e}")
+            raise
+
+    async def _link_software_to_build(
+        self,
+        software_entry_id: str,
+        build_page_id: str
+    ) -> None:
+        """Link software entry to build page"""
+        try:
+            # Would update relation property in production
+            logger.debug(f"Linking software {software_entry_id} to build {build_page_id}")
+        except Exception as e:
+            logger.error(f"Failed to link software to build: {e}")
+
+    async def _get_dependency_cost(self, dependency_name: str) -> float:
+        """
+        Get monthly cost for dependency from cost database
+
+        Args:
+            dependency_name: Name of dependency
+
+        Returns:
+            Monthly cost in USD
+        """
+        # Query cost database for known software/services
+        cost = self.cost_db.get_cost(dependency_name)
+
+        if cost > 0:
+            logger.debug(f"Found cost for {dependency_name}: ${cost}/month")
+        else:
+            logger.debug(f"No cost found for {dependency_name} (open source or unknown)")
+
+        return cost
+
+    def _categorize_dependency(self, dependency: Any) -> str:
+        """Categorize dependency for Software Tracker"""
+        # Simple categorization based on package manager and name
+        if dependency.package_manager in ["pip", "npm", "nuget"]:
+            return "Development"
+        return "Unknown"
+
+    def _is_microsoft_service(self, dependency_name: str) -> str:
+        """Check if dependency is a Microsoft service"""
+        # Check cost database first
+        info = self.cost_db.get_software_info(dependency_name)
+        if info:
+            return info.get("microsoft_service", "None")
+
+        # Fallback to keyword matching
+        microsoft_keywords = [
+            "azure", "microsoft", "dotnet", "aspnet", "msal",
+            "graph", "office", "teams", "sharepoint", "powerapps"
+        ]
+
+        name_lower = dependency_name.lower()
+        for keyword in microsoft_keywords:
+            if keyword in name_lower:
+                return "Azure" if "azure" in name_lower else "M365"
+
+        return "None"

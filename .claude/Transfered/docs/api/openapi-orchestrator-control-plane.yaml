@@ -1,0 +1,1304 @@
+openapi: 3.1.0
+info:
+  title: Agent Orchestrator Control Plane API
+  version: 1.0.0
+  description: |
+    REST API for the .NET Orchestrator to control and manage Python Agent execution.
+
+    This API provides endpoints for:
+    - Executing tasks on remote Python agents
+    - Monitoring agent status and health
+    - Managing agent lifecycle (start, stop, cancel)
+    - Retrieving execution results and artifacts
+
+    ## Design Principles
+    - RESTful resource-oriented design
+    - Async execution with polling or webhooks
+    - Idempotent operations where possible
+    - Comprehensive error handling
+    - OpenTelemetry integration for observability
+
+  contact:
+    name: Agent Studio Team
+    email: support@agentstudio.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.agentstudio.dev/v1
+    description: Production server
+  - url: https://staging-api.agentstudio.dev/v1
+    description: Staging server
+  - url: http://localhost:5000/v1
+    description: Local development server
+
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+tags:
+  - name: Tasks
+    description: Task execution and management
+  - name: Agents
+    description: Agent status and lifecycle
+  - name: Results
+    description: Execution results and artifacts
+  - name: Health
+    description: Health checks and diagnostics
+
+paths:
+  /tasks:
+    post:
+      tags:
+        - Tasks
+      summary: Execute a new task on an agent
+      description: |
+        Submit a new task for execution on a Python agent. The task is executed asynchronously,
+        and the response includes a task ID for tracking status and retrieving results.
+
+        The operation is idempotent when using the `idempotency_key` parameter.
+      operationId: createTask
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          description: Optional idempotency key to prevent duplicate task submissions
+          required: false
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            examples:
+              simpleTask:
+                summary: Simple task execution
+                value:
+                  agent_id: "analyst-agent-01"
+                  workflow_id: "wf_abc123"
+                  task_type: "analyze"
+                  input:
+                    data: "Sample data to analyze"
+                    options:
+                      depth: "detailed"
+                  priority: "normal"
+                  timeout_seconds: 300
+              complexWorkflow:
+                summary: Complex workflow with dependencies
+                value:
+                  agent_id: "orchestrator-agent"
+                  workflow_id: "wf_complex_001"
+                  task_type: "execute_workflow"
+                  input:
+                    workflow_definition:
+                      steps:
+                        - name: "gather_data"
+                          agent: "data-agent"
+                        - name: "analyze"
+                          agent: "analyst-agent"
+                          depends_on: ["gather_data"]
+                  priority: "high"
+                  timeout_seconds: 600
+                  callback_url: "https://orchestrator.example.com/callbacks/workflow-complete"
+      responses:
+        '202':
+          description: Task accepted for processing
+          headers:
+            X-Request-ID:
+              description: Unique request identifier for tracing
+              schema:
+                type: string
+                format: uuid
+            Location:
+              description: URL to check task status
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+              example:
+                task_id: "task_xyz789"
+                status: "pending"
+                agent_id: "analyst-agent-01"
+                workflow_id: "wf_abc123"
+                created_at: "2025-10-07T10:30:00Z"
+                estimated_completion: "2025-10-07T10:35:00Z"
+                status_url: "/v1/tasks/task_xyz789"
+                _links:
+                  self:
+                    href: "/v1/tasks/task_xyz789"
+                  cancel:
+                    href: "/v1/tasks/task_xyz789/cancel"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Duplicate task (idempotency key already used)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                type: "https://api.agentstudio.dev/errors/duplicate-task"
+                title: "Duplicate Task"
+                status: 409
+                detail: "A task with this idempotency key already exists"
+                instance: "/v1/tasks"
+                task_id: "task_xyz789"
+                trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+    get:
+      tags:
+        - Tasks
+      summary: List tasks
+      description: Retrieve a paginated list of tasks with optional filtering
+      operationId: listTasks
+      parameters:
+        - name: workflow_id
+          in: query
+          description: Filter by workflow ID
+          required: false
+          schema:
+            type: string
+        - name: agent_id
+          in: query
+          description: Filter by agent ID
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by task status
+          required: false
+          schema:
+            type: string
+            enum: [pending, running, completed, failed, cancelled]
+        - name: priority
+          in: query
+          description: Filter by priority
+          required: false
+          schema:
+            type: string
+            enum: [low, normal, high, critical]
+        - name: created_after
+          in: query
+          description: Filter tasks created after this timestamp
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: created_before
+          in: query
+          description: Filter tasks created before this timestamp
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /tasks/{taskId}:
+    get:
+      tags:
+        - Tasks
+      summary: Get task status
+      description: Retrieve the current status and details of a specific task
+      operationId: getTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique task identifier
+          schema:
+            type: string
+          example: "task_xyz789"
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+              example:
+                task_id: "task_xyz789"
+                status: "running"
+                agent_id: "analyst-agent-01"
+                workflow_id: "wf_abc123"
+                task_type: "analyze"
+                priority: "normal"
+                created_at: "2025-10-07T10:30:00Z"
+                started_at: "2025-10-07T10:30:15Z"
+                updated_at: "2025-10-07T10:31:45Z"
+                progress:
+                  percentage: 45
+                  current_step: "Processing data"
+                  total_steps: 5
+                  completed_steps: 2
+                metrics:
+                  cpu_usage_percent: 23.5
+                  memory_usage_mb: 512
+                  execution_time_seconds: 90
+                _links:
+                  self:
+                    href: "/v1/tasks/task_xyz789"
+                  results:
+                    href: "/v1/tasks/task_xyz789/results"
+                  cancel:
+                    href: "/v1/tasks/task_xyz789/cancel"
+                  logs:
+                    href: "/v1/tasks/task_xyz789/logs"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /tasks/{taskId}/cancel:
+    post:
+      tags:
+        - Tasks
+      summary: Cancel a running task
+      description: |
+        Request cancellation of a running task. The task will attempt a graceful shutdown,
+        saving any intermediate state before terminating.
+      operationId: cancelTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique task identifier
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: Force immediate cancellation without graceful shutdown
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '202':
+          description: Cancellation request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [cancelling, cancelled]
+                  message:
+                    type: string
+                  cancelled_at:
+                    type: string
+                    format: date-time
+              example:
+                task_id: "task_xyz789"
+                status: "cancelling"
+                message: "Task cancellation in progress"
+                cancelled_at: "2025-10-07T10:32:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Task cannot be cancelled in current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                type: "https://api.agentstudio.dev/errors/invalid-state"
+                title: "Invalid Task State"
+                status: 409
+                detail: "Task has already completed and cannot be cancelled"
+                instance: "/v1/tasks/task_xyz789/cancel"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tasks/{taskId}/results:
+    get:
+      tags:
+        - Results
+      summary: Get task results
+      description: Retrieve the execution results and output artifacts from a completed task
+      operationId: getTaskResults
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Unique task identifier
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Response format
+          required: false
+          schema:
+            type: string
+            enum: [json, msgpack, protobuf]
+            default: json
+      responses:
+        '200':
+          description: Task results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResult'
+              example:
+                task_id: "task_xyz789"
+                status: "completed"
+                completed_at: "2025-10-07T10:35:30Z"
+                execution_time_seconds: 330
+                result:
+                  analysis:
+                    sentiment: "positive"
+                    confidence: 0.87
+                    key_themes: ["innovation", "growth", "success"]
+                  recommendations:
+                    - action: "Increase investment"
+                      priority: "high"
+                artifacts:
+                  - name: "detailed_report.pdf"
+                    url: "/v1/tasks/task_xyz789/artifacts/report.pdf"
+                    size_bytes: 245760
+                    content_type: "application/pdf"
+                metadata:
+                  model_version: "v2.1.0"
+                  confidence_threshold: 0.75
+                trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Results expired and no longer available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '425':
+          description: Task not yet completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                type: "https://api.agentstudio.dev/errors/task-incomplete"
+                title: "Task Not Complete"
+                status: 425
+                detail: "Task is still running. Results will be available when status is 'completed'"
+                instance: "/v1/tasks/task_xyz789/results"
+                current_status: "running"
+                estimated_completion: "2025-10-07T10:35:00Z"
+
+  /tasks/{taskId}/logs:
+    get:
+      tags:
+        - Results
+      summary: Stream task logs
+      description: Retrieve or stream execution logs for a task
+      operationId: getTaskLogs
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: follow
+          in: query
+          description: Stream logs in real-time
+          schema:
+            type: boolean
+            default: false
+        - name: tail
+          in: query
+          description: Number of most recent lines to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 100
+        - name: since
+          in: query
+          description: Return logs since this timestamp
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Task logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogsResponse'
+            text/plain:
+              schema:
+                type: string
+                description: Raw log output
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents:
+    get:
+      tags:
+        - Agents
+      summary: List available agents
+      description: Retrieve a list of all registered Python agents
+      operationId: listAgents
+      parameters:
+        - name: status
+          in: query
+          description: Filter by agent status
+          schema:
+            type: string
+            enum: [online, offline, degraded, maintenance]
+        - name: capability
+          in: query
+          description: Filter by agent capability
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentList'
+
+  /agents/{agentId}:
+    get:
+      tags:
+        - Agents
+      summary: Get agent details
+      description: Retrieve detailed information about a specific agent
+      operationId: getAgent
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentDetail'
+              example:
+                agent_id: "analyst-agent-01"
+                name: "Financial Analyst Agent"
+                version: "2.1.0"
+                status: "online"
+                capabilities:
+                  - "sentiment_analysis"
+                  - "trend_detection"
+                  - "report_generation"
+                health:
+                  status: "healthy"
+                  last_heartbeat: "2025-10-07T10:30:00Z"
+                  uptime_seconds: 86400
+                metrics:
+                  tasks_completed_24h: 156
+                  average_execution_time_seconds: 45.3
+                  success_rate_percent: 98.7
+                  current_load_percent: 23
+                resources:
+                  cpu_cores: 4
+                  memory_total_mb: 8192
+                  memory_available_mb: 6144
+                configuration:
+                  max_concurrent_tasks: 5
+                  timeout_seconds: 600
+                  retry_policy:
+                    max_attempts: 3
+                    backoff_type: "exponential"
+                _links:
+                  self:
+                    href: "/v1/agents/analyst-agent-01"
+                  tasks:
+                    href: "/v1/tasks?agent_id=analyst-agent-01"
+                  health:
+                    href: "/v1/agents/analyst-agent-01/health"
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents/{agentId}/health:
+    get:
+      tags:
+        - Agents
+      summary: Get agent health status
+      description: Detailed health check for a specific agent
+      operationId: getAgentHealth
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent health details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: Agent is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Overall system health
+      description: Health check for the entire orchestrator system
+      operationId: getSystemHealth
+      security: []  # No authentication required for health checks
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemHealth'
+              example:
+                status: "healthy"
+                version: "1.0.0"
+                timestamp: "2025-10-07T10:30:00Z"
+                components:
+                  database:
+                    status: "healthy"
+                    response_time_ms: 5
+                  redis:
+                    status: "healthy"
+                    response_time_ms: 2
+                  agents:
+                    status: "healthy"
+                    online_count: 8
+                    total_count: 10
+                  message_queue:
+                    status: "healthy"
+                    queue_depth: 45
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemHealth'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from the authentication service.
+        Include in the Authorization header as: `Authorization: Bearer <token>`
+
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key for service-to-service authentication.
+        Include in the X-API-Key header.
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSizeParam:
+      name: page_size
+      in: query
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: |
+        Sort field and direction. Prefix with '-' for descending order.
+        Example: `-created_at` for newest first
+      required: false
+      schema:
+        type: string
+        default: "-created_at"
+
+  schemas:
+    TaskRequest:
+      type: object
+      required:
+        - agent_id
+        - task_type
+        - input
+      properties:
+        agent_id:
+          type: string
+          description: ID of the agent to execute the task
+          example: "analyst-agent-01"
+        workflow_id:
+          type: string
+          description: Optional workflow ID for tracking related tasks
+          example: "wf_abc123"
+        task_type:
+          type: string
+          description: Type of task to execute
+          example: "analyze"
+        input:
+          type: object
+          description: Task input data (schema varies by task_type)
+          additionalProperties: true
+        priority:
+          type: string
+          enum: [low, normal, high, critical]
+          default: normal
+          description: Task execution priority
+        timeout_seconds:
+          type: integer
+          minimum: 1
+          maximum: 3600
+          default: 300
+          description: Maximum execution time in seconds
+        callback_url:
+          type: string
+          format: uri
+          description: Optional webhook URL for completion notification
+          example: "https://orchestrator.example.com/callbacks/task-complete"
+        metadata:
+          type: object
+          description: Optional metadata for tracking and correlation
+          additionalProperties: true
+        retry_policy:
+          $ref: '#/components/schemas/RetryPolicy'
+
+    RetryPolicy:
+      type: object
+      properties:
+        max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+        backoff_type:
+          type: string
+          enum: [fixed, linear, exponential]
+          default: exponential
+        initial_delay_seconds:
+          type: integer
+          minimum: 1
+          default: 1
+        max_delay_seconds:
+          type: integer
+          minimum: 1
+          default: 300
+
+    TaskResponse:
+      type: object
+      required:
+        - task_id
+        - status
+        - created_at
+      properties:
+        task_id:
+          type: string
+          description: Unique task identifier
+        status:
+          type: string
+          enum: [pending, queued, running, completed, failed, cancelled]
+        agent_id:
+          type: string
+        workflow_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        estimated_completion:
+          type: string
+          format: date-time
+        status_url:
+          type: string
+          format: uri
+        _links:
+          $ref: '#/components/schemas/HATEOASLinks'
+
+    TaskDetail:
+      allOf:
+        - $ref: '#/components/schemas/TaskResponse'
+        - type: object
+          properties:
+            task_type:
+              type: string
+            priority:
+              type: string
+              enum: [low, normal, high, critical]
+            started_at:
+              type: string
+              format: date-time
+            completed_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            progress:
+              $ref: '#/components/schemas/TaskProgress'
+            metrics:
+              $ref: '#/components/schemas/TaskMetrics'
+            error:
+              $ref: '#/components/schemas/TaskError'
+
+    TaskProgress:
+      type: object
+      properties:
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        current_step:
+          type: string
+        total_steps:
+          type: integer
+        completed_steps:
+          type: integer
+        message:
+          type: string
+
+    TaskMetrics:
+      type: object
+      properties:
+        cpu_usage_percent:
+          type: number
+        memory_usage_mb:
+          type: number
+        execution_time_seconds:
+          type: number
+        tokens_consumed:
+          type: integer
+        api_calls_made:
+          type: integer
+
+    TaskError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+        stack_trace:
+          type: string
+          description: Stack trace (only in development mode)
+        retry_after_seconds:
+          type: integer
+          description: Suggested delay before retry
+
+    TaskResult:
+      type: object
+      required:
+        - task_id
+        - status
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+        execution_time_seconds:
+          type: number
+        result:
+          type: object
+          description: Task output data (schema varies by task type)
+          additionalProperties: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artifact'
+        metadata:
+          type: object
+          additionalProperties: true
+        trace_id:
+          type: string
+          description: OpenTelemetry trace ID for correlation
+
+    Artifact:
+      type: object
+      required:
+        - name
+        - url
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        size_bytes:
+          type: integer
+        content_type:
+          type: string
+        checksum:
+          type: string
+          description: SHA-256 checksum
+        expires_at:
+          type: string
+          format: date-time
+
+    TaskList:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskDetail'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AgentList:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentSummary'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AgentSummary:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, degraded, maintenance]
+        capabilities:
+          type: array
+          items:
+            type: string
+        current_load_percent:
+          type: number
+
+    AgentDetail:
+      allOf:
+        - $ref: '#/components/schemas/AgentSummary'
+        - type: object
+          properties:
+            health:
+              $ref: '#/components/schemas/HealthStatus'
+            metrics:
+              type: object
+              properties:
+                tasks_completed_24h:
+                  type: integer
+                average_execution_time_seconds:
+                  type: number
+                success_rate_percent:
+                  type: number
+                current_load_percent:
+                  type: number
+            resources:
+              type: object
+              properties:
+                cpu_cores:
+                  type: integer
+                memory_total_mb:
+                  type: integer
+                memory_available_mb:
+                  type: integer
+            configuration:
+              type: object
+              additionalProperties: true
+            _links:
+              $ref: '#/components/schemas/HATEOASLinks'
+
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        last_heartbeat:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [pass, fail, warn]
+              message:
+                type: string
+              response_time_ms:
+                type: number
+
+    SystemHealth:
+      type: object
+      required:
+        - status
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        components:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              response_time_ms:
+                type: number
+              message:
+                type: string
+
+    LogsResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+        logs:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              level:
+                type: string
+                enum: [debug, info, warning, error, critical]
+              message:
+                type: string
+              source:
+                type: string
+              metadata:
+                type: object
+                additionalProperties: true
+
+    Pagination:
+      type: object
+      required:
+        - page
+        - page_size
+        - total_items
+        - total_pages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+          minimum: 1
+        total_items:
+          type: integer
+          minimum: 0
+        total_pages:
+          type: integer
+          minimum: 0
+        has_next:
+          type: boolean
+        has_previous:
+          type: boolean
+        _links:
+          type: object
+          properties:
+            first:
+              type: string
+              format: uri
+            previous:
+              type: string
+              format: uri
+            next:
+              type: string
+              format: uri
+            last:
+              type: string
+              format: uri
+
+    HATEOASLinks:
+      type: object
+      description: Hypermedia links for resource navigation
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+            format: uri
+          method:
+            type: string
+            enum: [GET, POST, PUT, PATCH, DELETE]
+          type:
+            type: string
+            description: Media type
+
+    ErrorResponse:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type
+          example: "https://api.agentstudio.dev/errors/validation-error"
+        title:
+          type: string
+          description: Short, human-readable summary
+          example: "Validation Error"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 422
+        detail:
+          type: string
+          description: Human-readable explanation
+          example: "The 'agent_id' field is required"
+        instance:
+          type: string
+          format: uri
+          description: URI reference to the specific occurrence
+          example: "/v1/tasks"
+        errors:
+          type: array
+          description: Detailed validation errors
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+              code:
+                type: string
+        trace_id:
+          type: string
+          description: OpenTelemetry trace ID for debugging
+          example: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters or request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/bad-request"
+            title: "Bad Request"
+            status: 400
+            detail: "Invalid request format"
+            instance: "/v1/tasks"
+
+    Unauthorized:
+      description: Authentication required or failed
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+          description: Authentication challenge
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/unauthorized"
+            title: "Unauthorized"
+            status: 401
+            detail: "Invalid or expired authentication token"
+            instance: "/v1/tasks"
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/forbidden"
+            title: "Forbidden"
+            status: 403
+            detail: "You do not have permission to execute tasks on this agent"
+            instance: "/v1/tasks"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/not-found"
+            title: "Not Found"
+            status: 404
+            detail: "Task with ID 'task_xyz789' not found"
+            instance: "/v1/tasks/task_xyz789"
+
+    ValidationError:
+      description: Validation error in request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/validation-error"
+            title: "Validation Error"
+            status: 422
+            detail: "One or more validation errors occurred"
+            instance: "/v1/tasks"
+            errors:
+              - field: "agent_id"
+                message: "Agent ID is required"
+                code: "REQUIRED_FIELD"
+              - field: "timeout_seconds"
+                message: "Timeout must be between 1 and 3600 seconds"
+                code: "OUT_OF_RANGE"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Total requests allowed per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Requests remaining in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when the rate limit resets
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/rate-limit-exceeded"
+            title: "Rate Limit Exceeded"
+            status: 429
+            detail: "Rate limit of 100 requests per minute exceeded"
+            instance: "/v1/tasks"
+            retry_after_seconds: 45
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/internal-error"
+            title: "Internal Server Error"
+            status: 500
+            detail: "An unexpected error occurred"
+            instance: "/v1/tasks"
+            trace_id: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+
+    ServiceUnavailable:
+      description: Service temporarily unavailable
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            type: "https://api.agentstudio.dev/errors/service-unavailable"
+            title: "Service Unavailable"
+            status: 503
+            detail: "The service is temporarily unavailable. Please try again later."
+            instance: "/v1/tasks"
+            retry_after_seconds: 60

@@ -1,0 +1,31 @@
+{
+  "name": "Bulkhead Pattern State Machine",
+  "description": "State machine for bulkhead resource isolation",
+  "initialState": "idle",
+  "states": [
+    {"name": "idle", "description": "No tasks executing", "type": "initial"},
+    {"name": "accepting", "description": "Accepting new task for execution", "type": "intermediate"},
+    {"name": "executing", "description": "Task executing within limits", "type": "intermediate"},
+    {"name": "queued", "description": "Task queued due to capacity limit", "type": "intermediate"},
+    {"name": "rejected", "description": "Task rejected due to full queue", "type": "final"},
+    {"name": "completed", "description": "Task completed successfully", "type": "final"},
+    {"name": "timeout", "description": "Task execution timed out", "type": "final"},
+    {"name": "failed", "description": "Task execution failed", "type": "final"}
+  ],
+  "transitions": [
+    {"from": "idle", "to": "accepting", "event": "TASK_SUBMITTED", "guard": null, "action": "checkCapacity"},
+    {"from": "accepting", "to": "executing", "event": "CAPACITY_AVAILABLE", "guard": "belowMaxConcurrent", "action": "startExecution"},
+    {"from": "accepting", "to": "queued", "event": "CAPACITY_FULL", "guard": "queueNotFull", "action": "enqueueTask"},
+    {"from": "accepting", "to": "rejected", "event": "QUEUE_FULL", "guard": "overflowStrategy=reject", "action": "rejectTask"},
+    {"from": "accepting", "to": "queued", "event": "QUEUE_FULL", "guard": "overflowStrategy=drop-oldest", "action": "dropOldestAndEnqueue"},
+    {"from": "queued", "to": "executing", "event": "DEQUEUED", "guard": "capacityFreed", "action": "startExecution"},
+    {"from": "queued", "to": "rejected", "event": "DROPPED", "guard": null, "action": "notifyDrop"},
+    {"from": "executing", "to": "completed", "event": "EXECUTION_SUCCESS", "guard": null, "action": "recordSuccess"},
+    {"from": "executing", "to": "timeout", "event": "TIMEOUT", "guard": null, "action": "killExecution"},
+    {"from": "executing", "to": "failed", "event": "EXECUTION_FAILED", "guard": null, "action": "recordFailure"},
+    {"from": "completed", "to": "idle", "event": "CLEANUP", "guard": "noMoreTasks", "action": "releaseResources"},
+    {"from": "completed", "to": "accepting", "event": "PROCESS_NEXT", "guard": "queueNotEmpty", "action": "dequeueNext"}
+  ],
+  "errorStates": ["rejected", "timeout", "failed"],
+  "recoveryTransitions": []
+}

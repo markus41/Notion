@@ -41,15 +41,19 @@ class NotionSettings(BaseSettings):
         default="81686779-099a-8195-b49e-00037e25c23e", description="Notion workspace ID"
     )
 
-    # Database IDs (auto-discovered via Notion MCP if not provided)
-    database_id_builds: str | None = Field(default=None, description="Example Builds database ID")
-    database_id_knowledge: str | None = Field(
+    # Database IDs from Innovation Nexus (from CLAUDE.md documentation)
+    builds_database_id: str = Field(
+        default="a1cd1528-971d-4873-a176-5e93b93555f6",
+        description="Example Builds database ID"
+    )
+    software_database_id: str = Field(
+        default="13b5e9de-2dd1-45ec-839a-4f3d50cd8d06",
+        description="Software & Cost Tracker database ID"
+    )
+    knowledge_vault_database_id: str | None = Field(
         default=None, description="Knowledge Vault database ID"
     )
-    database_id_software: str | None = Field(
-        default=None, description="Software Tracker database ID"
-    )
-    database_id_integrations: str | None = Field(
+    integrations_database_id: str | None = Field(
         default=None, description="Integration Registry database ID"
     )
 

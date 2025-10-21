@@ -1,0 +1,962 @@
+openapi: 3.1.0
+info:
+  title: Agent Studio - Python Meta-Agents API
+  version: 0.1.0
+  description: |
+    **Establish AI-powered agent orchestration to streamline complex workflows
+    across your business environment.**
+
+    The Python Meta-Agents API provides direct access to specialized AI agents for
+    system design, implementation, validation, and documentation. Each agent leverages
+    Azure OpenAI models to deliver expert-level output with automatic workflow handoffs.
+
+    **Key Capabilities:**
+    - **Individual Agent Execution:** Direct task processing with specialized agents
+    - **Multi-Agent Workflows:** Coordinated execution across multiple agents
+    - **Automatic Handoffs:** Intelligent agent-to-agent task delegation
+    - **Context Preservation:** Shared context flows through workflow execution
+    - **Real-time Processing:** Immediate task execution with comprehensive results
+
+    **Best for:** Organizations requiring flexible AI agent integration with
+    fine-grained control over agent selection and workflow orchestration.
+
+    ## Architecture
+
+    This FastAPI service provides the execution layer for meta-agents:
+    - **Architect Agent:** System design and architecture planning
+    - **Builder Agent:** Code implementation and development
+    - **Validator Agent:** Quality assurance and testing
+    - **Scribe Agent:** Documentation generation
+
+    ## Getting Started
+
+    ### Authentication
+    Currently uses API key authentication (development). OAuth2 support planned for production.
+
+    ### Base URL
+    - **Development:** `http://localhost:8000`
+    - **Production:** `https://agents.agentstudio.com`
+
+    ### Quick Example
+    ```bash
+    curl -X POST "http://localhost:8000/architect/task" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "content": "Design microservices architecture for e-commerce platform",
+        "context": {"scale": "100K users/day"},
+        "auto_handoff": true
+      }'
+    ```
+
+  contact:
+    name: Brookside BI Support
+    email: consultations@brooksidebi.com
+    url: https://brooksidebi.com
+  license:
+    name: Proprietary
+    url: https://brooksidebi.com/license
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://agents-dev.agentstudio.com
+    description: Development environment
+  - url: https://agents-staging.agentstudio.com
+    description: Staging environment
+  - url: https://agents.agentstudio.com
+    description: Production environment
+
+tags:
+  - name: Service Health
+    description: |
+      Service health monitoring and availability verification endpoints.
+      Essential for operational monitoring and uptime tracking.
+  - name: Architect Agent
+    description: |
+      System architecture design and technology planning agent.
+      Specializes in microservices, cloud architecture, and scalability planning.
+  - name: Builder Agent
+    description: |
+      Code implementation and development agent.
+      Produces production-ready code with tests and best practices.
+  - name: Validator Agent
+    description: |
+      Quality assurance and testing agent.
+      Validates code quality, security, and performance.
+  - name: Scribe Agent
+    description: |
+      Documentation generation agent.
+      Creates comprehensive technical documentation and user guides.
+  - name: Multi-Agent Workflows
+    description: |
+      Orchestrated multi-agent execution with automatic handoffs.
+      Coordinates Design → Build → Validate → Document workflows.
+
+paths:
+  /health:
+    get:
+      operationId: health_check
+      summary: Check service health status
+      description: |
+        Establish service health monitoring to ensure reliable agent availability
+        across your business environment.
+
+        This endpoint provides real-time health status verification including:
+        - Service operational status
+        - Current API version
+        - List of available agent types
+        - Health check timestamp
+
+        **Best for:** Organizations requiring operational monitoring, uptime
+        verification, and service availability checks for production deployments.
+
+        **Use case:** Integration with monitoring tools (Prometheus, Datadog, Azure Monitor)
+        for alerting and service level objective (SLO) tracking.
+      tags:
+        - Service Health
+      responses:
+        '200':
+          description: Service is healthy and operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                version: 0.1.0
+                agents:
+                  - architect
+                  - builder
+                  - validator
+                  - scribe
+                timestamp: '2025-10-09T10:30:00Z'
+        '503':
+          description: Service is degraded or unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: unhealthy
+                version: 0.1.0
+                agents: []
+                timestamp: '2025-10-09T10:30:00Z'
+
+  /architect/task:
+    post:
+      operationId: architect_task
+      summary: Execute task with Architect agent
+      description: |
+        Establish system architecture design through AI-powered analysis to
+        streamline technical decision-making across your business environment.
+
+        The **Architect** agent specializes in:
+        - **System Design:** Microservices, monolithic, serverless, event-driven architectures
+        - **Technology Stack Recommendations:** Framework selection, database choices, cloud platform evaluation
+        - **Scalability Planning:** Load balancing, caching strategies, horizontal/vertical scaling
+        - **Cloud Infrastructure Design:** Azure, AWS, GCP resource architecture and networking
+        - **Architecture Pattern Analysis:** CQRS, Event Sourcing, Domain-Driven Design, Clean Architecture
+        - **Integration Strategy:** API design, message queuing, service mesh, API gateways
+
+        **Best for:** Organizations requiring expert-level architecture guidance for complex
+        system design decisions, platform migrations, or greenfield development projects.
+
+        **Workflow Integration:** When `auto_handoff=True`, the Architect agent automatically
+        hands off design specifications to the Builder agent for implementation.
+
+        **Common Use Cases:**
+        - Design microservices architecture for e-commerce platform with 100K+ daily users
+        - Recommend optimal technology stack for real-time analytics dashboard
+        - Plan database architecture supporting multi-tenancy and data isolation
+        - Design event-driven system for order processing with high throughput requirements
+      tags:
+        - Architect Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentTaskRequest'
+            examples:
+              microservices_design:
+                summary: Microservices architecture design
+                value:
+                  content: Design a microservices architecture for e-commerce platform with 100K daily users
+                  context:
+                    scale: 100K users/day
+                    cloud_provider: Azure
+                    requirements:
+                      - high availability
+                      - scalability
+                      - cost optimization
+                  auto_handoff: true
+              tech_stack_recommendation:
+                summary: Technology stack recommendation
+                value:
+                  content: Recommend optimal technology stack for real-time analytics dashboard
+                  context:
+                    data_volume: 1M events/day
+                    latency_requirement: <100ms
+                    team_expertise:
+                      - Python
+                      - TypeScript
+                  auto_handoff: false
+      responses:
+        '200':
+          description: Task completed successfully with architecture design
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskResponse'
+              example:
+                task_id: task-550e8400-e29b-41d4-a716-446655440000
+                agent_name: SystemArchitect
+                agent_role: architect
+                content: |
+                  Microservices architecture designed with 5 core services following domain-driven design principles.
+                  Services: User Service (authentication/authorization), Product Service (catalog management),
+                  Order Service (transaction processing), Payment Service (gateway integration),
+                  Notification Service (event-driven messaging). Each service uses dedicated PostgreSQL database
+                  with event sourcing for order processing.
+                success: true
+                metadata:
+                  execution_time_ms: 3500
+                  model_used: gpt-4
+                  architecture_patterns:
+                    - microservices
+                    - event-driven
+                    - domain-driven-design
+                handoff_to: builder
+                timestamp: '2025-10-09T10:30:00Z'
+        '400':
+          description: Invalid request - missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: ValidationError
+                message: Task content is required and cannot be empty
+                timestamp: '2025-10-09T10:30:00Z'
+        '503':
+          description: Architect agent service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: ServiceUnavailable
+                message: Architect agent not available. Please retry in a few moments.
+                timestamp: '2025-10-09T10:30:00Z'
+
+  /builder/task:
+    post:
+      operationId: builder_task
+      summary: Execute task with Builder agent
+      description: |
+        Establish code implementation and system construction through AI-powered development
+        to streamline software delivery across your business environment.
+
+        The **Builder** agent specializes in:
+        - **Code Implementation:** Full-stack development across multiple languages (Python, TypeScript, C#, Java)
+        - **API Development:** REST APIs, GraphQL, gRPC endpoints with comprehensive error handling
+        - **Database Implementation:** Schema creation, migrations, ORM configuration, query optimization
+        - **Authentication Systems:** OAuth2, JWT, SAML integration with role-based access control
+        - **Testing:** Unit tests, integration tests with high coverage (85%+)
+        - **DevOps Integration:** Docker containers, CI/CD pipeline configuration, deployment scripts
+
+        **Best for:** Organizations requiring rapid, production-ready code implementation following
+        architecture specifications and industry best practices.
+
+        **Workflow Integration:** Builder typically receives specifications from Architect agent
+        and hands off completed implementation to Validator agent for quality assurance.
+
+        **Common Use Cases:**
+        - Implement REST API endpoints with authentication and database persistence
+        - Build React components with TypeScript following design system specifications
+        - Create microservice implementation with Docker containerization
+        - Develop data processing pipeline with error handling and monitoring
+      tags:
+        - Builder Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentTaskRequest'
+            examples:
+              api_implementation:
+                summary: REST API implementation
+                value:
+                  content: Implement REST API endpoint for user authentication with JWT tokens
+                  context:
+                    language: Python
+                    framework: FastAPI
+                    database: PostgreSQL
+                  auto_handoff: true
+      responses:
+        '200':
+          description: Implementation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskResponse'
+              example:
+                task_id: task-650e8400-e29b-41d4-a716-446655440001
+                agent_name: CodeBuilder
+                agent_role: builder
+                content: |
+                  Implementation complete for User Service. Created FastAPI endpoints for user registration,
+                  login, and profile management. Implemented JWT authentication with refresh tokens.
+                  Added PostgreSQL database models using SQLAlchemy. Wrote 45 unit tests achieving 92% coverage.
+                  Containerized with Docker and added health check endpoints.
+                success: true
+                metadata:
+                  execution_time_ms: 5200
+                  files_created: 12
+                  test_coverage: 92%
+                  language: Python
+                handoff_to: validator
+                timestamp: '2025-10-09T10:35:00Z'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Builder agent service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /validator/task:
+    post:
+      operationId: validator_task
+      summary: Execute task with Validator agent
+      description: |
+        Establish quality assurance and validation through AI-powered testing
+        to ensure reliable, production-ready deliverables across your business environment.
+
+        The **Validator** agent specializes in:
+        - **Code Quality Review:** Static analysis, code smells, security vulnerabilities
+        - **Test Coverage Analysis:** Unit test completeness, edge case identification
+        - **Performance Validation:** Load testing, bottleneck identification, optimization recommendations
+        - **Security Assessment:** OWASP Top 10 vulnerabilities, authentication flaws, data exposure risks
+        - **Compliance Verification:** GDPR, HIPAA, SOC2 requirements validation
+        - **Integration Testing:** API contract testing, end-to-end workflow validation
+
+        **Best for:** Organizations requiring comprehensive quality assurance with automated
+        validation checks before production deployment.
+
+        **Workflow Integration:** Validator receives implementation from Builder agent and
+        provides detailed feedback. Can hand back to Builder for fixes or forward to Scribe for documentation.
+
+        **Common Use Cases:**
+        - Validate REST API implementation for security vulnerabilities and performance issues
+        - Review database schema for normalization and indexing optimization
+        - Test authentication system for common security flaws and edge cases
+        - Verify microservices integration contracts and error handling
+      tags:
+        - Validator Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentTaskRequest'
+            examples:
+              security_validation:
+                summary: Security validation
+                value:
+                  content: Validate the user authentication API for security vulnerabilities
+                  context:
+                    auth_type: JWT
+                    framework: FastAPI
+                    compliance_requirements:
+                      - OWASP Top 10
+                      - GDPR
+                  auto_handoff: true
+      responses:
+        '200':
+          description: Validation completed with detailed results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskResponse'
+              example:
+                task_id: task-750e8400-e29b-41d4-a716-446655440002
+                agent_name: QualityValidator
+                agent_role: validator
+                content: |
+                  Validation complete for User Service. Code quality: Excellent (9.2/10).
+                  Test coverage: 92% exceeds target of 85%. Security scan: No critical vulnerabilities found,
+                  2 minor warnings addressed. Performance: API response times under 100ms for 95th percentile.
+                  Ready for production deployment. Recommend adding rate limiting for authentication endpoints.
+                success: true
+                metadata:
+                  execution_time_ms: 4800
+                  code_quality_score: 9.2
+                  test_coverage: 92%
+                  vulnerabilities_found: 0
+                  warnings: 2
+                handoff_to: scribe
+                timestamp: '2025-10-09T10:40:00Z'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Validator agent service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /scribe/task:
+    post:
+      operationId: scribe_task
+      summary: Execute task with Scribe agent
+      description: |
+        Establish comprehensive documentation through AI-powered content generation
+        to streamline knowledge transfer and onboarding across your business environment.
+
+        The **Scribe** agent specializes in:
+        - **API Documentation:** OpenAPI/Swagger specifications, endpoint descriptions, request/response examples
+        - **Technical Guides:** Architecture decision records (ADRs), setup instructions, troubleshooting guides
+        - **Code Documentation:** Inline comments, docstrings, README files with usage examples
+        - **User Manuals:** Feature descriptions, user workflows, screenshots, FAQ sections
+        - **Runbooks:** Operational procedures, incident response, deployment checklists
+        - **Knowledge Base:** Best practices, design patterns, lessons learned documentation
+
+        **Best for:** Organizations requiring consistent, high-quality documentation that
+        accelerates developer onboarding and reduces support burden.
+
+        **Workflow Integration:** Scribe typically receives validated implementation from
+        Validator agent and produces comprehensive documentation as the final workflow step.
+
+        **Common Use Cases:**
+        - Generate OpenAPI specification with examples from REST API implementation
+        - Create technical setup guide with step-by-step instructions and screenshots
+        - Document microservices architecture with diagrams and interaction patterns
+        - Write user manual for new feature with workflows and best practices
+      tags:
+        - Scribe Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentTaskRequest'
+            examples:
+              api_documentation:
+                summary: API documentation generation
+                value:
+                  content: Generate comprehensive API documentation for the user authentication service
+                  context:
+                    api_framework: FastAPI
+                    endpoints: 15
+                    auth_type: JWT
+                  auto_handoff: false
+      responses:
+        '200':
+          description: Documentation generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskResponse'
+              example:
+                task_id: task-850e8400-e29b-41d4-a716-446655440003
+                agent_name: DocumentationScribe
+                agent_role: scribe
+                content: |
+                  Documentation complete for User Service. Generated: (1) OpenAPI 3.1 specification with 15 endpoints,
+                  request/response examples, and error codes. (2) README with quickstart guide, authentication flow diagram,
+                  and troubleshooting section. (3) API usage guide with cURL and Python examples for all endpoints.
+                  (4) Deployment runbook with Docker setup and environment configuration. Documentation ready for publication.
+                success: true
+                metadata:
+                  execution_time_ms: 3200
+                  documents_created: 4
+                  endpoints_documented: 15
+                  examples_included: 30
+                handoff_to: null
+                timestamp: '2025-10-09T10:45:00Z'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scribe agent service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workflow/execute:
+    post:
+      operationId: execute_workflow
+      summary: Execute multi-agent workflow
+      description: |
+        Establish orchestrated multi-agent workflows to drive measurable outcomes through
+        structured collaboration across specialized AI agents.
+
+        **Workflow Execution Pattern:**
+
+        1. **Architect** → Analyzes requirements and creates system design
+        2. **Builder** → Implements code based on architecture specifications
+        3. **Validator** → Tests and validates implementation quality
+        4. **Scribe** → Documents the complete solution
+
+        Each agent autonomously determines when to hand off to the next agent based on
+        task completion criteria. The workflow continues until all agents have contributed
+        or max iterations is reached.
+
+        **Key Features:**
+        - **Automatic Handoffs:** Agents intelligently determine next steps
+        - **Context Preservation:** Shared context flows through entire workflow
+        - **Iteration Control:** Configurable max iterations prevents infinite loops
+        - **Complete Traceability:** Full execution history with timestamps
+        - **Error Resilience:** Graceful handling of agent failures
+
+        **Best for:** Organizations requiring end-to-end AI-powered delivery of complex
+        projects with coordinated multi-agent collaboration from design through documentation.
+
+        **Common Workflows:**
+        - **Full-Stack Feature Development:** Architecture → Implementation → Testing → Documentation
+        - **API Development:** Design → Build endpoints → Validate security → Generate OpenAPI docs
+        - **System Migration:** Analyze current → Plan new architecture → Implement → Document changes
+        - **Technical Debt Resolution:** Identify issues → Refactor code → Test improvements → Update docs
+
+        **Performance:** Typical workflow with 4 agents completes in 15-30 seconds depending on
+        task complexity and model performance.
+      tags:
+        - Multi-Agent Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowRequest'
+            examples:
+              full_stack_feature:
+                summary: Full-stack feature development
+                value:
+                  initial_task: Build complete e-commerce platform with microservices architecture supporting 100K daily users
+                  starting_agent: architect
+                  max_iterations: 10
+                  context:
+                    scale: 100K users/day
+                    tech_stack:
+                      - Python
+                      - FastAPI
+                      - React
+                      - Azure
+                    requirements:
+                      - high availability
+                      - scalability
+                      - GDPR compliance
+                    constraints:
+                      - cost optimization
+                      - 6-month delivery timeline
+              api_development:
+                summary: API development workflow
+                value:
+                  initial_task: Create REST API for user management with authentication
+                  starting_agent: architect
+                  max_iterations: 5
+                  context:
+                    framework: FastAPI
+                    database: PostgreSQL
+                    auth_type: JWT
+      responses:
+        '200':
+          description: Workflow executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+              example:
+                workflow_id: wf-550e8400-e29b-41d4-a716-446655440000
+                steps:
+                  - step_number: 1
+                    agent_role: architect
+                    agent_name: SystemArchitect
+                    content: Architecture designed with 5 microservices. Handing off to Builder.
+                    success: true
+                    timestamp: '2025-10-09T10:30:00Z'
+                  - step_number: 2
+                    agent_role: builder
+                    agent_name: CodeBuilder
+                    content: Implementation complete with 92% test coverage. Handing off to Validator.
+                    success: true
+                    timestamp: '2025-10-09T10:35:00Z'
+                  - step_number: 3
+                    agent_role: validator
+                    agent_name: QualityValidator
+                    content: Validation complete. No critical issues found. Handing off to Scribe.
+                    success: true
+                    timestamp: '2025-10-09T10:40:00Z'
+                  - step_number: 4
+                    agent_role: scribe
+                    agent_name: DocumentationScribe
+                    content: Comprehensive documentation generated with API specs and guides.
+                    success: true
+                    timestamp: '2025-10-09T10:45:00Z'
+                final_output: E-commerce platform fully implemented with 5 microservices, comprehensive tests, and documentation.
+                success: true
+                total_iterations: 4
+                metadata:
+                  initial_task: Build complete e-commerce platform
+                  starting_agent: architect
+                  total_execution_time_ms: 18500
+        '400':
+          description: Invalid workflow request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: ValidationError
+                message: Initial task cannot be empty
+                timestamp: '2025-10-09T10:30:00Z'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: WorkflowExecutionError
+                message: 'Workflow failed at step 2: Builder agent encountered error'
+                details:
+                  failed_step: 2
+                  agent_role: builder
+                  error_details: Implementation task failed due to invalid requirements
+                timestamp: '2025-10-09T10:35:00Z'
+
+components:
+  schemas:
+    AgentRole:
+      type: string
+      enum:
+        - architect
+        - builder
+        - validator
+        - scribe
+      description: |
+        Agent role classification determining specialized capabilities:
+        - **architect:** System design and architecture planning
+        - **builder:** Code implementation and development
+        - **validator:** Quality assurance and testing
+        - **scribe:** Documentation generation
+
+    AgentTaskRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          description: Task content or instructions for the agent to process
+          examples:
+            - Design a microservices architecture for e-commerce platform
+            - Implement REST API endpoint for user authentication with JWT
+            - Validate the database schema for data integrity issues
+            - Document the authentication flow with code examples
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context and parameters for task execution
+          default: {}
+          example:
+            scale: 100K users/day
+            cloud_provider: Azure
+            architecture_style: microservices
+        auto_handoff:
+          type: boolean
+          description: Enable automatic handoff to next appropriate agent in workflow
+          default: false
+
+    AgentTaskResponse:
+      type: object
+      required:
+        - task_id
+        - agent_name
+        - agent_role
+        - content
+        - success
+        - metadata
+        - timestamp
+      properties:
+        task_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the executed task
+          example: task-550e8400-e29b-41d4-a716-446655440000
+        agent_name:
+          type: string
+          description: Name of the agent that processed the task
+          examples:
+            - SystemArchitect
+            - CodeBuilder
+            - QualityValidator
+            - DocumentationScribe
+        agent_role:
+          $ref: '#/components/schemas/AgentRole'
+        content:
+          type: string
+          description: Detailed task execution results and output
+          example: |
+            Architecture design completed with 5 microservices: User Service, Product Service,
+            Order Service, Payment Service, Notification Service. Each service follows domain-driven
+            design principles...
+        success:
+          type: boolean
+          description: Indicates whether task execution completed successfully
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional execution metadata including performance metrics and configuration
+          example:
+            execution_time_ms: 3500
+            model_used: gpt-4
+            tokens_used: 2840
+            architecture_patterns:
+              - microservices
+              - event-driven
+              - domain-driven-design
+        handoff_to:
+          allOf:
+            - $ref: '#/components/schemas/AgentRole'
+          nullable: true
+          description: Target agent role for workflow handoff, if applicable
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp of task completion
+
+    WorkflowRequest:
+      type: object
+      required:
+        - initial_task
+      properties:
+        initial_task:
+          type: string
+          minLength: 1
+          description: Initial task description to start the workflow execution
+          examples:
+            - Build complete e-commerce platform with microservices architecture
+            - Design and implement user authentication system with OAuth2
+            - Create comprehensive API documentation with interactive examples
+        starting_agent:
+          allOf:
+            - $ref: '#/components/schemas/AgentRole'
+          description: Role of the agent to initiate workflow execution (typically Architect for design-first approach)
+          default: architect
+        max_iterations:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Maximum number of agent handoffs allowed before workflow termination (prevents infinite loops)
+          default: 10
+        context:
+          type: object
+          additionalProperties: true
+          description: Shared context available to all agents throughout workflow execution
+          default: {}
+          example:
+            scale: 100K users/day
+            tech_stack:
+              - Python
+              - FastAPI
+              - React
+              - Azure
+            requirements:
+              - high availability
+              - scalability
+              - GDPR compliance
+            constraints:
+              - cost optimization
+              - 6-month delivery timeline
+
+    WorkflowStep:
+      type: object
+      required:
+        - step_number
+        - agent_role
+        - agent_name
+        - content
+        - success
+        - timestamp
+      properties:
+        step_number:
+          type: integer
+          minimum: 1
+          description: Sequential step number in workflow execution (1-based indexing)
+        agent_role:
+          $ref: '#/components/schemas/AgentRole'
+        agent_name:
+          type: string
+          description: Name of the specific agent instance that processed this step
+          examples:
+            - SystemArchitect
+            - CodeBuilder
+            - QualityValidator
+            - DocumentationScribe
+        content:
+          type: string
+          description: Detailed output and results from this workflow step
+        success:
+          type: boolean
+          description: Indicates whether this workflow step completed successfully
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when this workflow step was completed
+
+    WorkflowResponse:
+      type: object
+      required:
+        - workflow_id
+        - steps
+        - final_output
+        - success
+        - total_iterations
+        - metadata
+      properties:
+        workflow_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the workflow execution instance
+          example: wf-550e8400-e29b-41d4-a716-446655440000
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+          description: Complete sequence of agent execution steps in chronological order
+        final_output:
+          type: string
+          description: Consolidated final output from the last agent in the workflow
+          example: |
+            E-commerce platform fully implemented and validated. Architecture includes 5 microservices
+            with comprehensive documentation. All services include authentication, database models,
+            unit tests (85%+ coverage), and API documentation. Platform ready for deployment to Azure.
+        success:
+          type: boolean
+          description: Indicates whether the entire workflow completed successfully (all steps succeeded)
+        total_iterations:
+          type: integer
+          description: Total number of agent handoffs executed in this workflow
+          example: 4
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional workflow-level metadata including execution metrics and configuration
+          example:
+            initial_task: Build complete e-commerce platform
+            starting_agent: architect
+            total_execution_time_ms: 18500
+            agents_involved:
+              - architect
+              - builder
+              - validator
+              - scribe
+            total_tokens_used: 12400
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+        - agents
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: Current service health status
+        version:
+          type: string
+          description: Current API version following semantic versioning
+          example: 0.1.0
+        agents:
+          type: array
+          items:
+            type: string
+          description: List of currently available agent types ready for task execution
+          example:
+            - architect
+            - builder
+            - validator
+            - scribe
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when health check was performed
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: Error type classification
+          examples:
+            - ValidationError
+            - ServiceUnavailable
+            - AgentNotFound
+            - TaskTimeout
+        message:
+          type: string
+          description: Human-readable error message with actionable guidance
+          examples:
+            - Invalid agent type 'unknown'. Supported types architect, builder, validator, scribe
+            - Task execution exceeded timeout limit of 60 seconds
+            - Agent service temporarily unavailable. Please retry in a few moments.
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Additional structured error context including field-level validation errors and trace information
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when the error occurred
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (development only)
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.agentstudio.com/oauth/authorize
+          tokenUrl: https://auth.agentstudio.com/oauth/token
+          scopes:
+            agents.execute: Execute agent tasks
+            agents.read: Read agent information
+            workflows.execute: Execute multi-agent workflows
+            workflows.read: Read workflow status
+      description: OAuth2 authentication for production (planned)
+
+security:
+  - ApiKeyAuth: []
+  - OAuth2:
+      - agents.execute
+      - workflows.execute

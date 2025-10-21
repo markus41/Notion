@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "code-review-agent",
+  "name": "Code Review Agent",
+  "version": "1.0.0",
+  "description": "An AI agent that automatically reviews pull requests and provides intelligent feedback on code quality, security issues, and best practices",
+  "type": "autonomous",
+  "capabilities": [
+    "code-analysis",
+    "security-scanning",
+    "best-practices-checking",
+    "automated-commenting"
+  ],
+  "configuration": {
+    "model": "gpt-4",
+    "temperature": 0.3,
+    "max_tokens": 2000,
+    "languages": [
+      "python",
+      "javascript",
+      "typescript",
+      "csharp",
+      "java"
+    ]
+  },
+  "triggers": [
+    {
+      "type": "webhook",
+      "event": "pull_request.opened",
+      "conditions": {
+        "repository": "*"
+      }
+    },
+    {
+      "type": "webhook",
+      "event": "pull_request.synchronize",
+      "conditions": {
+        "repository": "*"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "github-api",
+      "type": "mcp",
+      "config": {
+        "endpoint": "https://api.github.com"
+      }
+    },
+    {
+      "name": "code-analyzer",
+      "type": "mcp",
+      "config": {
+        "endpoint": "https://analyzer.agentstudio.local"
+      }
+    }
+  ],
+  "observability": {
+    "telemetry_enabled": true,
+    "log_level": "info",
+    "trace_sampling_rate": 0.1
+  },
+  "security": {
+    "authentication_required": true,
+    "allowed_origins": [
+      "github.com"
+    ],
+    "rate_limit": {
+      "requests_per_minute": 60
+    }
+  }
+}

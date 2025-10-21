@@ -1,0 +1,137 @@
+%% Iterative Workflow with Validator Feedback
+%% Shows iterative execution with feedback loops until quality criteria met
+%% Streamlines quality improvement through automated feedback cycles
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+stateDiagram-v2
+    [*] --> Initialize: Start Workflow
+
+    Initialize --> SetIterationLimit: Context Ready
+    note right of Initialize
+        Max iterations: 5
+        Quality threshold: 95%
+        Timeout: 60 min
+    end note
+
+    SetIterationLimit --> GenerateInitial: Limits Set
+
+    state IterationLoop {
+        GenerateInitial --> Validate: Iteration 1
+
+        state Validate {
+            [*] --> RunValidation
+            RunValidation --> CheckQuality
+            CheckQuality --> GenerateFeedback
+            GenerateFeedback --> [*]
+        }
+        note right of Validate
+            Agent: Validator
+            Checks: Code quality, tests, docs
+            Output: Feedback + score
+        end note
+
+        Validate --> EvaluateScore: Validation Complete
+
+        state EvaluateScore <<choice>>
+        EvaluateScore --> Success: Score >= 95%
+        EvaluateScore --> CheckIterations: Score < 95%
+
+        state CheckIterations <<choice>>
+        CheckIterations --> Improve: Iterations < Max
+        CheckIterations --> PartialSuccess: Iterations = Max
+
+        state Improve {
+            [*] --> AnalyzeFeedback
+            AnalyzeFeedback --> PlanChanges
+            PlanChanges --> ImplementChanges
+            ImplementChanges --> [*]
+        }
+        note right of Improve
+            Agent: Builder
+            Uses validator feedback
+            Targeted improvements
+        end note
+
+        Improve --> Validate: Next Iteration
+    }
+
+    state IterationTracking {
+        Iteration1[Iteration 1<br/>Score: 72%<br/>Issues: 8]
+        Iteration2[Iteration 2<br/>Score: 85%<br/>Issues: 4]
+        Iteration3[Iteration 3<br/>Score: 91%<br/>Issues: 2]
+        Iteration4[Iteration 4<br/>Score: 96%<br/>Issues: 0]
+
+        Iteration1 --> Iteration2
+        Iteration2 --> Iteration3
+        Iteration3 --> Iteration4
+    }
+    note left of IterationTracking
+        Progressive improvement
+        Convergence tracking
+        Learning patterns
+    end note
+
+    Success --> FinalValidation: Quality Met
+
+    state FinalValidation {
+        [*] --> ComprehensiveCheck
+        ComprehensiveCheck --> SecurityScan
+        SecurityScan --> PerformanceTest
+        PerformanceTest --> [*]
+    }
+
+    FinalValidation --> Complete: All Checks Pass
+    FinalValidation --> Remediate: Critical Issues
+
+    state Remediate {
+        [*] --> IdentifyIssues
+        IdentifyIssues --> QuickFix
+        QuickFix --> ReValidate
+        ReValidate --> [*]
+    }
+
+    Remediate --> Complete: Fixed
+    Complete --> [*]: Workflow Complete
+
+    PartialSuccess --> ReviewRequired: Max Iterations Reached
+
+    state ReviewRequired {
+        [*] --> GenerateReport
+        GenerateReport --> FlagForReview
+        FlagForReview --> NotifyTeam
+        NotifyTeam --> [*]
+    }
+    note right of ReviewRequired
+        Human intervention needed
+        Best effort: 91% quality
+        Detailed report generated
+    end note
+
+    ReviewRequired --> [*]: Manual Review Required
+
+    state FeedbackCategories {
+        CodeQuality[Code Quality<br/>- Complexity<br/>- Duplication<br/>- Standards]
+        TestCoverage[Test Coverage<br/>- Unit tests<br/>- Integration<br/>- Edge cases]
+        Documentation[Documentation<br/>- Completeness<br/>- Clarity<br/>- Examples]
+        Performance[Performance<br/>- Efficiency<br/>- Scalability<br/>- Resources]
+    }
+    note left of FeedbackCategories
+        Structured feedback
+        Actionable items
+        Priority scoring
+    end note
+
+    state LearningSystem {
+        [*] --> CollectPatterns
+        CollectPatterns --> AnalyzeTrends
+        AnalyzeTrends --> UpdateRules
+        UpdateRules --> ImproveValidator
+        ImproveValidator --> [*]
+    }
+    note right of LearningSystem
+        ML-based improvement
+        Pattern recognition
+        Rule refinement
+        Continuous learning
+    end note

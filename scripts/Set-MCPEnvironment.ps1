@@ -30,7 +30,8 @@
     - Read permissions on required secrets
 
     Secrets Retrieved:
-    - github-personal-access-token to GITHUB_PERSONAL_ACCESS_TOKEN
+    - github-personal-access-token → GITHUB_PERSONAL_ACCESS_TOKEN
+    - notion-api-key → NOTION_API_KEY
 
     Created: 2025-10-21
     Author: Brookside BI
@@ -46,6 +47,7 @@ $ErrorActionPreference = "Stop"
 $VaultName = "kv-brookside-secrets"
 $SecretsToRetrieve = @{
     "github-personal-access-token" = "GITHUB_PERSONAL_ACCESS_TOKEN"
+    "notion-api-key" = "NOTION_API_KEY"
 }
 
 Write-Host "Establishing secure connection to Azure Key Vault..." -ForegroundColor Cyan

@@ -1,0 +1,77 @@
+sequenceDiagram
+    participant O as Orchestrator
+    participant SH as SignalR Hub
+    participant A1 as Agent A<br/>(TypeScript)
+    participant A2 as Agent B<br/>(Python)
+    participant A3 as Agent C<br/>(.NET)
+    participant ES as Event Store
+    participant BB as Blackboard<br/>(Shared State)
+
+    Note over O: Workflow execution begins
+
+    O->>SH: Subscribe to workflow events
+    SH-->>O: Connection established
+
+    O->>A1: Execute Task 1 (Async)
+    activate A1
+    A1->>BB: Write: "analysis_started"
+    A1->>ES: Log: "Task 1 started"
+
+    Note over A1: Perform analysis<br/>(2-3 minutes)
+
+    A1->>BB: Write: "analysis_results"
+    A1->>ES: Log: "Task 1 completed"
+    A1->>SH: Broadcast: task.completed
+    SH->>O: Notify: Task 1 done
+    deactivate A1
+
+    O->>SH: Broadcast: task.available
+
+    par Parallel Execution
+        O->>A2: Execute Task 2 (Async)
+        activate A2
+        A2->>BB: Read: "analysis_results"
+        A2->>ES: Log: "Task 2 started"
+
+        Note over A2: Process data<br/>(1-2 minutes)
+
+        A2->>BB: Write: "processed_data"
+        A2->>ES: Log: "Task 2 completed"
+        A2->>SH: Broadcast: task.completed
+        deactivate A2
+    and
+        O->>A3: Execute Task 3 (Async)
+        activate A3
+        A3->>BB: Read: "analysis_results"
+        A3->>ES: Log: "Task 3 started"
+
+        Note over A3: Generate report<br/>(1-2 minutes)
+
+        A3->>BB: Write: "report_generated"
+        A3->>ES: Log: "Task 3 completed"
+        A3->>SH: Broadcast: task.completed
+        deactivate A3
+    end
+
+    SH->>O: Notify: Tasks 2 & 3 done
+
+    Note over O: Check quality gates
+
+    O->>BB: Read: Aggregate results
+    BB-->>O: Combined state
+
+    O->>ES: Write: "Workflow completed"
+    O->>SH: Broadcast: workflow.completed
+    SH->>A1: Notify: Success
+    SH->>A2: Notify: Success
+    SH->>A3: Notify: Success
+
+    Note over O,A3: All agents notified<br/>Resources cleaned up
+
+    rect rgb(240, 248, 255)
+        Note over BB: Blackboard Pattern:<br/>Shared knowledge space<br/>for collaborative problem-solving
+    end
+
+    rect rgb(255, 250, 240)
+        Note over ES: Event Sourcing:<br/>Complete audit trail<br/>State reconstruction<br/>Time-travel debugging
+    end

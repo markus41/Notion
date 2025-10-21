@@ -1,19 +1,21 @@
 # 🚀 Brookside BI Innovation Nexus Repository Analyzer
 
-Analyzes all repositories in the brookside-bi GitHub organization and creates a comprehensive knowledge base in Notion. This solution is designed to streamline portfolio management and drive measurable outcomes through automated pattern extraction and cost tracking.
+Analyzes repositories across all your GitHub organizations and creates a comprehensive knowledge base in Notion. This solution is designed to streamline portfolio management and drive measurable outcomes through automated pattern extraction and cost tracking across your entire repository portfolio.
 
-**Best for:** Organizations managing multiple repositories requiring automated analysis, cost visibility, and knowledge base generation to support sustainable growth.
+**Best for:** Organizations managing multiple repositories across personal accounts and enterprise organizations requiring automated analysis, cost visibility, and knowledge base generation to support sustainable growth.
 
 ## 📋 Overview
 
 This Python-based CLI tool leverages existing GitHub MCP and Notion MCP integrations to:
 
-- 📊 **Scan organization repositories** - Automated discovery and metadata extraction
+- 🏢 **Discover organizations** - Automatically find all GitHub organizations you belong to
+- 📊 **Scan repositories** - Automated discovery and metadata extraction across personal and enterprise repositories
 - 🔍 **Analyze code quality** - Viability scoring based on tests, activity, documentation, dependencies
 - 🎯 **Extract patterns** - Identify reusable components and architectural patterns
 - 💰 **Calculate costs** - Map dependencies to monthly costs via Software Tracker
 - 📝 **Sync to Notion** - Automated Example Build and Knowledge Vault entries
 - 🤖 **Detect Claude configs** - Parse .claude/ directories for agent/command capabilities
+- 🔐 **Validate token scopes** - Verify GitHub PAT has required permissions for organization access
 
 ## 🏗️ Architecture
 
@@ -69,6 +71,19 @@ poetry --version
 az --version
 ```
 
+**GitHub Personal Access Token Requirements:**
+
+Your GitHub PAT (stored in Azure Key Vault) must have the following scopes:
+
+- `repo` - Full repository access (read/write to repositories)
+- `read:org` - Read organization membership and repositories (required for organization scanning)
+- `read:user` - Read user profile data (required for organization discovery)
+
+**Optional but recommended:**
+- `admin:org` - Full organization access (for comprehensive organization management)
+
+To verify your token scopes, use the organizations command (see Usage section below).
+
 ### Installation
 
 ```bash
@@ -116,24 +131,93 @@ CALCULATE_COSTS=true
 
 ### Usage
 
+**Organization Discovery:**
+
 ```bash
-# Scan entire organization (full analysis)
-poetry run brookside-analyze scan --full
+# List all organizations you belong to
+poetry run brookside-analyze organizations
 
-# Scan with Notion sync
-poetry run brookside-analyze scan --full --sync
+# Output shows:
+# - Organization names and descriptions
+# - Your token scopes and permissions
+# - Instructions for scanning multiple organizations
+```
 
-# Analyze single repository
+**Repository Scanning:**
+
+```bash
+# Scan all organizations you have access to (recommended)
+poetry run brookside-analyze scan --all-orgs --full
+
+# Quick scan across all organizations (faster, less detailed)
+poetry run brookside-analyze scan --all-orgs --quick
+
+# Scan specific organization only
+poetry run brookside-analyze scan --org brookside-bi --full
+
+# Scan with Notion sync enabled
+poetry run brookside-analyze scan --all-orgs --full --sync
+
+# Quick scan without Notion sync (fastest)
+poetry run brookside-analyze scan --all-orgs --quick --no-sync
+```
+
+**Single Repository Analysis:**
+
+```bash
+# Analyze single repository with deep analysis
 poetry run brookside-analyze analyze my-repo --deep
 
-# Extract patterns
+# Shallow analysis (metadata only)
+poetry run brookside-analyze analyze my-repo --shallow
+```
+
+**Pattern Mining and Cost Analysis:**
+
+```bash
+# Extract patterns (requires full scan first)
 poetry run brookside-analyze patterns
 
-# Calculate costs
-poetry run brookside-analyze costs
+# Calculate costs (requires full scan first)
+poetry run brookside-analyze costs --threshold 90
 ```
 
 ## 📊 Features
+
+### Organization Discovery
+
+**Automatic Organization Detection:**
+- Discovers all GitHub organizations you belong to via `/user/orgs` endpoint
+- Displays organization names, descriptions, and URLs in formatted table
+- Shows your personal account repositories if no organizations found
+
+**Token Scope Validation:**
+- Verifies GitHub PAT has required scopes (`repo`, `read:org`, `read:user`)
+- Displays authenticated user information
+- Warns if token is missing organization access permissions
+- Checks for both read-only and admin organization permissions
+
+**Multi-Organization Scanning:**
+- `--all-orgs` flag enables automatic discovery and scanning of all organizations
+- Aggregates repositories across personal account and all enterprise organizations
+- Progress tracking shows scan status per organization
+- Total repository count displayed before analysis begins
+
+**Example Output:**
+```
+GitHub Organizations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Organization          Description                URL
+──────────────────────────────────────────────────
+Advisor-OS           AI advisory platform       https://github.com/Advisor-OS
+Brookside-Proving-   Testing grounds           https://github.com/Brookside-Proving-Grounds
+Grounds
+
+Found 4 organizations
+
+To scan all organizations:
+  brookside-analyze scan --all-orgs --full
+```
 
 ### Repository Analysis
 
@@ -252,6 +336,60 @@ poetry run ruff src/
 poetry run mypy src/
 ```
 
+## 🧪 Testing
+
+### Test Structure
+
+```
+tests/
+├── unit/                    # Unit tests (fast, isolated)
+├── integration/             # Integration tests (require Azure/Notion)
+└── e2e/                     # End-to-end tests (full workflows)
+```
+
+### Running Tests
+
+```bash
+# All unit tests
+poetry run pytest tests/unit -v
+
+# Integration tests (requires Azure authentication)
+poetry run pytest tests/integration -v -m integration
+
+# E2E tests (requires full setup)
+poetry run pytest tests/e2e -v -m e2e
+
+# Full test suite with coverage
+poetry run pytest --cov=src --cov-report=html
+
+# Specific test file
+poetry run pytest tests/unit/test_models.py -v
+```
+
+### Test Categories
+
+**Unit Tests** (`tests/unit/`):
+- Data models and validation
+- Configuration loading
+- Authentication and credentials
+- Viability scoring algorithms
+- Pattern detection logic
+- Cost calculations
+
+**Integration Tests** (`tests/integration/`):
+- Azure Key Vault access
+- GitHub MCP client operations
+- Notion MCP synchronization
+- Cost database queries
+- Software dependency linking
+
+**E2E Tests** (`tests/e2e/`):
+- Complete CLI workflows
+- Organization-wide scanning
+- Pattern extraction pipelines
+- Notion synchronization flows
+- Cost analysis reports
+
 ## 🚢 Deployment
 
 ### Local CLI (Current)
@@ -332,10 +470,18 @@ Internal Brookside BI tool - Proprietary
 
 ## 🎯 Roadmap
 
+**Completed:**
+- [x] Multi-organization scanning with automatic discovery
+- [x] GitHub PAT scope validation
+- [x] Organization listing command with token verification
+
+**In Progress:**
 - [ ] Complete Notion MCP integration for automated syncing
+- [ ] Enhanced dependency cost database
+
+**Planned:**
 - [ ] Azure Function deployment for weekly automated scans
 - [ ] GitHub Actions workflow for event-triggered analysis
-- [ ] Enhanced dependency cost database
 - [ ] Machine learning for pattern detection
 - [ ] Integration with Azure DevOps for CI/CD metrics
 - [ ] Real-time cost alerts and budget tracking

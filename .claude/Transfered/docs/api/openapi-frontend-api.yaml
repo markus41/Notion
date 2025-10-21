@@ -1,0 +1,1401 @@
+openapi: 3.1.0
+info:
+  title: Agent Studio Frontend API
+  version: 1.0.0
+  description: |
+    REST API for the React frontend to manage workflows, agents, and system configuration.
+
+    This API provides CRUD operations for:
+    - Workflow definitions and execution
+    - Agent configuration and management
+    - Execution history and analytics
+    - System settings and user preferences
+
+    ## Design Principles
+    - RESTful resource-oriented design
+    - HATEOAS for discoverability
+    - Optimistic concurrency with ETags
+    - Comprehensive filtering and sorting
+    - Pagination for all list operations
+
+  contact:
+    name: Agent Studio Team
+    email: support@agentstudio.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://app.agentstudio.dev/api/v1
+    description: Production server
+  - url: https://staging-app.agentstudio.dev/api/v1
+    description: Staging server
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Workflows
+    description: Workflow management and execution
+  - name: Agents
+    description: Agent configuration and monitoring
+  - name: Executions
+    description: Execution history and results
+  - name: Settings
+    description: System settings and user preferences
+  - name: Analytics
+    description: Analytics and reporting
+
+paths:
+  /workflows:
+    get:
+      tags:
+        - Workflows
+      summary: List workflows
+      description: Retrieve a paginated list of workflow definitions with filtering
+      operationId: listWorkflows
+      parameters:
+        - name: search
+          in: query
+          description: Search in workflow name and description
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [draft, active, archived]
+        - name: tags
+          in: query
+          description: Filter by tags (comma-separated)
+          schema:
+            type: string
+          example: "analytics,production"
+        - name: created_by
+          in: query
+          description: Filter by creator user ID
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Workflows
+      summary: Create workflow
+      description: Create a new workflow definition
+      operationId: createWorkflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowCreate'
+            examples:
+              simpleWorkflow:
+                summary: Simple sequential workflow
+                value:
+                  name: "Customer Feedback Analysis"
+                  description: "Analyze customer feedback and generate insights"
+                  type: "sequential"
+                  steps:
+                    - id: "step1"
+                      name: "Gather Feedback"
+                      agent_id: "data-collector-01"
+                      task_type: "collect"
+                      config:
+                        source: "customer_feedback_db"
+                    - id: "step2"
+                      name: "Analyze Sentiment"
+                      agent_id: "analyst-agent-01"
+                      task_type: "analyze"
+                      depends_on: ["step1"]
+                  tags: ["analytics", "customer-service"]
+                  timeout_seconds: 600
+      responses:
+        '201':
+          description: Workflow created
+          headers:
+            Location:
+              description: URL of created workflow
+              schema:
+                type: string
+                format: uri
+            ETag:
+              description: Entity tag for optimistic concurrency
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /workflows/{workflowId}:
+    get:
+      tags:
+        - Workflows
+      summary: Get workflow
+      description: Retrieve a specific workflow definition
+      operationId: getWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+      responses:
+        '200':
+          description: Workflow details
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags:
+        - Workflows
+      summary: Update workflow
+      description: Update an existing workflow (full replacement)
+      operationId: updateWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+        - name: If-Match
+          in: header
+          description: ETag for optimistic concurrency control
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowUpdate'
+      responses:
+        '200':
+          description: Workflow updated
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Optimistic concurrency conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '412':
+          description: Precondition failed (ETag mismatch)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags:
+        - Workflows
+      summary: Partially update workflow
+      description: Update specific fields of a workflow
+      operationId: patchWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowPatch'
+            examples:
+              updateStatus:
+                summary: Update workflow status
+                value:
+                  status: "archived"
+              updateTags:
+                summary: Update tags
+                value:
+                  tags: ["analytics", "production", "v2"]
+      responses:
+        '200':
+          description: Workflow updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+
+    delete:
+      tags:
+        - Workflows
+      summary: Delete workflow
+      description: Delete a workflow (soft delete - archives instead of removing)
+      operationId: deleteWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+        - name: permanent
+          in: query
+          description: Permanently delete instead of archiving
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: Workflow deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete - active executions exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workflows/{workflowId}/execute:
+    post:
+      tags:
+        - Workflows
+      summary: Execute workflow
+      description: Start a new execution of the workflow
+      operationId: executeWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowExecutionRequest'
+            examples:
+              simpleExecution:
+                summary: Simple execution
+                value:
+                  input_data:
+                    customer_segment: "enterprise"
+                    time_period: "2025-Q3"
+                  priority: "normal"
+              scheduledExecution:
+                summary: Scheduled execution
+                value:
+                  input_data:
+                    data_source: "crm_db"
+                  schedule:
+                    type: "cron"
+                    expression: "0 0 * * *"
+                    timezone: "UTC"
+      responses:
+        '202':
+          description: Execution started
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Execution'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /workflows/{workflowId}/validate:
+    post:
+      tags:
+        - Workflows
+      summary: Validate workflow
+      description: Validate workflow configuration without executing
+      operationId: validateWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+      responses:
+        '200':
+          description: Validation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /workflows/{workflowId}/clone:
+    post:
+      tags:
+        - Workflows
+      summary: Clone workflow
+      description: Create a copy of an existing workflow
+      operationId: cloneWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name for the cloned workflow
+      responses:
+        '201':
+          description: Workflow cloned
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+  /agents:
+    get:
+      tags:
+        - Agents
+      summary: List agents
+      description: Retrieve a paginated list of agents
+      operationId: listAgents
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [online, offline, degraded, maintenance]
+        - name: capability
+          in: query
+          description: Filter by capability
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Filter by version
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentList'
+
+    post:
+      tags:
+        - Agents
+      summary: Register agent
+      description: Register a new agent in the system
+      operationId: registerAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentCreate'
+      responses:
+        '201':
+          description: Agent registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Agent ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agentId}:
+    get:
+      tags:
+        - Agents
+      summary: Get agent
+      description: Retrieve agent details
+      operationId: getAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentIdParam'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Agents
+      summary: Update agent
+      description: Update agent configuration
+      operationId: updateAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentUpdate'
+      responses:
+        '200':
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Agents
+      summary: Unregister agent
+      description: Remove agent from the system
+      operationId: unregisterAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentIdParam'
+      responses:
+        '204':
+          description: Agent unregistered
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete - active tasks exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agentId}/metrics:
+    get:
+      tags:
+        - Agents
+      summary: Get agent metrics
+      description: Retrieve performance metrics for an agent
+      operationId: getAgentMetrics
+      parameters:
+        - $ref: '#/components/parameters/AgentIdParam'
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: interval
+          in: query
+          description: Aggregation interval
+          schema:
+            type: string
+            enum: [1m, 5m, 15m, 1h, 1d]
+            default: 5m
+      responses:
+        '200':
+          description: Agent metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMetrics'
+
+  /executions:
+    get:
+      tags:
+        - Executions
+      summary: List executions
+      description: Retrieve execution history
+      operationId: listExecutions
+      parameters:
+        - name: workflow_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, running, completed, failed, cancelled]
+        - name: started_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: started_before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: List of executions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionList'
+
+  /executions/{executionId}:
+    get:
+      tags:
+        - Executions
+      summary: Get execution
+      description: Retrieve execution details
+      operationId: getExecution
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Execution details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Executions
+      summary: Cancel execution
+      description: Cancel a running execution
+      operationId: cancelExecution
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: Force immediate cancellation
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '202':
+          description: Cancellation requested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  execution_id:
+                    type: string
+                  status:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Execution already completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /executions/{executionId}/traces:
+    get:
+      tags:
+        - Executions
+      summary: Get execution traces
+      description: Retrieve OpenTelemetry traces for the execution
+      operationId: getExecutionTraces
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Execution traces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceData'
+
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get settings
+      description: Retrieve system settings and user preferences
+      operationId: getSettings
+      responses:
+        '200':
+          description: System settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+    put:
+      tags:
+        - Settings
+      summary: Update settings
+      description: Update system settings and user preferences
+      operationId: updateSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsUpdate'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+  /analytics/summary:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics summary
+      description: Retrieve high-level analytics and metrics
+      operationId: getAnalyticsSummary
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsSummary'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    WorkflowIdParam:
+      name: workflowId
+      in: path
+      required: true
+      description: Workflow identifier
+      schema:
+        type: string
+      example: "wf_abc123"
+
+    AgentIdParam:
+      name: agentId
+      in: path
+      required: true
+      description: Agent identifier
+      schema:
+        type: string
+      example: "analyst-agent-01"
+
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSizeParam:
+      name: page_size
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and direction (prefix with - for descending)
+      schema:
+        type: string
+        default: "-created_at"
+      example: "-created_at"
+
+  schemas:
+    Workflow:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [sequential, concurrent, group_chat, handoff]
+        status:
+          type: string
+          enum: [draft, active, archived]
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        tags:
+          type: array
+          items:
+            type: string
+        timeout_seconds:
+          type: integer
+        retry_policy:
+          $ref: '#/components/schemas/RetryPolicy'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        version:
+          type: integer
+        _links:
+          $ref: '#/components/schemas/Links'
+
+    WorkflowCreate:
+      type: object
+      required:
+        - name
+        - type
+        - steps
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [sequential, concurrent, group_chat, handoff]
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        tags:
+          type: array
+          items:
+            type: string
+        timeout_seconds:
+          type: integer
+
+    WorkflowUpdate:
+      allOf:
+        - $ref: '#/components/schemas/WorkflowCreate'
+
+    WorkflowPatch:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+        tags:
+          type: array
+          items:
+            type: string
+
+    WorkflowStep:
+      type: object
+      required:
+        - id
+        - name
+        - agent_id
+        - task_type
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        agent_id:
+          type: string
+        task_type:
+          type: string
+        depends_on:
+          type: array
+          items:
+            type: string
+        config:
+          type: object
+          additionalProperties: true
+        timeout_seconds:
+          type: integer
+
+    WorkflowList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workflow'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    WorkflowExecutionRequest:
+      type: object
+      properties:
+        input_data:
+          type: object
+          additionalProperties: true
+        priority:
+          type: string
+          enum: [low, normal, high, critical]
+          default: normal
+        callback_url:
+          type: string
+          format: uri
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+
+    Schedule:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [once, cron, interval]
+        expression:
+          type: string
+          description: Cron expression or interval specification
+        timezone:
+          type: string
+          default: UTC
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+
+    ValidationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+              field:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, degraded, maintenance]
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+        health:
+          $ref: '#/components/schemas/HealthStatus'
+        metadata:
+          type: object
+          additionalProperties: true
+        registered_at:
+          type: string
+          format: date-time
+        last_heartbeat:
+          type: string
+          format: date-time
+
+    AgentCreate:
+      type: object
+      required:
+        - id
+        - name
+        - capabilities
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+
+    AgentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          enum: [online, offline, degraded, maintenance]
+
+    AgentList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AgentMetrics:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        time_range:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        data_points:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              cpu_usage_percent:
+                type: number
+              memory_usage_mb:
+                type: number
+              tasks_completed:
+                type: integer
+              average_task_duration:
+                type: number
+
+    Execution:
+      type: object
+      properties:
+        id:
+          type: string
+        workflow_id:
+          type: string
+        workflow_name:
+          type: string
+        status:
+          type: string
+          enum: [pending, running, completed, failed, cancelled]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        duration:
+          type: number
+        triggered_by:
+          type: string
+        input_data:
+          type: object
+          additionalProperties: true
+        trace_id:
+          type: string
+
+    ExecutionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Execution'
+        - type: object
+          properties:
+            tasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskSummary'
+            result:
+              type: object
+              additionalProperties: true
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                message:
+                  type: string
+            metrics:
+              type: object
+              properties:
+                total_tasks:
+                  type: integer
+                successful_tasks:
+                  type: integer
+                failed_tasks:
+                  type: integer
+
+    ExecutionList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    TaskSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        agent_id:
+          type: string
+        status:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        duration:
+          type: number
+
+    TraceData:
+      type: object
+      properties:
+        execution_id:
+          type: string
+        trace_id:
+          type: string
+        spans:
+          type: array
+          items:
+            type: object
+            properties:
+              span_id:
+                type: string
+              parent_span_id:
+                type: string
+              name:
+                type: string
+              start_time:
+                type: string
+                format: date-time
+              end_time:
+                type: string
+                format: date-time
+              duration_ms:
+                type: number
+              attributes:
+                type: object
+                additionalProperties: true
+
+    Settings:
+      type: object
+      properties:
+        user_preferences:
+          type: object
+          properties:
+            theme:
+              type: string
+              enum: [light, dark, auto]
+            notifications_enabled:
+              type: boolean
+            default_page_size:
+              type: integer
+        system_config:
+          type: object
+          properties:
+            otel_endpoint:
+              type: string
+            default_timeout_seconds:
+              type: integer
+            max_concurrent_workflows:
+              type: integer
+
+    SettingsUpdate:
+      type: object
+      properties:
+        user_preferences:
+          type: object
+          additionalProperties: true
+        system_config:
+          type: object
+          additionalProperties: true
+
+    AnalyticsSummary:
+      type: object
+      properties:
+        time_range:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        total_executions:
+          type: integer
+        successful_executions:
+          type: integer
+        failed_executions:
+          type: integer
+        average_duration:
+          type: number
+        total_tasks:
+          type: integer
+        active_agents:
+          type: integer
+        top_workflows:
+          type: array
+          items:
+            type: object
+            properties:
+              workflow_id:
+                type: string
+              name:
+                type: string
+              execution_count:
+                type: integer
+
+    RetryPolicy:
+      type: object
+      properties:
+        max_attempts:
+          type: integer
+        backoff_type:
+          type: string
+          enum: [fixed, linear, exponential]
+        initial_delay_seconds:
+          type: integer
+        max_delay_seconds:
+          type: integer
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        last_check:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: integer
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_previous:
+          type: boolean
+        _links:
+          type: object
+          properties:
+            first:
+              type: string
+            previous:
+              type: string
+            next:
+              type: string
+            last:
+              type: string
+
+    Links:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+          method:
+            type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+        trace_id:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    PreconditionFailed:
+      description: Precondition failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

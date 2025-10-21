@@ -1,0 +1,475 @@
+# C4 Container Diagram - Agent Studio
+
+## Overview
+This diagram presents the container-level architecture of Agent Studio, showing how the platform decomposes into independently deployable services, data stores, and external dependencies designed to streamline workflow orchestration across distributed components.
+
+**Best for:** Developers and architects seeking to understand service boundaries, technology choices, and integration patterns within the platform.
+
+## Container Architecture (C4 Level 2)
+
+```mermaid
+C4Container
+    title Container Architecture - Agent Studio Platform (C4 Level 2)
+
+    Person(developer, "Developer", "Creates and manages agent workflows")
+    Person(operator, "Operator", "Monitors and maintains platform")
+
+    System_Boundary(c1, "Agent Studio Platform") {
+        Container(webApp, "Web Application", "React 19, TypeScript, Vite", "Single-page application providing workflow design, real-time monitoring, and agent configuration. Implements responsive design with Tailwind CSS.")
+
+        Container(orchestrationAPI, "Orchestration API", ".NET 8, ASP.NET Core", "RESTful API coordinating workflow execution, state management, and agent handoffs. Implements circuit breaker and retry patterns for resilience.")
+
+        Container(pythonAgentService, "Python Agent Service", "Python 3.12, FastAPI", "Executes AI agent tasks with Azure OpenAI integration. Supports streaming responses and asynchronous task processing.")
+
+        Container(signalRHub, "SignalR Hub", ".NET 8, Azure SignalR Service", "Real-time communication hub broadcasting workflow events, agent thoughts, and progress updates via WebSocket connections.")
+
+        ContainerDb(cosmosDB, "Cosmos DB", "Azure Cosmos DB (Serverless)", "Stores workflow state, checkpoints, agent conversations, and configurations. Implements optimistic concurrency with ETag validation.")
+
+        ContainerDb(redisCache, "Redis Cache", "Azure Cache for Redis (Standard C1)", "Distributed cache for session state, context deduplication, and rate limiting. Implements LRU eviction policy.")
+
+        ContainerDb(blobStorage, "Blob Storage", "Azure Storage Account (GRS)", "Stores workflow artifacts, execution logs, and checkpoint backups. Implements lifecycle policies for cost optimization.")
+    }
+
+    System_Ext(azureOpenAI, "Azure OpenAI", "GPT-4, GPT-3.5-Turbo, text-embedding-ada-002 models")
+    System_Ext(appInsights, "Application Insights", "Distributed tracing, metrics, logs")
+    System_Ext(keyVault, "Azure Key Vault", "Secrets and certificate management")
+    System_Ext(azureAD, "Azure AD", "OAuth 2.0/OIDC authentication")
+
+    Rel(developer, webApp, "Uses", "HTTPS")
+    Rel(operator, webApp, "Monitors", "HTTPS")
+
+    Rel(webApp, orchestrationAPI, "Manages workflows", "HTTPS/REST (JSON)")
+    Rel(webApp, signalRHub, "Subscribes to events", "WebSocket")
+    Rel(webApp, azureAD, "Authenticates", "OAuth 2.0")
+
+    Rel(orchestrationAPI, pythonAgentService, "Executes tasks", "HTTP/JSON with retry")
+    Rel(orchestrationAPI, cosmosDB, "Persists state", "Cosmos DB SDK")
+    Rel(orchestrationAPI, redisCache, "Caches context", "StackExchange.Redis")
+    Rel(orchestrationAPI, blobStorage, "Stores artifacts", "Azure Storage SDK")
+    Rel(orchestrationAPI, signalRHub, "Publishes events", "SignalR SDK")
+    Rel(orchestrationAPI, appInsights, "Sends telemetry", "OpenTelemetry")
+    Rel(orchestrationAPI, keyVault, "Retrieves secrets", "Managed Identity")
+
+    Rel(pythonAgentService, azureOpenAI, "Generates responses", "Azure SDK")
+    Rel(pythonAgentService, cosmosDB, "Reads/writes state", "azure-cosmos")
+    Rel(pythonAgentService, redisCache, "Caches results", "redis-py")
+    Rel(pythonAgentService, appInsights, "Sends telemetry", "opencensus-ext-azure")
+    Rel(pythonAgentService, keyVault, "Retrieves secrets", "azure-identity")
+
+    Rel(signalRHub, webApp, "Broadcasts events", "WebSocket")
+    Rel(signalRHub, appInsights, "Sends telemetry", "OpenTelemetry")
+
+    UpdateRelStyle(webApp, orchestrationAPI, $textColor="blue", $lineColor="blue")
+    UpdateRelStyle(orchestrationAPI, pythonAgentService, $textColor="green", $lineColor="green")
+    UpdateRelStyle(signalRHub, webApp, $textColor="purple", $lineColor="purple")
+```
+
+## Container Details
+
+### Web Application (React 19 + TypeScript)
+
+**Technology Stack:**
+- **Framework:** React 19.0 with concurrent rendering and automatic batching
+- **Language:** TypeScript 5.3 with strict mode enabled
+- **Build Tool:** Vite 5.0 for fast HMR and optimized production builds
+- **Styling:** Tailwind CSS 3.4 with custom design system
+- **State Management:** React Context + hooks (no Redux complexity)
+- **Testing:** Vitest + React Testing Library (85%+ coverage target)
+
+**Key Features:**
+- **Workflow Designer:** Visual DAG builder using React Flow for workflow construction
+- **Real-time Monitoring:** Live execution traces with SignalR integration
+- **Code Editor:** Monaco Editor for agent prompt editing with syntax highlighting
+- **Responsive Design:** Mobile-first design supporting tablet and desktop viewports
+- **Accessibility:** WCAG 2.1 AA compliant with keyboard navigation and ARIA labels
+
+**Deployment:**
+- Hosted on Azure Container Apps (2-10 instances)
+- CDN-backed static assets with edge caching
+- Environment-specific configuration via .env files
+- Automated builds via GitHub Actions
+
+**Performance Metrics:**
+- First Contentful Paint (FCP): < 1.5s
+- Time to Interactive (TTI): < 3.0s
+- Lighthouse Score: > 90 (Performance, Accessibility, Best Practices)
+
+---
+
+### Orchestration API (.NET 8 ASP.NET Core)
+
+**Technology Stack:**
+- **Runtime:** .NET 8 with Native AOT compilation for faster startup
+- **Framework:** ASP.NET Core 8.0 with minimal APIs
+- **Authentication:** Microsoft.Identity.Web for Azure AD integration
+- **Resilience:** Polly for retry, circuit breaker, and timeout policies
+- **Validation:** FluentValidation for request validation
+- **Testing:** xUnit + Moq + FluentAssertions (85%+ coverage)
+
+**Core Components:**
+- **MetaAgentOrchestrator:** Coordinates workflow execution with DAG-based scheduling
+- **WorkflowExecutor:** Implements Sequential, Parallel, Iterative, and Dynamic patterns
+- **StateManager:** Manages Cosmos DB state persistence with checkpointing
+- **PythonAgentClient:** HTTP client with exponential backoff and circuit breaker
+- **MetaAgentHub:** SignalR hub for real-time communication
+
+**API Endpoints:**
+```
+POST   /api/workflows              - Create new workflow execution
+GET    /api/workflows/{id}         - Get workflow status and results
+GET    /api/workflows              - List workflows with pagination
+DELETE /api/workflows/{id}         - Cancel workflow execution
+POST   /api/workflows/{id}/resume  - Resume from checkpoint
+GET    /api/health                 - Health check endpoint
+```
+
+**Resilience Patterns:**
+- **Circuit Breaker:** Opens after 5 consecutive failures, 30s cooldown
+- **Retry:** Exponential backoff with jitter (3 attempts max)
+- **Timeout:** 60s for agent execution, 5s for state operations
+- **Bulkhead:** Isolated thread pools for agent calls vs. state operations
+
+**Deployment:**
+- Azure Container Apps (3-20 instances with auto-scaling)
+- Health probes: Liveness (5s), Readiness (10s)
+- Environment variables from Key Vault references
+- Horizontal scaling based on CPU (70%), memory (80%), or custom metrics
+
+---
+
+### Python Agent Service (Python 3.12 + FastAPI)
+
+**Technology Stack:**
+- **Framework:** FastAPI 0.110 with async/await support
+- **Runtime:** Python 3.12 with uvicorn ASGI server
+- **AI Integration:** Azure OpenAI Python SDK, LangChain, Semantic Kernel
+- **Validation:** Pydantic v2 for request/response validation
+- **Testing:** pytest + pytest-asyncio + pytest-cov (85%+ coverage)
+
+**Agent Types:**
+- **Architect Agent:** Designs system architecture and technical specifications
+- **Builder Agent:** Implements code generation and scaffolding
+- **Validator Agent:** Validates outputs against quality gates and business rules
+- **Scribe Agent:** Generates comprehensive documentation
+
+**API Endpoints:**
+```
+POST /api/agents/execute          - Execute agent task
+POST /api/agents/stream           - Stream agent execution with SSE
+GET  /api/agents/capabilities     - List available agent types
+GET  /api/health                  - Health check
+```
+
+**LLM Integration:**
+- **Prompt Templates:** Jinja2 templates with variable substitution
+- **Token Management:** Automatic chunking for context window limits (8K/32K/128K)
+- **Response Streaming:** Server-sent events for real-time output
+- **Cost Tracking:** Token usage logging to Application Insights
+
+**Deployment:**
+- Azure Container Apps (5-50 instances with aggressive auto-scaling)
+- GPU support for local model inference (future)
+- Environment variables from Key Vault
+- Scaling based on queue depth and CPU utilization
+
+---
+
+### SignalR Hub (.NET 8 + Azure SignalR Service)
+
+**Technology Stack:**
+- **Framework:** ASP.NET Core SignalR with Azure SignalR Service
+- **Transport:** WebSocket with long-polling fallback
+- **Scaling:** Azure SignalR Service (Standard S1, 1K connections)
+
+**Hub Methods:**
+```csharp
+// Client methods (invoked by server)
+ReceiveWorkflowStarted(workflowId, metadata)
+ReceiveTaskStarted(taskId, agentType)
+ReceiveAgentThought(thought, reasoning)
+ReceiveProgress(percentage, message)
+ReceiveTaskCompleted(taskId, result)
+ReceiveWorkflowCompleted(workflowId, result)
+ReceiveError(error, details)
+
+// Server methods (invoked by client)
+SubscribeToWorkflow(workflowId)
+UnsubscribeFromWorkflow(workflowId)
+GetConnectionInfo()
+```
+
+**Event Broadcasting:**
+- **Workflow Events:** Start, complete, fail, pause, resume
+- **Task Events:** Start, progress, complete, fail
+- **Agent Events:** Thought, tool usage, validation
+- **System Events:** Checkpoint created, recovery initiated
+
+**Connection Management:**
+- **Authentication:** Azure AD JWT token validation
+- **Reconnection:** Automatic reconnect with exponential backoff
+- **Connection Limit:** 1K concurrent connections (Standard S1 tier)
+- **Message Size:** Max 32KB per message
+
+---
+
+### Cosmos DB (Azure Cosmos DB Serverless)
+
+**Container Schema:**
+
+**workflows** (Partition Key: `/id`)
+```json
+{
+  "id": "wf_abc123",
+  "name": "Customer Onboarding",
+  "pattern": "Sequential",
+  "status": "Running",
+  "tasks": [...],
+  "metadata": {...},
+  "_etag": "abc123",
+  "ttl": -1
+}
+```
+
+**checkpoints** (Partition Key: `/workflowId`)
+```json
+{
+  "id": "cp_xyz789",
+  "workflowId": "wf_abc123",
+  "type": "Automatic",
+  "state": {...},
+  "createdAt": "2025-10-14T10:30:00Z",
+  "ttl": 2592000
+}
+```
+
+**thread-message-store** (Partition Key: `/threadId`)
+```json
+{
+  "id": "msg_def456",
+  "threadId": "thread_abc",
+  "role": "assistant",
+  "content": "Here is the analysis...",
+  "timestamp": "2025-10-14T10:31:00Z"
+}
+```
+
+**agent-entity-store** (Partition Key: `/agentType`)
+```json
+{
+  "id": "agent_architect_001",
+  "agentType": "Architect",
+  "capabilities": ["design", "planning"],
+  "configuration": {...}
+}
+```
+
+**Performance Configuration:**
+- **Provisioning:** Serverless for dev/test; Provisioned (400-10K RU/s) for production
+- **Consistency:** Session consistency (default) for balance of performance and consistency
+- **Indexing:** Optimized indexes on `status`, `createdAt`, `workflowId`
+- **Retention:** TTL of 30 days for checkpoints; indefinite for workflows
+
+---
+
+### Redis Cache (Azure Cache for Redis)
+
+**Use Cases:**
+1. **Context Deduplication:** SHA-256 hash-based cache to avoid redundant LLM calls
+2. **Session State:** User session data for web application
+3. **Rate Limiting:** Token bucket algorithm for API throttling
+4. **Distributed Locks:** Pessimistic locking for concurrent workflow access
+
+**Data Structures:**
+```
+context:{hash} → JSON (TTL: 1 hour)
+session:{userId} → JSON (TTL: 24 hours)
+ratelimit:{apiKey}:{endpoint} → Counter (TTL: 1 minute)
+lock:workflow:{id} → String (TTL: 5 minutes)
+```
+
+**Configuration:**
+- **Tier:** Standard C1 (1GB) for dev; Premium P1 (6GB) for production
+- **Eviction Policy:** LRU (Least Recently Used)
+- **Persistence:** RDB snapshots every 15 minutes (Premium tier)
+- **Clustering:** Redis Cluster with 3 shards for production
+
+---
+
+### Blob Storage (Azure Storage Account)
+
+**Container Structure:**
+```
+workflow-artifacts/
+  {workflowId}/
+    {taskId}/
+      output.json
+      logs.txt
+
+checkpoints-backup/
+  {year}/{month}/{day}/
+    {workflowId}_{timestamp}.json
+
+audit-logs/
+  {year}/{month}/
+    {date}.jsonl
+```
+
+**Lifecycle Management:**
+- **Hot Tier:** 0-30 days (frequent access)
+- **Cool Tier:** 31-90 days (infrequent access)
+- **Archive Tier:** 90+ days (long-term retention)
+- **Deletion:** Automatic deletion after 365 days
+
+**Access Patterns:**
+- **Artifacts:** Public read with SAS token, private write
+- **Checkpoints:** Private read/write with managed identity
+- **Logs:** Append-only blobs with WORM (Write Once, Read Many)
+
+## Communication Patterns
+
+### Synchronous (REST API)
+```
+Web App → Orchestration API → Python Agent Service
+  ↓
+HTTP/JSON with retry and circuit breaker
+  ↓
+Response with 200 OK (success) or 4xx/5xx (error)
+```
+
+**Characteristics:**
+- Request/response with blocking wait
+- Timeout: 60s for agent execution
+- Retry: 3 attempts with exponential backoff
+- Circuit breaker: Opens after 5 failures
+
+---
+
+### Asynchronous (SignalR)
+```
+Orchestration API → SignalR Hub → Web App
+  ↓
+Publish event to hub
+  ↓
+Broadcast to subscribed clients via WebSocket
+  ↓
+Client updates UI in real-time
+```
+
+**Characteristics:**
+- Fire-and-forget event publishing
+- WebSocket transport with long-polling fallback
+- Automatic reconnection with backoff
+- Message ordering guaranteed per connection
+
+---
+
+### Data Access (Cosmos DB)
+```
+Service → Cosmos DB SDK → Cosmos DB
+  ↓
+Optimistic concurrency with ETag
+  ↓
+Retry on 429 (Too Many Requests)
+  ↓
+Success or conflict detection
+```
+
+**Characteristics:**
+- Async I/O with `await` pattern
+- Session consistency for read-your-writes
+- Automatic retry on throttling (429)
+- Conflict detection via ETag mismatch
+
+## Deployment Topology
+
+```mermaid
+graph TB
+    subgraph "Azure Container Apps Environment"
+        subgraph "Frontend Tier"
+            WEB1[Web App Instance 1]
+            WEB2[Web App Instance 2]
+        end
+
+        subgraph "API Tier"
+            API1[Orchestration API 1]
+            API2[Orchestration API 2]
+            API3[Orchestration API 3]
+        end
+
+        subgraph "Agent Tier"
+            AGENT1[Python Agent 1]
+            AGENT2[Python Agent 2]
+            AGENT3[Python Agent 3]
+        end
+    end
+
+    subgraph "Data Tier"
+        COSMOS[(Cosmos DB)]
+        REDIS[(Redis Cache)]
+        BLOB[(Blob Storage)]
+    end
+
+    LB[Azure Load Balancer] --> WEB1
+    LB --> WEB2
+
+    WEB1 --> API1
+    WEB2 --> API2
+
+    API1 --> AGENT1
+    API2 --> AGENT2
+    API3 --> AGENT3
+
+    API1 --> COSMOS
+    API2 --> COSMOS
+    API3 --> COSMOS
+
+    AGENT1 --> REDIS
+    AGENT2 --> REDIS
+    AGENT3 --> REDIS
+
+    API1 --> BLOB
+```
+
+## Scaling Strategy
+
+### Auto-Scaling Rules
+
+**Web Application:**
+- Min: 2 instances, Max: 10 instances
+- Scale-out: CPU > 70% for 5 minutes
+- Scale-in: CPU < 30% for 10 minutes
+
+**Orchestration API:**
+- Min: 3 instances, Max: 20 instances
+- Scale-out: CPU > 70% OR Request Queue > 100
+- Scale-in: CPU < 40% AND Request Queue < 20
+
+**Python Agent Service:**
+- Min: 5 instances, Max: 50 instances
+- Scale-out: CPU > 60% OR Active Tasks > 20 per instance
+- Scale-in: CPU < 30% AND Active Tasks < 5 per instance
+
+### Resource Limits
+
+| Container | CPU | Memory | Disk |
+|-----------|-----|--------|------|
+| Web App | 0.5-2 vCPU | 1-4 GB | 10 GB |
+| Orchestration API | 1-4 vCPU | 2-8 GB | 20 GB |
+| Python Agent | 2-4 vCPU | 4-8 GB | 30 GB |
+
+## Related Documentation
+
+- [C4 System Context](c4-system-context.mmd) - High-level system overview
+- [C4 Component Diagram](c4-orchestration-components.mmd) - Internal component architecture
+- [Data Flow Documentation](data-flows.md) - Sequence diagrams and data flows
+- [ADR-001: React TypeScript Webapp](../adrs/ADR-001-react-typescript-webapp.md)
+- [ADR-002: Meta-Agent Architecture](../adrs/002-meta-agent-architecture.md)
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** 2025-10-14
+**Maintained By:** Architecture Team
+**Review Cycle:** Quarterly or on major architecture changes
+
+This container architecture establishes clear service boundaries designed to streamline development, deployment, and scaling across Agent Studio's distributed components.

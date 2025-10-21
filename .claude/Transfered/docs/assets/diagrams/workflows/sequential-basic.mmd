@@ -1,0 +1,87 @@
+%% Sequential Workflow - Basic Pattern
+%% Shows simple linear task execution flow
+%% Streamlines straightforward workflows for predictable operations
+%% Version: 1.0
+%% Last Updated: 2025-10-14
+
+stateDiagram-v2
+    [*] --> Initialize: Start Workflow
+
+    Initialize --> ValidateInput: Initialize Context
+    note right of Initialize
+        Set up workflow context
+        Load configuration
+        Initialize state
+    end note
+
+    ValidateInput --> AnalyzeRequirements: Input Valid
+    ValidateInput --> ErrorHandler: Input Invalid
+    note right of ValidateInput
+        Schema validation
+        Business rule checks
+        Dependency verification
+    end note
+
+    AnalyzeRequirements --> DesignSolution: Requirements Clear
+    note right of AnalyzeRequirements
+        Agent: Architect
+        Duration: ~5 min
+        Output: Design spec
+    end note
+
+    DesignSolution --> ImplementCode: Design Approved
+    note right of DesignSolution
+        Agent: Designer
+        Duration: ~10 min
+        Output: Architecture
+    end note
+
+    ImplementCode --> RunTests: Code Complete
+    note right of ImplementCode
+        Agent: Builder
+        Duration: ~15 min
+        Output: Source code
+    end note
+
+    RunTests --> ValidateQuality: Tests Pass
+    RunTests --> FixIssues: Tests Fail
+    note right of RunTests
+        Agent: Validator
+        Duration: ~5 min
+        Output: Test results
+    end note
+
+    FixIssues --> RunTests: Issues Fixed
+
+    ValidateQuality --> GenerateDocs: Quality Met
+    ValidateQuality --> ImplementCode: Quality Issues
+    note right of ValidateQuality
+        Code review
+        Coverage check
+        Performance validation
+    end note
+
+    GenerateDocs --> Complete: Docs Generated
+    note right of GenerateDocs
+        Agent: Scribe
+        Duration: ~3 min
+        Output: Documentation
+    end note
+
+    Complete --> [*]: Workflow Completed
+
+    ErrorHandler --> [*]: Fatal Error
+
+    state AnalyzeRequirements {
+        [*] --> LoadContext
+        LoadContext --> ProcessRequirements
+        ProcessRequirements --> GenerateSpec
+        GenerateSpec --> [*]
+    }
+
+    state ImplementCode {
+        [*] --> SetupEnvironment
+        SetupEnvironment --> WriteCode
+        WriteCode --> LocalTest
+        LocalTest --> [*]
+    }

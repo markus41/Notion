@@ -1,0 +1,60 @@
+flowchart TB
+    Start([Workflow Request]) --> LoadDef[Load Workflow<br/>Definition]
+    LoadDef --> CheckState{State<br/>Exists?}
+
+    CheckState -->|No| InitState[Initialize State<br/>---<br/>• Create execution ID<br/>• Set status: pending<br/>• Initialize context]
+    CheckState -->|Yes| LoadState[Load from Checkpoint<br/>---<br/>• Restore state snapshot<br/>• Resume from last task<br/>• Replay events if needed]
+
+    InitState --> ValidateDeps[Validate Dependencies<br/>---<br/>Check DAG for cycles]
+    LoadState --> ValidateDeps
+
+    ValidateDeps --> ExecTask[Execute Task<br/>---<br/>• Invoke agent<br/>• Set timeout<br/>• Track progress]
+
+    ExecTask --> Success{Task<br/>Success?}
+
+    Success -->|Yes| CreateCheckpoint[Create Checkpoint<br/>---<br/>• Snapshot state<br/>• Increment version<br/>• Persist to Cosmos]
+
+    Success -->|No| ClassifyError{Error<br/>Type?}
+
+    ClassifyError -->|Transient| CheckRetry{Retry<br/>Count<br/>< Max?}
+    ClassifyError -->|Permanent| MarkFailed[Mark Failed<br/>---<br/>• Set status: failed<br/>• Record error<br/>• Trigger compensation]
+
+    CheckRetry -->|Yes| Backoff[Exponential Backoff<br/>---<br/>• Wait: 2^n seconds<br/>• Increment retry count]
+    CheckRetry -->|No| MarkFailed
+
+    Backoff --> ExecTask
+
+    CreateCheckpoint --> PublishEvent[Publish Event<br/>---<br/>• Event type: task.completed<br/>• Publish to Event Hub<br/>• Update metrics]
+
+    PublishEvent --> MoreTasks{More<br/>Tasks?}
+
+    MoreTasks -->|Yes| NextTask[Get Next Task<br/>---<br/>Check dependencies resolved]
+    MoreTasks -->|No| Finalize[Finalize Workflow<br/>---<br/>• Set status: completed<br/>• Calculate duration<br/>• Clean up resources]
+
+    NextTask --> ExecTask
+
+    Finalize --> End([Workflow Complete])
+    MarkFailed --> Compensate[Execute Compensation<br/>---<br/>• Saga pattern<br/>• Reverse order<br/>• Best-effort rollback]
+    Compensate --> End
+
+    subgraph "State Storage Layer"
+        Cosmos[(Cosmos DB<br/>---<br/>• Workflow state<br/>• Checkpoints<br/>• Event log)]
+        Redis[(Redis Cache<br/>---<br/>• Active executions<br/>• Distributed locks<br/>• Rate limiting)]
+    end
+
+    CreateCheckpoint -.->|Write| Cosmos
+    LoadState -.->|Read| Cosmos
+    ExecTask -.->|Lock| Redis
+    PublishEvent -.->|Write| Cosmos
+
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff,stroke-width:2px
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#000,stroke-width:2px
+    classDef checkpoint fill:#10b981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef error fill:#ef4444,stroke:#dc2626,color:#fff,stroke-width:2px
+    classDef storage fill:#8b5cf6,stroke:#7c3aed,color:#fff,stroke-width:2px
+
+    class LoadDef,InitState,LoadState,ValidateDeps,ExecTask,NextTask,Finalize process
+    class CheckState,Success,ClassifyError,CheckRetry,MoreTasks decision
+    class CreateCheckpoint,PublishEvent checkpoint
+    class MarkFailed,Compensate error
+    class Cosmos,Redis storage

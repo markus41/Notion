@@ -1,0 +1,34 @@
+graph TB
+    subgraph "External Users"
+        user[("Developer<br/>(Person)<br/>---<br/>Creates agents<br/>and workflows")]
+        ops[("DevOps Engineer<br/>(Person)<br/>---<br/>Deploys and<br/>monitors platform")]
+        biz[("Business User<br/>(Person)<br/>---<br/>Views dashboards<br/>and analytics")]
+    end
+
+    subgraph "Agent Studio Platform"
+        system["<b>Agent Studio</b><br/>(Software System)<br/>---<br/>AI Agent Orchestration Platform<br/>for building, deploying, and<br/>managing intelligent agents"]
+    end
+
+    subgraph "External Systems"
+        azure[("Azure OpenAI<br/>(External System)<br/>---<br/>LLM inference<br/>and AI generation")]
+        github[("GitHub<br/>(External System)<br/>---<br/>Source code<br/>management")]
+        slack[("Slack<br/>(External System)<br/>---<br/>Team notifications<br/>and alerts")]
+        email[("Email Service<br/>(External System)<br/>---<br/>User notifications")]
+    end
+
+    user -->|Creates agents,<br/>workflows, tests| system
+    ops -->|Deploys,<br/>monitors, scales| system
+    biz -->|Views dashboards,<br/>analytics, reports| system
+
+    system -->|Generates AI<br/>responses| azure
+    system -->|Triggers<br/>workflows| github
+    system -->|Sends<br/>notifications| slack
+    system -->|Sends<br/>emails| email
+
+    classDef person fill:#08427b,stroke:#052e56,color:#fff,stroke-width:2px
+    classDef system fill:#3eaf7c,stroke:#2d8659,color:#fff,stroke-width:3px
+    classDef external fill:#94a3b8,stroke:#64748b,color:#fff,stroke-width:2px
+
+    class user,ops,biz person
+    class system system
+    class azure,github,slack,email external

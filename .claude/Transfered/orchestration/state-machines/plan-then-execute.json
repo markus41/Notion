@@ -1,0 +1,208 @@
+{
+  "name": "Plan-then-Execute State Machine",
+  "description": "State machine for plan-then-execute orchestration pattern",
+  "initialState": "idle",
+  "states": [
+    {
+      "name": "idle",
+      "description": "Waiting for execution request",
+      "type": "initial",
+      "onEnter": null,
+      "onExit": null
+    },
+    {
+      "name": "planning",
+      "description": "Creating strategic plan from goal and tasks",
+      "type": "intermediate",
+      "onEnter": "initializePlanningContext",
+      "onExit": "finalizePlan"
+    },
+    {
+      "name": "validating",
+      "description": "Validating plan for feasibility and correctness",
+      "type": "intermediate",
+      "onEnter": "startValidation",
+      "onExit": "recordValidationResult"
+    },
+    {
+      "name": "executing",
+      "description": "Executing tasks in parallel according to plan",
+      "type": "intermediate",
+      "onEnter": "initializeExecution",
+      "onExit": "cleanupExecution"
+    },
+    {
+      "name": "monitoring",
+      "description": "Monitoring execution progress and detecting failures",
+      "type": "intermediate",
+      "onEnter": "startMonitoring",
+      "onExit": "stopMonitoring"
+    },
+    {
+      "name": "replanning",
+      "description": "Re-planning due to failures exceeding threshold",
+      "type": "intermediate",
+      "onEnter": "captureCurrentState",
+      "onExit": "applyNewPlan"
+    },
+    {
+      "name": "checkpointing",
+      "description": "Creating state checkpoint for rollback",
+      "type": "intermediate",
+      "onEnter": "saveCheckpoint",
+      "onExit": null
+    },
+    {
+      "name": "rolling_back",
+      "description": "Rolling back to previous checkpoint",
+      "type": "intermediate",
+      "onEnter": "initiateRollback",
+      "onExit": "restoreCheckpointState"
+    },
+    {
+      "name": "completed",
+      "description": "Plan execution completed successfully",
+      "type": "final",
+      "onEnter": "recordSuccess",
+      "onExit": null
+    },
+    {
+      "name": "failed",
+      "description": "Plan execution failed",
+      "type": "final",
+      "onEnter": "recordFailure",
+      "onExit": null
+    }
+  ],
+  "transitions": [
+    {
+      "from": "idle",
+      "to": "planning",
+      "event": "START_EXECUTION",
+      "guard": "hasValidGoal",
+      "action": "createPlan"
+    },
+    {
+      "from": "planning",
+      "to": "validating",
+      "event": "PLAN_CREATED",
+      "guard": "planExists",
+      "action": "validatePlan"
+    },
+    {
+      "from": "planning",
+      "to": "failed",
+      "event": "PLANNING_FAILED",
+      "guard": null,
+      "action": "logPlanningError"
+    },
+    {
+      "from": "validating",
+      "to": "executing",
+      "event": "VALIDATION_PASSED",
+      "guard": "planIsValid",
+      "action": "startExecution"
+    },
+    {
+      "from": "validating",
+      "to": "planning",
+      "event": "VALIDATION_FAILED",
+      "guard": "canRetryPlanning",
+      "action": "retryPlanning"
+    },
+    {
+      "from": "validating",
+      "to": "failed",
+      "event": "VALIDATION_FAILED",
+      "guard": "!canRetryPlanning",
+      "action": "abortExecution"
+    },
+    {
+      "from": "executing",
+      "to": "monitoring",
+      "event": "EXECUTION_STARTED",
+      "guard": null,
+      "action": "setupMonitoring"
+    },
+    {
+      "from": "monitoring",
+      "to": "checkpointing",
+      "event": "CHECKPOINT_INTERVAL_REACHED",
+      "guard": "shouldCreateCheckpoint",
+      "action": "createCheckpoint"
+    },
+    {
+      "from": "checkpointing",
+      "to": "monitoring",
+      "event": "CHECKPOINT_CREATED",
+      "guard": null,
+      "action": "resumeMonitoring"
+    },
+    {
+      "from": "monitoring",
+      "to": "replanning",
+      "event": "FAILURE_THRESHOLD_EXCEEDED",
+      "guard": "autoReplanEnabled",
+      "action": "triggerReplanning"
+    },
+    {
+      "from": "monitoring",
+      "to": "rolling_back",
+      "event": "CRITICAL_FAILURE",
+      "guard": "hasCheckpoint",
+      "action": "initiateRollback"
+    },
+    {
+      "from": "replanning",
+      "to": "executing",
+      "event": "REPLAN_COMPLETED",
+      "guard": "newPlanValid",
+      "action": "applyNewPlan"
+    },
+    {
+      "from": "replanning",
+      "to": "failed",
+      "event": "REPLAN_FAILED",
+      "guard": null,
+      "action": "abortAfterReplan"
+    },
+    {
+      "from": "rolling_back",
+      "to": "monitoring",
+      "event": "ROLLBACK_COMPLETED",
+      "guard": "canRetryExecution",
+      "action": "retryFromCheckpoint"
+    },
+    {
+      "from": "rolling_back",
+      "to": "failed",
+      "event": "ROLLBACK_FAILED",
+      "guard": null,
+      "action": "abortAfterRollback"
+    },
+    {
+      "from": "monitoring",
+      "to": "completed",
+      "event": "ALL_TASKS_COMPLETED",
+      "guard": "noFailures",
+      "action": "finalizeSuccess"
+    },
+    {
+      "from": "monitoring",
+      "to": "failed",
+      "event": "EXECUTION_FAILED",
+      "guard": "!canRecover",
+      "action": "finalizeFailure"
+    }
+  ],
+  "errorStates": ["failed"],
+  "recoveryTransitions": [
+    {
+      "from": "failed",
+      "to": "planning",
+      "event": "RETRY_REQUESTED",
+      "guard": "retriesAvailable",
+      "action": "resetAndRetry"
+    }
+  ]
+}

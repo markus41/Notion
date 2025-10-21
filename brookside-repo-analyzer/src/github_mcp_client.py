@@ -464,3 +464,86 @@ class GitHubMCPClient:
 
         except GitHubAPIError:
             return []
+
+    async def list_user_organizations(self) -> list[dict[str, Any]]:
+        """
+        List all organizations the authenticated user belongs to
+
+        Returns:
+            List of organization dictionaries with 'login' and 'description'
+
+        Example:
+            >>> async with GitHubMCPClient(settings, creds) as client:
+            ...     orgs = await client.list_user_organizations()
+            ...     for org in orgs:
+            ...         print(f"{org['login']}: {org.get('description', 'No description')}")
+        """
+        try:
+            data = await self._request("GET", "/user/orgs")
+
+            if isinstance(data, list):
+                return [
+                    {
+                        "login": org["login"],
+                        "description": org.get("description"),
+                        "url": org.get("html_url"),
+                        "repos_url": org.get("repos_url"),
+                    }
+                    for org in data
+                ]
+
+            return []
+
+        except GitHubAPIError as e:
+            logger.warning(f"Failed to list organizations: {e.message}")
+            return []
+
+    async def check_token_scopes(self) -> dict[str, Any]:
+        """
+        Check GitHub Personal Access Token scopes and permissions
+
+        Returns:
+            Dictionary with 'scopes' (list), 'user' (username), and 'valid' (bool)
+
+        Example:
+            >>> async with GitHubMCPClient(settings, creds) as client:
+            ...     info = await client.check_token_scopes()
+            ...     print(f"User: {info['user']}")
+            ...     print(f"Scopes: {', '.join(info['scopes'])}")
+            ...     if 'repo' in info['scopes'] and 'read:org' in info['scopes']:
+            ...         print("✓ Token has required scopes")
+        """
+        try:
+            if not self._client:
+                raise GitHubAPIError("Client not initialized")
+
+            # Make request to /user endpoint
+            response = await self._client.get(f"{self.base_url}/user")
+            response.raise_for_status()
+            user_data = response.json()
+
+            # Parse X-OAuth-Scopes header
+            scopes_header = response.headers.get("X-OAuth-Scopes", "")
+            scopes = [s.strip() for s in scopes_header.split(",") if s.strip()]
+
+            return {
+                "valid": True,
+                "user": user_data.get("login"),
+                "name": user_data.get("name"),
+                "scopes": scopes,
+                "has_repo_access": "repo" in scopes or "public_repo" in scopes,
+                "has_org_access": "read:org" in scopes or "admin:org" in scopes,
+                "has_user_access": "read:user" in scopes or "user" in scopes,
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to check token scopes: {str(e)}")
+            return {
+                "valid": False,
+                "user": None,
+                "name": None,
+                "scopes": [],
+                "has_repo_access": False,
+                "has_org_access": False,
+                "has_user_access": False,
+            }
