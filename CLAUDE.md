@@ -843,28 +843,209 @@ When relevant, reference:
 - Technical documentation is AI-agent executable
 - Builds can be deployed by AI agents without human intervention
 
+## Notion Workspace Configuration
+
+### Workspace Details
+
+**Workspace ID**: `81686779-099a-8195-b49e-00037e25c23e`
+**Workspace Name**: Brookside BI
+**TeamSpace**: BrookSide Bi
+
+### Notion Database IDs
+
+**💡 Ideas Registry:**
+- Database URL: `https://www.notion.so/c17ec2eb9555449eaa34edba4f0c7b60`
+- Data Source ID: `984a4038-3e45-4a98-8df4-fd64dd8a1032`
+- Collection URL: `collection://984a4038-3e45-4a98-8df4-fd64dd8a1032`
+
+**🔬 Research Hub:**
+- Data Source ID: `91e8beff-af94-4614-90b9-3a6d3d788d4a`
+- Collection URL: `collection://91e8beff-af94-4614-90b9-3a6d3d788d4a`
+
+**🛠️ Example Builds:**
+- Data Source ID: `a1cd1528-971d-4873-a176-5e93b93555f6`
+- Collection URL: `collection://a1cd1528-971d-4873-a176-5e93b93555f6`
+
+**💰 Software & Cost Tracker:**
+- Data Source ID: `13b5e9de-2dd1-45ec-839a-4f3d50cd8d06`
+- Collection URL: `collection://13b5e9de-2dd1-45ec-839a-4f3d50cd8d06`
+
+**Additional Databases** (query programmatically as needed):
+- 📚 Knowledge Vault
+- 🔗 Integration Registry
+- 🎯 OKRs & Strategic Initiatives
+
+**Best for**: Direct database queries, API integrations, and programmatic access to Notion workspace.
+
+### Notion MCP Authentication
+
+**Method**: HTTP-based MCP via Notion's official server
+- **Endpoint**: `https://mcp.notion.com/mcp`
+- **Authentication**: Handled automatically via Notion's OAuth flow
+- **Status**: ✓ Connected (verify with `claude mcp list`)
+
+**To authenticate Notion MCP:**
+1. Restart Claude Code to trigger OAuth flow
+2. Follow browser authentication prompt
+3. Grant workspace access to Claude Code
+4. Verify connection: `claude mcp list` should show "notion: ✓ Connected"
+
+## MCP Servers
+
+This project uses 4 Model Context Protocol (MCP) servers to streamline operations across multiple platforms:
+
+### 1. Notion MCP Server
+
+**Purpose**: Seamless integration with Notion workspace for innovation management
+
+**Configuration:**
+```json
+{
+  "name": "notion",
+  "url": "https://mcp.notion.com/mcp",
+  "transport": "http"
+}
+```
+
+**Capabilities:**
+- Search workspace content (semantic search with AI)
+- Fetch pages and databases
+- Create/update pages and database entries
+- Manage database properties and relations
+- Query databases with filters
+- User and team management
+
+**Use Cases:**
+- Create Ideas Registry entries
+- Document Research findings
+- Track Example Builds
+- Manage Software & Cost Tracker
+- Archive to Knowledge Vault
+
+### 2. GitHub MCP Server
+
+**Purpose**: Version control and repository management
+
+**Configuration:**
+```json
+{
+  "name": "github",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+  }
+}
+```
+
+**Authentication**: Personal Access Token from Azure Key Vault
+
+**Capabilities:**
+- Repository operations (create, fork, search, clone)
+- File operations (read, create, update, push multiple files)
+- Pull request management (create, review, merge, status checks)
+- Issue tracking (create, update, comment, search)
+- Branch management (create, list commits)
+- Code search across repositories
+
+**Use Cases:**
+- Create repositories for Example Builds
+- Manage code for prototypes and POCs
+- Link GitHub repos to Notion Build entries
+- Track issues related to ideas and research
+- Collaborative code reviews
+
+### 3. Azure MCP Server
+
+**Purpose**: Azure cloud services management and operations
+
+**Configuration:**
+```json
+{
+  "name": "azure",
+  "command": "npx",
+  "args": ["-y", "@azure/mcp@latest", "server", "start"]
+}
+```
+
+**Authentication**: Azure CLI (`az login`)
+
+**Capabilities:**
+- Resource management (list, create, configure resources)
+- Azure OpenAI operations
+- Key Vault secret management
+- App Service deployment and management
+- Cosmos DB operations
+- SQL Database management
+- Storage operations (Blob, File, Queue, Table)
+- Cost analysis and quota management
+- Resource health monitoring
+
+**Use Cases:**
+- Deploy Example Builds to Azure
+- Manage Key Vault secrets
+- Query Azure OpenAI services
+- Monitor resource costs
+- Health checks for deployed services
+
+### 4. Playwright MCP Server
+
+**Purpose**: Browser automation and web testing
+
+**Configuration:**
+```json
+{
+  "name": "playwright",
+  "command": "npx",
+  "args": ["@playwright/mcp@latest", "--browser", "msedge", "--headless"]
+}
+```
+
+**Capabilities:**
+- Browser navigation and interaction
+- Screenshot capture
+- Form filling and submission
+- Element clicking and hovering
+- Web scraping and data extraction
+- Automated testing workflows
+
+**Use Cases:**
+- Test web-based Example Builds
+- Capture screenshots for documentation
+- Automate data collection for research
+- Validate integration endpoints
+- UI testing for prototypes
+
 ## Environment Configuration
 
+**Complete Environment Setup:**
+
 ```bash
-# Notion MCP Connection
-NOTION_API_KEY=[from Notion integration - configured in .claude.json]
-NOTION_WORKSPACE_ID=81686779-099a-8195-b49e-00037e25c23e
+# Azure Configuration
+AZURE_TENANT_ID=2930489e-9d8a-456b-9de9-e4787faeab9c
+AZURE_SUBSCRIPTION_ID=cfacbbe8-a2a3-445f-a188-68b3b35f0c84
+AZURE_KEYVAULT_NAME=kv-brookside-secrets
+AZURE_KEYVAULT_URI=https://kv-brookside-secrets.vault.azure.net/
 
-# Database IDs (to be populated after authentication)
-NOTION_DATABASE_ID_IDEAS=[UUID - query after restart]
-NOTION_DATABASE_ID_RESEARCH=[UUID - query after restart]
-NOTION_DATABASE_ID_BUILDS=[UUID - query after restart]
-NOTION_DATABASE_ID_SOFTWARE=[UUID - query after restart]
-NOTION_DATABASE_ID_KNOWLEDGE=[UUID - query after restart]
-NOTION_DATABASE_ID_INTEGRATIONS=[UUID - query after restart]
-NOTION_DATABASE_ID_OKRS=[UUID - query after restart]
-
-# Future Microsoft Ecosystem Integration (when implementing)
-AZURE_TENANT_ID=[UUID]
-AZURE_SUBSCRIPTION_ID=[UUID]
-GITHUB_TOKEN=[PAT with repo scope]
+# GitHub Configuration
 GITHUB_ORG=brookside-bi
+GITHUB_PERSONAL_ACCESS_TOKEN=[Retrieved from Key Vault]
+
+# Notion Configuration
+NOTION_WORKSPACE_ID=81686779-099a-8195-b49e-00037e25c23e
+NOTION_DATABASE_ID_IDEAS=984a4038-3e45-4a98-8df4-fd64dd8a1032
+NOTION_DATABASE_ID_RESEARCH=91e8beff-af94-4614-90b9-3a6d3d788d4a
+NOTION_DATABASE_ID_BUILDS=a1cd1528-971d-4873-a176-5e93b93555f6
+NOTION_DATABASE_ID_SOFTWARE=13b5e9de-2dd1-45ec-839a-4f3d50cd8d06
+
+# MCP Server Status (verify with: claude mcp list)
+# notion: ✓ Connected
+# github: ✓ Connected
+# azure: ✓ Connected
+# playwright: ✓ Connected
 ```
+
+**Important**: Use `scripts/Set-MCPEnvironment.ps1` to automatically configure environment variables from Azure Key Vault.
 
 ## Claude Code Configuration
 
@@ -1031,28 +1212,938 @@ NOTION_API_KEY=ntn_...
 
 **Best for**: Organizations managing multiple innovation workflows where immediate task completion feedback improves productivity through structured notification approaches, allowing team members to focus on other work while Claude Code processes requests.
 
+## Quick-Start Setup Guide
+
+This guide establishes a fully configured development environment in minutes.
+
+### Prerequisites
+
+**Required Software:**
+- ✓ Azure CLI 2.50.0 or higher
+- ✓ Node.js 18.0.0 or higher
+- ✓ Git
+- ✓ PowerShell 7.0 or higher
+- ✓ Claude Code (latest version)
+
+**Verify Prerequisites:**
+```powershell
+# Check versions
+az --version
+node --version
+git --version
+pwsh --version
+```
+
+### Step 1: Azure Authentication
+
+Establish secure connection to Azure services and Key Vault:
+
+```powershell
+# Login to Azure (opens browser)
+az login
+
+# Verify successful authentication
+az account show
+
+# Confirm Key Vault access
+az keyvault secret list --vault-name kv-brookside-secrets
+```
+
+**Expected Result**: You should see your Azure account details and have access to Key Vault secrets.
+
+### Step 2: Configure MCP Environment
+
+Retrieve secrets from Azure Key Vault and set environment variables:
+
+```powershell
+# Navigate to repository
+cd C:\Users\MarkusAhling\Notion
+
+# Configure environment for current session
+.\scripts\Set-MCPEnvironment.ps1
+
+# OR configure persistent environment variables (optional)
+.\scripts\Set-MCPEnvironment.ps1 -Persistent
+```
+
+**Expected Result**: Environment variables set successfully with confirmation message.
+
+### Step 3: Verify MCP Server Connectivity
+
+Test all MCP server connections:
+
+```powershell
+# Test Azure MCP server
+.\scripts\Test-AzureMCP.ps1
+
+# Verify all MCP servers
+claude mcp list
+```
+
+**Expected Result**: All 4 MCP servers show "✓ Connected":
+- ✓ notion
+- ✓ github
+- ✓ azure
+- ✓ playwright
+
+### Step 4: Configure Git
+
+Set up Git authentication with GitHub PAT from Key Vault:
+
+```powershell
+# Retrieve GitHub PAT
+$githubPAT = .\scripts\Get-KeyVaultSecret.ps1 -SecretName "github-personal-access-token"
+
+# Configure Git (replace with your details)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@brooksidebi.com"
+git config --global credential.helper store
+
+# Test Git connection
+git remote -v
+git status
+```
+
+**Expected Result**: Git configured with your identity and connected to remote repository.
+
+### Step 5: Launch Claude Code
+
+Start Claude Code with fully configured environment:
+
+```powershell
+# Launch Claude Code (ensure environment variables are set)
+claude
+```
+
+**Verification Checklist:**
+- [ ] Azure CLI authenticated
+- [ ] Key Vault secrets accessible
+- [ ] Environment variables configured
+- [ ] All 4 MCP servers connected
+- [ ] Git configured with GitHub authentication
+- [ ] Claude Code launched successfully
+
+### Troubleshooting Common Issues
+
+**Issue: Azure CLI not authenticated**
+```powershell
+# Solution: Login again
+az login
+az account set --subscription "cfacbbe8-a2a3-445f-a188-68b3b35f0c84"
+```
+
+**Issue: Key Vault access denied**
+```powershell
+# Solution: Verify permissions
+az keyvault show --name kv-brookside-secrets
+# Contact Azure administrator if permissions needed
+```
+
+**Issue: MCP server not connecting**
+```powershell
+# Solution: Test individual server
+.\scripts\Test-AzureMCP.ps1
+
+# Check environment variables
+$env:GITHUB_PERSONAL_ACCESS_TOKEN
+$env:NOTION_WORKSPACE_ID
+
+# Re-run environment setup
+.\scripts\Set-MCPEnvironment.ps1
+```
+
+**Issue: GitHub authentication failing**
+```powershell
+# Solution: Re-retrieve PAT and configure Git
+$env:GITHUB_PERSONAL_ACCESS_TOKEN = .\scripts\Get-KeyVaultSecret.ps1 -SecretName "github-personal-access-token"
+git config --global credential.helper store
+```
+
+### Daily Workflow
+
+**Every time you start a new session:**
+
+```powershell
+# 1. Ensure Azure authentication is active
+az account show
+
+# 2. Set environment variables (if not persistent)
+.\scripts\Set-MCPEnvironment.ps1
+
+# 3. Launch Claude Code
+claude
+```
+
+**Best for**: Teams requiring consistent, secure environment setup with minimal manual configuration.
+
 ## Quick Reference
 
 ```bash
+# Azure Operations
+az login                                           # Authenticate to Azure
+az keyvault secret show --vault-name kv-brookside-secrets --name <secret-name>  # Get secret
+.\scripts\Set-MCPEnvironment.ps1                   # Configure all environment variables
+
 # Notion MCP Operations
-notion-search "query text"              # Search for existing content
-notion-fetch "page-url-or-id"          # Fetch specific page/database
+notion-search "query text"                         # Search for existing content
+notion-fetch "page-url-or-id"                     # Fetch specific page/database
+claude mcp list                                    # Verify MCP authentication status
+
+# GitHub Operations
+git status                                         # Check repository status
+git remote -v                                      # View remote repositories
 
 # Sub-Agent Shortcuts
-@ideas-capture "idea description"       # Create new idea
-@cost-analyst "show spending"          # Analyze costs
-@archive-manager "archive [item]"      # Archive work
-@workflow-router "who should do [x]"   # Get team assignment
+@ideas-capture "idea description"                  # Create new idea
+@cost-analyst "show spending"                     # Analyze costs
+@archive-manager "archive [item]"                 # Archive work
+@workflow-router "who should do [x]"              # Get team assignment
 
-# Verify MCP Authentication
-claude mcp list                        # Check authentication status
+# MCP Server Verification
+claude mcp list                                    # Check all MCP connections
+.\scripts\Test-AzureMCP.ps1                       # Test Azure MCP specifically
 ```
+
+## Sub-Agents Quick Reference
+
+This project establishes 14 specialized sub-agents to streamline innovation workflows and drive measurable outcomes through intelligent task delegation.
+
+### Complete Agent Directory
+
+| Agent | Primary Purpose | When to Use | Key Capabilities |
+|-------|----------------|-------------|------------------|
+| **@ideas-capture** | Capture innovation opportunities with viability assessment | User mentions "idea", "concept", "we should build" | • Duplicate prevention<br>• Champion assignment<br>• Cost estimation |
+| **@research-coordinator** | Structure feasibility investigations | User mentions "research", "investigate", "feasibility" | • Hypothesis formation<br>• Methodology design<br>• SharePoint/OneNote setup |
+| **@build-architect** | Design technical architecture & documentation | User mentions "build", "prototype", "POC", "demo" | • AI-agent-friendly docs<br>• GitHub integration<br>• Tech stack specification |
+| **@cost-analyst** | Analyze software spend & optimize costs | User asks "costs", "spending", "budget", "optimize" | • Total spend calculation<br>• Unused tool detection<br>• Microsoft alternatives |
+| **@knowledge-curator** | Archive learnings & maintain knowledge vault | Build completes or user says "document learnings" | • Post-mortem creation<br>• Reusability assessment<br>• Knowledge Vault entries |
+| **@integration-specialist** | Configure Microsoft ecosystem connections | User mentions Azure, GitHub, M365, Power Platform | • Service Principal setup<br>• Authentication config<br>• Security reviews |
+| **@schema-manager** | Maintain Notion database structures | User wants to "modify database", "add property", "change schema" | • Property management<br>• Relation configuration<br>• Formula creation |
+| **@workflow-router** | Assign work based on specialization & workload | User asks "who should", "assign to", "who can handle" | • Specialization matching<br>• Workload balancing<br>• Team distribution |
+| **@viability-assessor** | Evaluate feasibility & impact | User asks "should we build", "is this viable", "worth it" | • Effort vs. impact analysis<br>• Risk assessment<br>• Go/No-Go recommendations |
+| **@archive-manager** | Complete lifecycle & preserve learnings | User says "archive", "done with", "complete" | • Status updates<br>• Link preservation<br>• Dependent item updates |
+| **@github-repo-analyst** | Analyze repository structure & health | User provides GitHub URL or asks about repo | • Code quality assessment<br>• Activity analysis<br>• Dependency evaluation |
+| **@notion-mcp-specialist** | Expert Notion operations & troubleshooting | Issues with Notion MCP or complex database operations | • MCP configuration<br>• Relation debugging<br>• Query optimization |
+| **@markdown-expert** | Format technical documentation | User needs README, docs, or technical writing | • Structure validation<br>• Markdown best practices<br>• AI-agent readability |
+| **@mermaid-diagram-expert** | Create visual diagrams & architecture charts | User needs "diagram", "flowchart", "architecture visual" | • Workflow diagrams<br>• ER diagrams<br>• Sequence diagrams |
+
+### Agent Invocation Patterns
+
+**Proactive Usage (Always Delegate):**
+- New idea mentioned → Immediately invoke `@ideas-capture`
+- Research discussed → Automatically engage `@research-coordinator`
+- Build creation → Delegate to `@build-architect`
+- Cost questions → Route to `@cost-analyst`
+- Archive requests → Invoke `@archive-manager`
+
+**On-Demand Usage (User-Triggered):**
+- Schema changes → `@schema-manager`
+- GitHub analysis → `@github-repo-analyst`
+- Diagram creation → `@mermaid-diagram-expert`
+- Markdown review → `@markdown-expert`
+- Notion troubleshooting → `@notion-mcp-specialist`
+
+**Multi-Agent Workflows:**
+- **New Idea**: `@ideas-capture` → `@workflow-router` → `@cost-analyst` → `@viability-assessor`
+- **Build Creation**: `@build-architect` → `@integration-specialist` → `@cost-analyst` → `@workflow-router`
+- **Archival**: `@archive-manager` → `@knowledge-curator` → `@markdown-expert`
+- **Cost Review**: `@cost-analyst` → `@viability-assessor` → `@workflow-router`
+
+**Best for**: Organizations requiring intelligent task routing that maximizes specialized expertise while minimizing manual coordination overhead.
+
+## Slash Commands Quick Reference
+
+Slash commands provide executable workflows that delegate to specialized agents. This section establishes sustainable command patterns for innovation operations.
+
+### Innovation Commands
+
+**Category**: `.claude/commands/innovation/`
+
+| Command | Purpose | Parameters | Example |
+|---------|---------|------------|---------|
+| `/innovation:new-idea` | Capture innovation opportunity with duplicate prevention | `[idea description]` | `/innovation:new-idea Automated Power BI deployment pipeline` |
+| `/innovation:start-research` | Begin structured feasibility investigation | `[topic] [originating-idea-title]` | `/innovation:start-research "Azure OpenAI integration" "AI-powered insights"` |
+
+**Delegates to**: `@ideas-capture`, `@research-coordinator`, `@workflow-router`, `@cost-analyst`
+
+### Cost Commands
+
+**Category**: `.claude/commands/cost/`
+
+| Command | Purpose | Parameters | Example |
+|---------|---------|------------|---------|
+| `/cost:analyze` | Comprehensive spend analysis with optimization | `[scope: all\|active\|unused\|expiring]` | `/cost:analyze unused` |
+| `/cost:monthly-spend` | Quick total monthly software spend | - | `/cost:monthly-spend` |
+| `/cost:annual-projection` | Yearly cost forecast | - | `/cost:annual-projection` |
+| `/cost:expiring-contracts` | Identify renewals within 60 days | - | `/cost:expiring-contracts` |
+| `/cost:unused-software` | Find tools with no active relations | - | `/cost:unused-software` |
+| `/cost:consolidation-opportunities` | Detect duplicate capabilities | - | `/cost:consolidation-opportunities` |
+| `/cost:microsoft-alternatives` | Suggest Microsoft-first replacements | `[software-name]` | `/cost:microsoft-alternatives "Slack"` |
+| `/cost:what-if-analysis` | Model cost scenarios | `[scenario description]` | `/cost:what-if-analysis "Remove 5 licenses from GitHub"` |
+| `/cost:build-costs` | Calculate costs for specific build | `[build-name]` | `/cost:build-costs "Cost Dashboard MVP"` |
+| `/cost:research-costs` | Research-specific cost breakdown | `[research-topic]` | `/cost:research-costs "Azure OpenAI research"` |
+| `/cost:cost-by-category` | Category-based spend analysis | `[category]` | `/cost:cost-by-category Development` |
+| `/cost:cost-impact` | Assess impact of adding/removing tool | `[tool-name] [action]` | `/cost:cost-impact "Power BI Pro" add` |
+
+**Delegates to**: `@cost-analyst`, `@viability-assessor`
+
+### Knowledge Commands
+
+**Category**: `.claude/commands/knowledge/`
+
+| Command | Purpose | Parameters | Example |
+|---------|---------|------------|---------|
+| `/knowledge:archive` | Complete lifecycle with learnings preservation | `[item-name] [database: idea\|research\|build]` | `/knowledge:archive "AI Documentation Generator" build` |
+
+**Delegates to**: `@archive-manager`, `@knowledge-curator`, `@markdown-expert`
+
+### Team Commands
+
+**Category**: `.claude/commands/team/`
+
+| Command | Purpose | Parameters | Example |
+|---------|---------|------------|---------|
+| `/team:assign` | Route work to specialist based on expertise | `[work-description] [database]` | `/team:assign "ML model for forecasting" build` |
+
+**Delegates to**: `@workflow-router`, `@cost-analyst`
+
+### Command Usage Patterns
+
+**Daily Operations:**
+```bash
+# Morning: Check spend
+/cost:monthly-spend
+
+# Capture new idea
+/innovation:new-idea Real-time collaboration features using Azure SignalR
+
+# Assign to team member
+/team:assign "Azure SignalR integration" idea
+
+# End of week: Review costs
+/cost:analyze
+```
+
+**Monthly Cost Review:**
+```bash
+# Step 1: Comprehensive analysis
+/cost:analyze all
+
+# Step 2: Find waste
+/cost:unused-software
+
+# Step 3: Check renewals
+/cost:expiring-contracts
+
+# Step 4: Identify consolidation
+/cost:consolidation-opportunities
+```
+
+**Complete Innovation Cycle:**
+```bash
+# 1. Capture
+/innovation:new-idea [description]
+
+# 2. Research (if needed)
+/innovation:start-research [topic] [idea-name]
+
+# 3. Archive when complete
+/knowledge:archive [item-name] [database]
+```
+
+**Best for**: Teams seeking repeatable, automated workflows that ensure consistent execution of innovation management operations while maintaining cost transparency and knowledge preservation.
+
+## Common Workflows
+
+These workflows establish sustainable patterns for innovation management that drive measurable outcomes through structured, repeatable processes.
+
+### Workflow 1: Complete Innovation Lifecycle
+
+**Purpose**: Transform raw idea into production-ready example with full knowledge capture
+
+**Stages**: Concept → Research → Build → Deploy → Archive → Knowledge Vault
+
+**Timeline**: 2-8 weeks depending on complexity
+
+```
+Step 1: Capture Idea
+├─ Command: /innovation:new-idea [description]
+├─ Agent: @ideas-capture
+├─ Outputs: Ideas Registry entry, Champion assigned, Cost estimate
+└─ Next: Research or Build?
+
+Step 2: Conduct Research (if Viability = "Needs Research")
+├─ Command: /innovation:start-research [topic] [idea-name]
+├─ Agent: @research-coordinator
+├─ Outputs: Research Hub entry, Hypothesis, Methodology, SharePoint/OneNote links
+├─ Duration: 1-2 weeks
+└─ Next: Viability Assessment
+
+Step 3: Assess Viability
+├─ Agent: @viability-assessor (auto-invoked during research completion)
+├─ Outputs: Highly Viable | Moderately Viable | Not Viable | Inconclusive
+├─ Decision: Build Example | More Research | Archive | Abandon
+└─ Next: If "Build Example" → Create Build
+
+Step 4: Create Build
+├─ Command: /innovation:create-build [name] [type]
+├─ Agent: @build-architect
+├─ Outputs: Example Build entry, GitHub repo, Technical docs, Cost rollup
+├─ Supporting Agents: @integration-specialist (Azure/M365), @workflow-router (team)
+└─ Next: Development work begins
+
+Step 5: Develop & Deploy
+├─ Activities: Code, test, document, deploy to Azure
+├─ Tools: GitHub, Azure DevOps, Azure services
+├─ Tracking: Update Build entry with progress, link resources
+├─ Duration: 1-6 weeks
+└─ Next: Completion & Archive
+
+Step 6: Archive with Learnings
+├─ Command: /knowledge:archive [build-name] build
+├─ Agent: @archive-manager + @knowledge-curator
+├─ Outputs: Status = Archived, Knowledge Vault entry, Lessons documented
+├─ Verification: All links preserved, costs tracked, reusability assessed
+└─ Complete: Idea → Build → Knowledge lifecycle closed
+
+Verification Steps:
+✓ Check Ideas Registry: Idea status updated through lifecycle
+✓ Check Research Hub: Findings documented, viability recorded
+✓ Check Example Builds: Build entry complete with all links
+✓ Check Knowledge Vault: Learnings captured for future reference
+✓ Check Software Tracker: All costs properly linked
+```
+
+**Best for**: High-value innovations requiring thorough investigation before implementation.
+
+### Workflow 2: Cost Optimization Sprint
+
+**Purpose**: Quarterly cost review to identify savings and optimize spend
+
+**Stages**: Analyze → Identify Waste → Consolidate → Optimize
+
+**Timeline**: 1-2 days for analysis, 2-4 weeks for implementation
+
+```
+Phase 1: Comprehensive Analysis (30 minutes)
+├─ Command: /cost:analyze all
+├─ Agent: @cost-analyst
+├─ Outputs:
+│   ├─ Total monthly spend: $X,XXX
+│   ├─ Annual projection: $XX,XXX
+│   ├─ Top 5 expenses identified
+│   ├─ Category breakdown
+│   └─ Potential savings estimate
+└─ Next: Drill into specific areas
+
+Phase 2: Identify Unused Software (15 minutes)
+├─ Command: /cost:unused-software
+├─ Agent: @cost-analyst
+├─ Query: Status = "Active" AND no relations to Ideas/Research/Builds
+├─ Outputs: List of tools with $0 utilization
+├─ Action: Review with owners, consider cancellation
+└─ Potential Savings: $XXX/month
+
+Phase 3: Find Duplicate Tools (20 minutes)
+├─ Command: /cost:consolidation-opportunities
+├─ Agent: @cost-analyst
+├─ Detection: Multiple tools in same category
+├─ Outputs: Consolidation recommendations
+├─ Example: 3 project management tools → 1 Microsoft solution
+└─ Potential Savings: $XXX/month
+
+Phase 4: Check Microsoft Alternatives (30 minutes)
+├─ Command: /cost:microsoft-alternatives [tool-name]
+├─ Agent: @cost-analyst
+├─ Priority: Microsoft 365 → Azure → Power Platform → GitHub
+├─ Outputs: Direct replacements with cost comparison
+├─ Example: Slack → Microsoft Teams (included in M365)
+└─ Potential Savings: $XXX/month
+
+Phase 5: Contract Renewals (15 minutes)
+├─ Command: /cost:expiring-contracts
+├─ Agent: @cost-analyst
+├─ Window: Next 60 days
+├─ Outputs: Renewal decisions required with timeline
+├─ Action: Review each contract, negotiate or cancel
+└─ Potential Savings: Renegotiation opportunities
+
+Phase 6: Implementation (2-4 weeks)
+├─ Activities:
+│   ├─ Cancel unused software
+│   ├─ Migrate to Microsoft alternatives
+│   ├─ Consolidate duplicate tools
+│   ├─ Renegotiate contracts
+│   └─ Update Software Tracker with changes
+├─ Tracking: Document savings realized
+└─ Verification: /cost:monthly-spend before/after comparison
+
+Quarterly Follow-Up:
+✓ Month 1: Execute cancellations and migrations
+✓ Month 2: Monitor adoption and usage
+✓ Month 3: Measure actual savings vs. projected
+✓ Quarter end: Run full analysis again, iterate
+```
+
+**Expected Outcomes**: 10-20% cost reduction, improved Microsoft ecosystem alignment, reduced tool sprawl.
+
+**Best for**: Finance-driven organizations seeking measurable cost reductions through systematic software optimization.
+
+### Workflow 3: Team Workload Balancing
+
+**Purpose**: Ensure even distribution of work based on specialization and capacity
+
+**Frequency**: Weekly or when assigning new work
+
+**Timeline**: 10-15 minutes per assignment
+
+```
+Step 1: Analyze New Work
+├─ Input: Work description from user
+├─ Agent: @workflow-router
+├─ Analysis:
+│   ├─ Extract keywords (Azure, ML, DevOps, Sales, etc.)
+│   ├─ Categorize by domain
+│   ├─ Assess complexity and effort
+│   └─ Identify required specializations
+└─ Next: Match to team member
+
+Step 2: Match to Specializations
+├─ Team Member Expertise:
+│   ├─ Markus Ahling: Engineering, Operations, AI, Infrastructure
+│   ├─ Brad Wright: Sales, Business, Finance, Marketing
+│   ├─ Stephan Densby: Operations, Continuous Improvement, Research
+│   ├─ Alec Fielding: DevOps, Engineering, Security, Integrations, R&D
+│   └─ Mitch Bisbee: DevOps, Engineering, ML, Master Data, Quality
+├─ Matching Logic:
+│   ├─ Primary: Strongest specialization alignment
+│   ├─ Secondary: Adjacent skill areas
+│   └─ Multi-person: If cross-functional
+└─ Next: Check workload
+
+Step 3: Check Current Workload
+├─ Command: /team:assign [work-description]
+├─ Query per team member:
+│   ├─ Active Ideas (Champion = Person)
+│   ├─ Active Research (Researchers contains Person)
+│   ├─ Active Builds (Lead Builder or Core Team = Person)
+│   └─ Total active count
+├─ Thresholds:
+│   ├─ Optimal: 3-5 active items
+│   ├─ Full: 5-7 active items
+│   └─ ⚠️ Overloaded: > 7 active items
+└─ Next: Assign or rebalance
+
+Step 4: Assignment Decision
+├─ If primary match has capacity:
+│   ├─ Assign to primary
+│   ├─ Update Notion database
+│   ├─ Notify assignee
+│   └─ Complete
+├─ If primary overloaded:
+│   ├─ Suggest alternative with matching specialization
+│   ├─ OR suggest redistributing existing work
+│   ├─ OR delay new assignment
+│   └─ User decides
+└─ Multi-person work: Assign lead + supporting team
+
+Step 5: Ongoing Monitoring
+├─ Weekly team review:
+│   ├─ Check: Each person's active item count
+│   ├─ Identify: Items stuck or blocked
+│   ├─ Action: Redistribute if needed
+│   └─ Ensure: No one > 7 active items
+└─ Continuous: Update as items complete or archive
+
+Workload Rebalancing Triggers:
+✓ Team member has > 7 active items
+✓ Critical new work requires specific specialist
+✓ Items not progressing for > 2 weeks
+✓ Team member requests redistribution
+✓ Vacation or leave upcoming
+```
+
+**Best for**: Teams with diverse specializations requiring strategic work distribution to maintain sustainable pace and prevent burnout.
+
+### Workflow 4: Emergency Research Investigation
+
+**Purpose**: Rapid feasibility assessment for time-sensitive opportunities
+
+**Stages**: Idea → Fast Research → Decision → Action
+
+**Timeline**: 1-3 days
+
+```
+Day 1: Rapid Investigation
+├─ Morning: Capture idea and scope research
+│   ├─ Command: /innovation:new-idea [urgent opportunity]
+│   ├─ Command: /innovation:start-research [topic] [idea-name]
+│   ├─ Agent: @research-coordinator
+│   ├─ Time-box: 1 day maximum
+│   └─ Hypothesis: Clear success criteria defined
+├─ Afternoon: Focused investigation
+│   ├─ Research activities:
+│   │   ├─ Microsoft documentation review
+│   │   ├─ Proof-of-concept code (if technical)
+│   │   ├─ Cost estimation
+│   │   ├─ Risk identification
+│   │   └─ Implementation timeline
+│   ├─ Documentation: Real-time in SharePoint/OneNote
+│   └─ Team: Dedicated focus, minimize distractions
+└─ End of Day: Initial findings documented
+
+Day 2: Viability Assessment
+├─ Morning: Complete research documentation
+│   ├─ Key Findings: Documented in Research Hub
+│   ├─ Viability: Preliminary assessment
+│   ├─ Risks: Identified with mitigation strategies
+│   └─ Costs: Detailed breakdown
+├─ Midday: Stakeholder review
+│   ├─ Agent: @viability-assessor
+│   ├─ Present findings to decision makers
+│   ├─ Effort vs. Impact analysis
+│   └─ Go/No-Go recommendation
+└─ Afternoon: Decision point
+
+Decision Outcomes:
+├─ GO: Build Example immediately
+│   ├─ Command: /innovation:create-build [name] poc
+│   ├─ Fast-track: Skip normal approval process
+│   ├─ Timeline: 1-2 weeks for POC
+│   └─ Success criteria: Defined in research
+├─ MORE RESEARCH: Needs deeper investigation
+│   ├─ Extend research timeline
+│   ├─ Identify unknowns to address
+│   └─ Schedule follow-up decision point
+└─ NO-GO: Not viable or not worth effort
+    ├─ Archive idea with rationale
+    ├─ Command: /knowledge:archive [idea-name] idea
+    └─ Learnings: Document why rejected
+
+Day 3: Action (if GO)
+├─ Build Creation: @build-architect
+├─ GitHub Setup: Repository created
+├─ Azure Resources: Provisioned if needed
+├─ Team Mobilization: Dedicated POC sprint
+└─ Timeline: 1-2 weeks to working POC
+
+Verification:
+✓ Research completed within 1-3 days
+✓ Decision made with clear rationale
+✓ If GO: POC development underway
+✓ If NO-GO: Idea archived with learnings
+```
+
+**Best for**: High-stakes opportunities with short decision windows requiring rapid feasibility validation.
+
+### Workflow 5: Build Creation & Deployment
+
+**Purpose**: Structured approach to creating, deploying, and tracking example builds
+
+**Stages**: Architecture → Repository → Documentation → Deploy → Track Costs
+
+**Timeline**: 1-6 weeks depending on complexity
+
+```
+Phase 1: Architecture Design (Day 1-2)
+├─ Command: /innovation:create-build [name] [type]
+├─ Agent: @build-architect
+├─ Activities:
+│   ├─ System architecture design
+│   ├─ Technology stack selection (Microsoft-first)
+│   ├─ Data model design
+│   ├─ Integration points identified
+│   ├─ Security requirements
+│   └─ Cost estimation
+├─ Outputs:
+│   ├─ Example Build entry in Notion
+│   ├─ Technical specification page (AI-agent friendly)
+│   ├─ Architecture diagrams (@mermaid-diagram-expert)
+│   └─ GitHub repository URL required
+└─ Next: Repository setup
+
+Phase 2: GitHub Repository Setup (Day 2-3)
+├─ Agent: @integration-specialist
+├─ Activities:
+│   ├─ Create repository under github.com/brookside-bi
+│   ├─ Initialize with README (use @markdown-expert)
+│   ├─ Add .gitignore for technology stack
+│   ├─ Create branch protection rules
+│   ├─ Set up GitHub Actions for CI/CD
+│   └─ Link repository to Notion Build entry
+├─ Outputs:
+│   ├─ Repository URL in Build entry
+│   ├─ README with setup instructions
+│   ├─ CI/CD pipeline configured
+│   └─ Branch strategy documented
+└─ Next: Development environment
+
+Phase 3: Documentation (Day 3-4)
+├─ Agent: @markdown-expert
+├─ Technical Documentation Required:
+│   ├─ README.md: Project overview, quick start
+│   ├─ ARCHITECTURE.md: System design, diagrams
+│   ├─ API.md: Endpoints, request/response schemas (if applicable)
+│   ├─ DEPLOYMENT.md: Azure deployment steps
+│   ├─ COST.md: Service breakdown, monthly/annual estimates
+│   └─ CHANGELOG.md: Version history
+├─ Standards:
+│   ├─ AI-agent executable (explicit, no ambiguity)
+│   ├─ Idempotent setup steps
+│   ├─ Explicit version requirements
+│   ├─ Environment variable templates
+│   └─ Brookside BI brand voice
+└─ Next: Local development
+
+Phase 4: Development (Week 1-4)
+├─ Activities:
+│   ├─ Core functionality implementation
+│   ├─ Unit and integration tests
+│   ├─ Code reviews with team
+│   ├─ Documentation updates as architecture evolves
+│   └─ Local testing and debugging
+├─ Tracking:
+│   ├─ Update Build entry with progress
+│   ├─ Link pull requests
+│   ├─ Document blockers and solutions
+│   └─ Track time spent by team members
+└─ Next: Azure deployment
+
+Phase 5: Azure Deployment (Week 4-5)
+├─ Agent: @integration-specialist
+├─ Azure Resources Setup:
+│   ├─ Resource Group creation
+│   ├─ App Service / Function App / AKS (depending on build)
+│   ├─ Database (SQL, Cosmos, etc. if needed)
+│   ├─ Storage Account (if needed)
+│   ├─ Application Insights for monitoring
+│   ├─ Key Vault for secrets
+│   └─ Managed Identity for authentication
+├─ Security:
+│   ├─ No hardcoded credentials
+│   ├─ All secrets in Azure Key Vault
+│   ├─ Managed Identity where possible
+│   ├─ Network security groups configured
+│   └─ Security review completed
+├─ Deployment Pipeline:
+│   ├─ GitHub Actions workflow
+│   ├─ Automated deployment to Azure
+│   ├─ Environment-specific configurations (dev/staging/prod)
+│   └─ Rollback procedures documented
+└─ Next: Cost tracking
+
+Phase 6: Cost Tracking & Linking (Week 5-6)
+├─ Agent: @cost-analyst
+├─ Activities:
+│   ├─ Identify ALL software/tools used
+│   ├─ Search Software Tracker for each
+│   ├─ Add new entries if tools not found
+│   ├─ Create relations: Software → Build
+│   ├─ Verify Total Cost rollup displays
+│   └─ Document cost breakdown in COST.md
+├─ Software Categories:
+│   ├─ Azure services (App Service, SQL, Storage, etc.)
+│   ├─ GitHub (if paid org)
+│   ├─ Development tools (IDEs, etc.)
+│   ├─ Third-party APIs or services
+│   └─ Monitoring/observability tools
+├─ Command: /cost:build-costs [build-name]
+└─ Next: Integration registry
+
+Phase 7: Integration Registry (Week 6)
+├─ Agent: @integration-specialist
+├─ Activities:
+│   ├─ Create Integration Registry entry
+│   ├─ Document authentication method
+│   ├─ Link to Build and Software entries
+│   ├─ Security review status
+│   └─ API endpoints and webhooks
+└─ Complete: Build operational and tracked
+
+Verification Checklist:
+✓ Build entry in Notion with all fields populated
+✓ GitHub repository with comprehensive documentation
+✓ Azure resources deployed and monitored
+✓ All software/tools linked to build
+✓ Total Cost rollup displays correctly
+✓ Integration Registry entry created (if applicable)
+✓ Technical documentation is AI-agent executable
+✓ Team can deploy from scratch using docs alone
+```
+
+**Best for**: Production-quality builds requiring full deployment lifecycle with cost transparency and knowledge preservation.
+
+### Workflow 6: Knowledge Capture & Sharing
+
+**Purpose**: Extract and preserve learnings from completed work for organizational knowledge base
+
+**Stages**: Complete Work → Extract Learnings → Archive → Share
+
+**Timeline**: 1-2 hours per item
+
+```
+Step 1: Identify Completion
+├─ Triggers:
+│   ├─ Build Status → "Completed"
+│   ├─ Research Next Steps → "Archive"
+│   ├─ Idea fully explored
+│   └─ User explicitly says "done" or "archive"
+└─ Next: Assess knowledge value
+
+Step 2: Assess Knowledge Value
+├─ Agent: @knowledge-curator
+├─ Criteria for Knowledge Vault:
+│   ├─ ✓ Reusable patterns or templates created
+│   ├─ ✓ Novel problems solved with documented solutions
+│   ├─ ✓ Failed experiments with valuable learnings
+│   ├─ ✓ Process improvements that benefit future work
+│   ├─ ✓ Technical breakthroughs or innovations
+│   └─ ✗ Routine work with no unique insights
+├─ Decision: Create Knowledge Vault entry?
+│   ├─ YES → Proceed to Step 3
+│   └─ NO → Skip to Step 6 (Archive only)
+└─ Next: Extract learnings
+
+Step 3: Extract Learnings
+├─ Agent: @knowledge-curator + @markdown-expert
+├─ Content to Capture:
+│   ├─ Problem Statement: What business challenge was addressed?
+│   ├─ Solution Approach: How was it solved?
+│   ├─ Key Decisions: Architecture choices, technology selections
+│   ├─ Challenges Overcome: Blockers and how they were resolved
+│   ├─ Unexpected Findings: Surprises during implementation
+│   ├─ Cost Insights: Budget vs. actual, optimization opportunities
+│   ├─ Team Learnings: Skills developed, collaboration patterns
+│   └─ Future Recommendations: What we'd do differently
+└─ Next: Structure knowledge entry
+
+Step 4: Create Knowledge Vault Entry
+├─ Command: /knowledge:archive [item-name] [database]
+├─ Agent: @knowledge-curator
+├─ Content Type Selection:
+│   ├─ Tutorial: Step-by-step guides for repeatable tasks
+│   ├─ Case Study: Complete project story with outcomes
+│   ├─ Technical Doc: Architecture, API specs, integration guides
+│   ├─ Process: Repeatable workflows and methodologies
+│   ├─ Template: Reusable project structures, code templates
+│   ├─ Post-Mortem: What worked, what didn't, lessons learned
+│   └─ Reference: Quick-lookup information, cheat sheets
+├─ Evergreen vs. Dated:
+│   ├─ Evergreen: Timeless principles, architectural patterns
+│   └─ Dated: Version-specific, time-sensitive information
+├─ Entry Structure:
+│   ├─ Title: Descriptive, searchable
+│   ├─ Summary: 2-3 sentence overview
+│   ├─ Full Content: Detailed documentation
+│   ├─ Related Resources: Links to Builds, GitHub, docs
+│   ├─ Tags: Technology, domain, team members
+│   └─ Reusability Assessment: High | Medium | Low
+└─ Next: Archive original item
+
+Step 5: Archive Original Item
+├─ Agent: @archive-manager
+├─ Activities:
+│   ├─ Update Status → "Archived" or "Not Active"
+│   ├─ Add completion date
+│   ├─ Link to Knowledge Vault entry
+│   ├─ Verify all external links preserved:
+│   │   ├─ GitHub repositories
+│   │   ├─ SharePoint/OneNote documents
+│   │   ├─ Azure resources
+│   │   ├─ Teams channels
+│   │   └─ Integration endpoints
+│   ├─ Maintain software relations for historical cost tracking
+│   └─ Update dependent items
+└─ Next: Share knowledge
+
+Step 6: Share Knowledge
+├─ Distribution Channels:
+│   ├─ Teams announcement in appropriate channels
+│   ├─ Email summary to stakeholders
+│   ├─ Mention in weekly team sync
+│   ├─ Add to onboarding materials (if broadly applicable)
+│   └─ Reference in future similar work
+├─ Make Discoverable:
+│   ├─ Descriptive title optimized for search
+│   ├─ Comprehensive tags
+│   ├─ Cross-links to related knowledge
+│   └─ Listed in relevant "See Also" sections
+└─ Complete: Knowledge preserved and shared
+
+Verification:
+✓ Knowledge Vault entry created with comprehensive content
+✓ Original item archived with link to knowledge entry
+✓ All external links preserved
+✓ Team notified of new knowledge resource
+✓ Content is searchable and discoverable
+✓ Reusability clearly assessed
+```
+
+**Expected Outcomes**: Organizational learning accelerates, duplicate work prevented, new team members ramp up faster.
+
+**Best for**: Knowledge-driven organizations seeking to build institutional memory and accelerate innovation through systematic learning capture.
+
+## Agent + Command Integration Matrix
+
+This matrix establishes clear delegation patterns showing how slash commands route to specialized agents for execution.
+
+| Command Category | Primary Agent(s) | Supporting Agents | Typical Workflow |
+|------------------|------------------|-------------------|------------------|
+| **`/innovation:new-idea`** | `@ideas-capture` | `@workflow-router`<br>`@cost-analyst`<br>`@viability-assessor` | Search duplicates → Create entry → Assign champion → Estimate costs → Assess viability |
+| **`/innovation:start-research`** | `@research-coordinator` | `@cost-analyst`<br>`@integration-specialist`<br>`@workflow-router` | Create research → Link idea → Setup docs → Assign researchers → Track costs |
+| **`/innovation:create-build`** | `@build-architect` | `@integration-specialist`<br>`@cost-analyst`<br>`@workflow-router`<br>`@markdown-expert` | Design architecture → Setup GitHub → Create docs → Assign team → Link costs |
+| **`/cost:*`** (all cost commands) | `@cost-analyst` | `@viability-assessor` | Query Software Tracker → Calculate metrics → Identify optimizations → Recommend actions |
+| **`/knowledge:archive`** | `@archive-manager`<br>`@knowledge-curator` | `@markdown-expert` | Verify learnings → Create vault entry → Update status → Preserve links |
+| **`/team:assign`** | `@workflow-router` | `@cost-analyst` | Analyze work → Match specializations → Check workload → Assign or rebalance |
+
+### Command → Agent Delegation Logic
+
+**Single-Agent Commands:**
+- Simple operations delegated to one specialized agent
+- Example: `/cost:monthly-spend` → `@cost-analyst` (straightforward query)
+
+**Multi-Agent Workflows:**
+- Complex operations requiring multiple specialists
+- Example: `/innovation:new-idea` → `@ideas-capture` (lead) + `@workflow-router` + `@cost-analyst` + `@viability-assessor`
+
+**Agent Chaining:**
+- Sequential agent invocations based on workflow stage
+- Example: `/knowledge:archive` → `@archive-manager` (first) → `@knowledge-curator` (second)
+
+### When to Use Commands vs. Direct Agent Invocation
+
+**Use Slash Commands When:**
+- ✓ Workflow is well-defined and repeatable
+- ✓ Multiple steps need to execute in sequence
+- ✓ User wants standardized operation
+- ✓ Documentation/verification steps important
+
+**Use Direct Agent Invocation When:**
+- ✓ Custom or one-off operations
+- ✓ Need agent's specialized expertise for consultation
+- ✓ Troubleshooting or debugging
+- ✓ Exploratory analysis without formal workflow
+
+**Example:**
+```bash
+# Use command for standard operation
+/innovation:new-idea Automated cost tracking dashboard
+
+# Use agent directly for custom analysis
+@cost-analyst What would happen to our budget if we consolidated
+all project management tools to Microsoft Planner?
+```
+
+**Best for**: Organizations requiring clear operational patterns that maximize automation while retaining flexibility for custom scenarios through direct agent access.
 
 ## Notes for Claude Code Agents
 
-This project establishes scalable infrastructure for innovation management:
+This project establishes scalable infrastructure for innovation management with enterprise-grade security and automation:
+
+### Core Principles
 
 - **Notion is source of truth** for all innovation tracking
+- **Azure Key Vault is source of truth** for all secrets and credentials
 - **Cost tracking is critical** - never skip linking software/tools
 - **Microsoft ecosystem is default** - always check Microsoft solutions first
 - **Status over timelines** - focus on viability and progress, not deadlines
@@ -1062,6 +2153,89 @@ This project establishes scalable infrastructure for innovation management:
 - **Technical docs for AI agents** - all builds should be executable by future AI agents
 - **Brand consistency** - apply Brookside BI voice to all outputs
 
-**Remember**: You're building an innovation engine designed to streamline workflows and drive measurable outcomes through structured approaches. Focus on learning, reusability, cost transparency, and knowledge capture to support sustainable growth.
+### Infrastructure Context
 
-**Brookside BI Innovation Nexus - Where Ideas Become Examples, and Examples Become Knowledge.**
+**You have access to 4 MCP servers:**
+1. **Notion** - Innovation tracking and knowledge management
+2. **GitHub** - Version control and repository operations
+3. **Azure** - Cloud resources, Key Vault, and deployment
+4. **Playwright** - Browser automation and testing
+
+**All secrets are centralized in Azure Key Vault:**
+- GitHub PAT: `github-personal-access-token`
+- Notion API: `notion-api-key` (when needed)
+- Azure OpenAI: `azure-openai-api-key` (when configured)
+
+**Never hardcode credentials** - always reference Key Vault or use `scripts/Get-KeyVaultSecret.ps1`
+
+### Automated Workflows
+
+**When creating Example Builds:**
+1. Create GitHub repository (via GitHub MCP)
+2. Link repository URL to Notion Build entry
+3. Track all software/tools costs (link to Software Tracker)
+4. Create AI-agent-friendly technical documentation
+5. Deploy to Azure if needed (via Azure MCP)
+6. Link Azure resources to Integration Registry
+
+**When starting Research:**
+1. Create Research Hub entry (via Notion MCP)
+2. Link to originating Idea
+3. Track research tools in Software Tracker
+4. Set up GitHub repo for research code if needed
+5. Document findings for Knowledge Vault
+
+**When managing costs:**
+1. Query Software Tracker via Notion MCP
+2. Calculate rollups from relations
+3. Identify unused tools (no active relations)
+4. Check contract expiration dates
+5. Suggest Microsoft alternatives where applicable
+
+### Security Best Practices
+
+**When working with credentials:**
+- ✓ Use `scripts/Get-KeyVaultSecret.ps1` to retrieve secrets
+- ✓ Reference Key Vault in documentation, never actual values
+- ✓ Use environment variables from `Set-MCPEnvironment.ps1`
+- ✗ Never commit secrets to Git
+- ✗ Never display secrets in output or logs
+- ✗ Never hardcode credentials in code or documentation
+
+**When deploying to Azure:**
+- ✓ Use Managed Identity when possible
+- ✓ Reference Key Vault for application secrets
+- ✓ Document resource IDs and SKUs
+- ✓ Track costs in Software Tracker
+- ✗ Never use inline credentials
+
+### Integration Patterns
+
+**Notion ↔ GitHub:**
+- Link GitHub repo URLs in Example Builds
+- Reference Notion entries in commit messages
+- Track integration in Integration Registry
+
+**Notion ↔ Azure:**
+- Link Azure resource URLs in Builds
+- Deploy builds to Azure App Services
+- Store deployment configs in Key Vault
+- Track Azure service costs in Software Tracker
+
+**GitHub ↔ Azure:**
+- Use GitHub Actions for CI/CD to Azure
+- Authenticate with Service Principal (stored in Key Vault)
+- Deploy from GitHub to Azure App Services
+- Track deployment pipeline in Integration Registry
+
+### Performance Optimization
+
+**MCP Server Usage:**
+- Notion MCP: Cache database schemas, reuse queries
+- GitHub MCP: Batch file operations when possible
+- Azure MCP: Check authentication status before operations
+- Playwright MCP: Reuse browser sessions when testing
+
+**Remember**: You're building an innovation engine designed to streamline workflows and drive measurable outcomes through structured approaches. Focus on learning, reusability, cost transparency, knowledge capture, and secure credential management to support sustainable growth.
+
+**Brookside BI Innovation Nexus - Where Ideas Become Examples, and Examples Become Knowledge - Secured by Azure.**
