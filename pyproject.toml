@@ -1,0 +1,110 @@
+[tool.poetry]
+name = "brookside-bi-innovation-nexus"
+version = "1.0.0"
+description = "Brookside BI Innovation Nexus - A comprehensive innovation management workspace integrating Notion, GitHub, Azure, and Claude Code for structured idea-to-knowledge lifecycle management"
+package-mode = false
+authors = [
+    "Markus Ahling <markus@brooksidebi.com>",
+    "Alec Fielding <alec@brooksidebi.com>",
+    "Brad Wright <brad@brooksidebi.com>",
+    "Stephan Densby <stephan@brooksidebi.com>",
+    "Mitch Bisbee <mitch@brooksidebi.com>",
+]
+readme = "CLAUDE.md"
+homepage = "https://github.com/markus41/Notion"
+repository = "https://github.com/markus41/Notion"
+documentation = "https://github.com/markus41/Notion/blob/main/CLAUDE.md"
+keywords = [
+    "notion",
+    "innovation-management",
+    "knowledge-base",
+    "github-mcp",
+    "azure-integration",
+    "claude-code",
+    "repository-management",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Office/Business :: Groupware",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+# This is a monorepo workspace containing multiple projects
+packages = []
+
+[tool.poetry.dependencies]
+# Minimal root-level dependencies
+# Python projects in subdirectories manage their own dependencies
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+# Documentation and quality tools for the workspace
+pre-commit = "^3.6.0"
+mdformat = "^0.7.17"
+mdformat-gfm = "^0.3.5"
+mdformat-frontmatter = "^2.0.8"
+yamllint = "^1.33.0"
+
+[tool.poetry.scripts]
+# Workspace-level utility scripts
+analyze-repos = "brookside-repo-analyzer.src.cli:cli"
+
+# Configuration for documentation tools
+[tool.mdformat]
+wrap = 100
+number = false
+
+[tool.yamllint]
+extends = "default"
+
+[tool.yamllint.rules.line-length]
+max = 120
+
+[tool.yamllint.rules.indentation]
+spaces = 2
+
+[tool.yamllint.rules.comments]
+min-spaces-from-content = 1
+
+# Pre-commit configuration reference
+# See .pre-commit-config.yaml for actual hooks
+[tool.pre-commit]
+# This section documents that pre-commit is managed at workspace level
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ============================================================================
+# WORKSPACE STRUCTURE
+# ============================================================================
+# This repository is organized as a monorepo with the following structure:
+#
+# /                                  Root workspace (this file)
+# ├── .claude/                       Claude Code configuration
+# │   ├── agents/                    Specialized sub-agents (14 agents)
+# │   ├── commands/                  Slash commands (5 command categories)
+# │   └── settings.local.json       User-specific settings
+# ├── scripts/                       PowerShell automation scripts
+# │   ├── Get-KeyVaultSecret.ps1    Azure Key Vault secret retrieval
+# │   ├── Set-MCPEnvironment.ps1    MCP environment configuration
+# │   └── Test-AzureMCP.ps1         Azure MCP server validation
+# ├── brookside-repo-analyzer/      Python CLI tool for repo analysis
+# │   ├── pyproject.toml            Independent Python project
+# │   ├── src/                      Source code
+# │   └── tests/                    Unit and integration tests
+# ├── docs/                          Documentation files
+# └── CLAUDE.md                      Main project documentation
+#
+# SUBPROJECTS:
+# - brookside-repo-analyzer: Repository analysis and Notion sync tool
+#
+# DEVELOPMENT:
+# 1. Root level: poetry install          # Install workspace dev tools
+# 2. Analyzer:   cd brookside-repo-analyzer && poetry install
+#
+# BEST FOR:
+# Organizations managing multiple innovation workflows requiring centralized
+# documentation standards while maintaining independent project dependencies
