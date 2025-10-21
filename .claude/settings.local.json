@@ -46,7 +46,8 @@
       "Bash(done)",
       "Bash(C:UsersMarkusAhlingAppDataRoamingPythonScriptspoetry.exe run brookside-analyze scan --full --sync)",
       "Bash(C:UsersMarkusAhlingAppDataRoamingPythonScriptspoetry.exe run brookside-analyze scan --org markus41 --full)",
-      "Bash(Tee-Object -FilePath analysis-results.txt)"
+      "Bash(Tee-Object -FilePath analysis-results.txt)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
