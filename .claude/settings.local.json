@@ -47,7 +47,9 @@
       "Bash(C:UsersMarkusAhlingAppDataRoamingPythonScriptspoetry.exe run brookside-analyze scan --full --sync)",
       "Bash(C:UsersMarkusAhlingAppDataRoamingPythonScriptspoetry.exe run brookside-analyze scan --org markus41 --full)",
       "Bash(Tee-Object -FilePath analysis-results.txt)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(test:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Establish monorepo workspace configuration with Poetry\n\nImplement workspace-level dependency management to streamline documentation quality\nand development tool coordination across the Innovation Nexus. This solution is\ndesigned to support sustainable growth through centralized governance while\nmaintaining project independence.\n\nKey Features:\n- Workspace-level pyproject.toml with package-mode = false\n- Centralized documentation tooling (mdformat, yamllint, pre-commit)\n- Clear monorepo structure with independent sub-projects\n- Comprehensive workspace guide (WORKSPACE.md)\n- Development workflow documentation\n\nTools Configured:\n- pre-commit ^3.6.0 - Automated quality checks\n- mdformat ^0.7.17 - Markdown formatting with GFM support\n- yamllint ^1.33.0 - YAML validation\n\nStructure:\n- Root level: Workspace tools and documentation\n- brookside-repo-analyzer/: Independent Python project with own dependencies\n- scripts/: PowerShell automation utilities\n\nBenefits:\n- Consistent documentation formatting across all markdown files\n- Centralized pre-commit hooks for quality control\n- Independent project dependency management\n- Clear development guidelines and best practices\n\nBest for: Organizations managing multiple projects requiring centralized standards\nwith project-level autonomy through modern monorepo architecture.\n\nRelated:\n- Workspace Guide: WORKSPACE.md\n- Project Docs: CLAUDE.md\n- Analyzer Docs: brookside-repo-analyzer/README.md\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
