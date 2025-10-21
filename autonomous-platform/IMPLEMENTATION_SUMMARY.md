@@ -27,7 +27,7 @@ We've successfully implemented the **foundation for a fully autonomous innovatio
 | **Webhook Receiver** | ✅ Complete | HTTP trigger with signature verification and routing matrix |
 | **Build Pipeline Orchestrator** | ✅ Complete | 5-stage durable function workflow |
 | **Notion Client** | ✅ Complete | Reusable API wrapper with helper methods |
-| **Activity Functions** | ✅ Complete | UpdateNotionStatus and framework for agent invocation |
+| **Activity Functions** | ✅ Complete | Core functions implemented: UpdateNotionStatus, InvokeClaudeAgent, CreateResearchEntry, UpdateResearchFindings, EscalateToHuman, ArchiveWithLearnings |
 | **Pattern Database Schema** | ✅ Complete | Cosmos DB structure for pattern learning |
 | **Documentation** | ✅ Complete | README, Architecture, Deployment Guide |
 
@@ -170,19 +170,28 @@ autonomous-platform/
 
 ### Phase 2: Agent Integration (Weeks 5-8)
 
-**Implement Activity Functions:**
-- `InvokeClaudeAgent` - Execute specialized agents (@build-architect, @research-coordinator, etc.)
+**Activity Functions Implemented ✅:**
+- ✅ `InvokeClaudeAgent` - Execute specialized agents with Azure OpenAI/Anthropic integration
+- ✅ `CreateResearchEntry` - Create Research Hub entries with hypothesis and methodology
+- ✅ `UpdateResearchFindings` - Document multi-dimensional research results
+- ✅ `EscalateToHuman` - Multi-channel escalation (Notion, Email, Teams, App Insights)
+- ✅ `ArchiveWithLearnings` - Preserve insights from low-viability ideas in Knowledge Vault
+- ✅ `UpdateNotionStatus` - Update Notion properties during workflow execution
+
+**Activity Functions Remaining:**
 - `GenerateCodebase` - AI-powered code generation
 - `CreateGitHubRepository` - Automated repo creation and initial commit
 - `DeployToAzure` - Bicep template generation and deployment
 - `ValidateDeployment` - Health checks and test execution
-- `CaptureKnowledge` - Knowledge Vault entry creation
+- `CaptureKnowledge` - Knowledge Vault entry creation for successful builds
 - `LearnPatterns` - Pattern extraction and similarity matching
 
-**Implement Research Swarm:**
-- Parallel execution of 4 research agents
-- Viability score calculation
-- Auto-trigger build if score > 85
+**Research Swarm Orchestrator ✅:**
+- ✅ Parallel execution of 4 research agents (Market, Technical, Cost, Risk)
+- ✅ Weighted viability score calculation (30% market, 25% tech, 25% cost, 20% risk)
+- ✅ Auto-trigger build if score >= 85 and cost < $500
+- ✅ Escalation logic for gray-zone viability (60-85)
+- ✅ Automatic archival with learnings for low viability (< 60)
 
 ### Phase 3: Pattern Learning (Weeks 9-12)
 

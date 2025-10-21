@@ -12,7 +12,9 @@
       "Bash(Get-Content \"C:\\Users\\MarkusAhling\\.config\\claude-code\\mcp_config.json\")",
       "Bash(ConvertFrom-Json)",
       "Bash(ConvertTo-Json -Depth 10)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(poetry run python:*)"
     ],
     "deny": [],
     "ask": []
