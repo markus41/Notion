@@ -796,6 +796,7 @@ When relevant, reference:
 
 ### ❌ Never Do This
 
+- **NEVER mention project timelines, duration estimates, time to complete, or how long anything will take** - user does not want ANY time-related estimates in outputs
 - Create without searching for duplicates first
 - Create builds without linking origin ideas
 - Add software without cost information
@@ -804,7 +805,7 @@ When relevant, reference:
 - Suggest non-Microsoft solutions without checking Microsoft offerings first
 - Set Status = Active without user confirmation
 - Ignore cost rollups - always verify software links
-- Use timeline or deadline language ("due date", "week 1", "by Friday")
+- Use timeline or deadline language ("due date", "week 1", "by Friday", "1-2 weeks", "2-8 weeks", "10-15 minutes", etc.)
 - Skip Brookside BI branding on major pages
 - Create ambiguous technical documentation
 - Hardcode secrets or credentials in any documentation
@@ -1214,7 +1215,7 @@ NOTION_API_KEY=ntn_...
 
 ## Quick-Start Setup Guide
 
-This guide establishes a fully configured development environment in minutes.
+This guide establishes a fully configured development environment.
 
 ### Prerequisites
 
@@ -1520,7 +1521,7 @@ Slash commands provide executable workflows that delegate to specialized agents.
 # Assign to team member
 /team:assign "Azure SignalR integration" idea
 
-# End of week: Review costs
+# Regular: Review costs
 /cost:analyze
 ```
 
@@ -1563,8 +1564,6 @@ These workflows establish sustainable patterns for innovation management that dr
 
 **Stages**: Concept → Research → Build → Deploy → Archive → Knowledge Vault
 
-**Timeline**: 2-8 weeks depending on complexity
-
 ```
 Step 1: Capture Idea
 ├─ Command: /innovation:new-idea [description]
@@ -1576,7 +1575,6 @@ Step 2: Conduct Research (if Viability = "Needs Research")
 ├─ Command: /innovation:start-research [topic] [idea-name]
 ├─ Agent: @research-coordinator
 ├─ Outputs: Research Hub entry, Hypothesis, Methodology, SharePoint/OneNote links
-├─ Duration: 1-2 weeks
 └─ Next: Viability Assessment
 
 Step 3: Assess Viability
@@ -1596,7 +1594,6 @@ Step 5: Develop & Deploy
 ├─ Activities: Code, test, document, deploy to Azure
 ├─ Tools: GitHub, Azure DevOps, Azure services
 ├─ Tracking: Update Build entry with progress, link resources
-├─ Duration: 1-6 weeks
 └─ Next: Completion & Archive
 
 Step 6: Archive with Learnings
@@ -1622,10 +1619,8 @@ Verification Steps:
 
 **Stages**: Analyze → Identify Waste → Consolidate → Optimize
 
-**Timeline**: 1-2 days for analysis, 2-4 weeks for implementation
-
 ```
-Phase 1: Comprehensive Analysis (30 minutes)
+Phase 1: Comprehensive Analysis
 ├─ Command: /cost:analyze all
 ├─ Agent: @cost-analyst
 ├─ Outputs:
@@ -1636,7 +1631,7 @@ Phase 1: Comprehensive Analysis (30 minutes)
 │   └─ Potential savings estimate
 └─ Next: Drill into specific areas
 
-Phase 2: Identify Unused Software (15 minutes)
+Phase 2: Identify Unused Software
 ├─ Command: /cost:unused-software
 ├─ Agent: @cost-analyst
 ├─ Query: Status = "Active" AND no relations to Ideas/Research/Builds
@@ -1644,7 +1639,7 @@ Phase 2: Identify Unused Software (15 minutes)
 ├─ Action: Review with owners, consider cancellation
 └─ Potential Savings: $XXX/month
 
-Phase 3: Find Duplicate Tools (20 minutes)
+Phase 3: Find Duplicate Tools
 ├─ Command: /cost:consolidation-opportunities
 ├─ Agent: @cost-analyst
 ├─ Detection: Multiple tools in same category
@@ -1652,7 +1647,7 @@ Phase 3: Find Duplicate Tools (20 minutes)
 ├─ Example: 3 project management tools → 1 Microsoft solution
 └─ Potential Savings: $XXX/month
 
-Phase 4: Check Microsoft Alternatives (30 minutes)
+Phase 4: Check Microsoft Alternatives
 ├─ Command: /cost:microsoft-alternatives [tool-name]
 ├─ Agent: @cost-analyst
 ├─ Priority: Microsoft 365 → Azure → Power Platform → GitHub
@@ -1660,15 +1655,15 @@ Phase 4: Check Microsoft Alternatives (30 minutes)
 ├─ Example: Slack → Microsoft Teams (included in M365)
 └─ Potential Savings: $XXX/month
 
-Phase 5: Contract Renewals (15 minutes)
+Phase 5: Contract Renewals
 ├─ Command: /cost:expiring-contracts
 ├─ Agent: @cost-analyst
 ├─ Window: Next 60 days
-├─ Outputs: Renewal decisions required with timeline
+├─ Outputs: Renewal decisions required
 ├─ Action: Review each contract, negotiate or cancel
 └─ Potential Savings: Renegotiation opportunities
 
-Phase 6: Implementation (2-4 weeks)
+Phase 6: Implementation
 ├─ Activities:
 │   ├─ Cancel unused software
 │   ├─ Migrate to Microsoft alternatives
@@ -1694,8 +1689,6 @@ Quarterly Follow-Up:
 **Purpose**: Ensure even distribution of work based on specialization and capacity
 
 **Frequency**: Weekly or when assigning new work
-
-**Timeline**: 10-15 minutes per assignment
 
 ```
 Step 1: Analyze New Work
@@ -1758,7 +1751,7 @@ Step 5: Ongoing Monitoring
 Workload Rebalancing Triggers:
 ✓ Team member has > 7 active items
 ✓ Critical new work requires specific specialist
-✓ Items not progressing for > 2 weeks
+✓ Items not progressing
 ✓ Team member requests redistribution
 ✓ Vacation or leave upcoming
 ```
@@ -1771,48 +1764,39 @@ Workload Rebalancing Triggers:
 
 **Stages**: Idea → Fast Research → Decision → Action
 
-**Timeline**: 1-3 days
-
 ```
-Day 1: Rapid Investigation
-├─ Morning: Capture idea and scope research
-│   ├─ Command: /innovation:new-idea [urgent opportunity]
-│   ├─ Command: /innovation:start-research [topic] [idea-name]
-│   ├─ Agent: @research-coordinator
-│   ├─ Time-box: 1 day maximum
-│   └─ Hypothesis: Clear success criteria defined
-├─ Afternoon: Focused investigation
-│   ├─ Research activities:
-│   │   ├─ Microsoft documentation review
-│   │   ├─ Proof-of-concept code (if technical)
-│   │   ├─ Cost estimation
-│   │   ├─ Risk identification
-│   │   └─ Implementation timeline
-│   ├─ Documentation: Real-time in SharePoint/OneNote
-│   └─ Team: Dedicated focus, minimize distractions
-└─ End of Day: Initial findings documented
+Step 1: Rapid Investigation
+├─ Command: /innovation:new-idea [urgent opportunity]
+├─ Command: /innovation:start-research [topic] [idea-name]
+├─ Agent: @research-coordinator
+├─ Hypothesis: Clear success criteria defined
+├─ Research activities:
+│   ├─ Microsoft documentation review
+│   ├─ Proof-of-concept code (if technical)
+│   ├─ Cost estimation
+│   └─ Risk identification
+├─ Documentation: Real-time in SharePoint/OneNote
+└─ Team: Dedicated focus, minimize distractions
 
-Day 2: Viability Assessment
-├─ Morning: Complete research documentation
+Step 2: Viability Assessment
+├─ Complete research documentation
 │   ├─ Key Findings: Documented in Research Hub
 │   ├─ Viability: Preliminary assessment
 │   ├─ Risks: Identified with mitigation strategies
 │   └─ Costs: Detailed breakdown
-├─ Midday: Stakeholder review
+├─ Stakeholder review
 │   ├─ Agent: @viability-assessor
 │   ├─ Present findings to decision makers
 │   ├─ Effort vs. Impact analysis
 │   └─ Go/No-Go recommendation
-└─ Afternoon: Decision point
+└─ Decision point
 
 Decision Outcomes:
 ├─ GO: Build Example immediately
 │   ├─ Command: /innovation:create-build [name] poc
 │   ├─ Fast-track: Skip normal approval process
-│   ├─ Timeline: 1-2 weeks for POC
 │   └─ Success criteria: Defined in research
 ├─ MORE RESEARCH: Needs deeper investigation
-│   ├─ Extend research timeline
 │   ├─ Identify unknowns to address
 │   └─ Schedule follow-up decision point
 └─ NO-GO: Not viable or not worth effort
@@ -1820,15 +1804,14 @@ Decision Outcomes:
     ├─ Command: /knowledge:archive [idea-name] idea
     └─ Learnings: Document why rejected
 
-Day 3: Action (if GO)
+Step 3: Action (if GO)
 ├─ Build Creation: @build-architect
 ├─ GitHub Setup: Repository created
 ├─ Azure Resources: Provisioned if needed
-├─ Team Mobilization: Dedicated POC sprint
-└─ Timeline: 1-2 weeks to working POC
+└─ Team Mobilization: Dedicated POC sprint
 
 Verification:
-✓ Research completed within 1-3 days
+✓ Research completed
 ✓ Decision made with clear rationale
 ✓ If GO: POC development underway
 ✓ If NO-GO: Idea archived with learnings
@@ -1842,10 +1825,8 @@ Verification:
 
 **Stages**: Architecture → Repository → Documentation → Deploy → Track Costs
 
-**Timeline**: 1-6 weeks depending on complexity
-
 ```
-Phase 1: Architecture Design (Day 1-2)
+Phase 1: Architecture Design
 ├─ Command: /innovation:create-build [name] [type]
 ├─ Agent: @build-architect
 ├─ Activities:
@@ -1862,7 +1843,7 @@ Phase 1: Architecture Design (Day 1-2)
 │   └─ GitHub repository URL required
 └─ Next: Repository setup
 
-Phase 2: GitHub Repository Setup (Day 2-3)
+Phase 2: GitHub Repository Setup
 ├─ Agent: @integration-specialist
 ├─ Activities:
 │   ├─ Create repository under github.com/brookside-bi
@@ -1878,7 +1859,7 @@ Phase 2: GitHub Repository Setup (Day 2-3)
 │   └─ Branch strategy documented
 └─ Next: Development environment
 
-Phase 3: Documentation (Day 3-4)
+Phase 3: Documentation
 ├─ Agent: @markdown-expert
 ├─ Technical Documentation Required:
 │   ├─ README.md: Project overview, quick start
@@ -1895,7 +1876,7 @@ Phase 3: Documentation (Day 3-4)
 │   └─ Brookside BI brand voice
 └─ Next: Local development
 
-Phase 4: Development (Week 1-4)
+Phase 4: Development
 ├─ Activities:
 │   ├─ Core functionality implementation
 │   ├─ Unit and integration tests
@@ -1905,11 +1886,10 @@ Phase 4: Development (Week 1-4)
 ├─ Tracking:
 │   ├─ Update Build entry with progress
 │   ├─ Link pull requests
-│   ├─ Document blockers and solutions
-│   └─ Track time spent by team members
+│   └─ Document blockers and solutions
 └─ Next: Azure deployment
 
-Phase 5: Azure Deployment (Week 4-5)
+Phase 5: Azure Deployment
 ├─ Agent: @integration-specialist
 ├─ Azure Resources Setup:
 │   ├─ Resource Group creation
@@ -1932,7 +1912,7 @@ Phase 5: Azure Deployment (Week 4-5)
 │   └─ Rollback procedures documented
 └─ Next: Cost tracking
 
-Phase 6: Cost Tracking & Linking (Week 5-6)
+Phase 6: Cost Tracking & Linking
 ├─ Agent: @cost-analyst
 ├─ Activities:
 │   ├─ Identify ALL software/tools used
@@ -1950,7 +1930,7 @@ Phase 6: Cost Tracking & Linking (Week 5-6)
 ├─ Command: /cost:build-costs [build-name]
 └─ Next: Integration registry
 
-Phase 7: Integration Registry (Week 6)
+Phase 7: Integration Registry
 ├─ Agent: @integration-specialist
 ├─ Activities:
 │   ├─ Create Integration Registry entry
@@ -1978,8 +1958,6 @@ Verification Checklist:
 **Purpose**: Extract and preserve learnings from completed work for organizational knowledge base
 
 **Stages**: Complete Work → Extract Learnings → Archive → Share
-
-**Timeline**: 1-2 hours per item
 
 ```
 Step 1: Identify Completion

@@ -14,7 +14,12 @@
       "Bash(ConvertTo-Json -Depth 10)",
       "Bash(find:*)",
       "Bash(mkdir:*)",
-      "Bash(poetry run python:*)"
+      "Bash(poetry run python:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(npx -y @notionhq/client@latest)",
+      "Bash(gh repo list:*)",
+      "Bash(az bicep build:*)",
+      "Bash(gh auth status:*)"
     ],
     "deny": [],
     "ask": []

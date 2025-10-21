@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "dev"
+    },
+    "prefix": {
+      "value": "myapp"
+    },
+    "location": {
+      "value": "eastus2"
+    },
+    "sqlAdminLogin": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/{subscription-id}/resourceGroups/{kv-rg}/providers/Microsoft.KeyVault/vaults/{kv-name}"
+        },
+        "secretName": "sql-admin-login"
+      }
+    },
+    "sqlAdminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/{subscription-id}/resourceGroups/{kv-rg}/providers/Microsoft.KeyVault/vaults/{kv-name}"
+        },
+        "secretName": "sql-admin-password"
+      }
+    },
+    "runtimeStack": {
+      "value": "PYTHON|3.11"
+    }
+  }
+}
