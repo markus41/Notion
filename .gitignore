@@ -25,3 +25,7 @@ poetry.lock
 .venv/
 env/
 venv/
+
+# MCP Foundry (separate repository)
+mcp-foundry/
+UsersMarkusAhlingNotionmcp-foundry/

@@ -65,7 +65,7 @@
                                            "hooks":  [
                                                          {
                                                              "type":  "command",
-                                                             "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify Messaging.wav\u0027).PlaySync()\""
+                                                             "command":  "powershell -c \"'Notification hook fired' | Out-File C:\\Users\\MarkusAhling\\notification-hook.log -Append; [System.Media.SystemSounds]::Exclamation.Play()\""
                                                          }
                                                      ]
                                        }

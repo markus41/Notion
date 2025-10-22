@@ -119,53 +119,93 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Notion Database Architecture
 
-The workspace consists of 7 interconnected databases:
+The workspace consists of 11 interconnected databases organized into four operational categories:
+
+#### Innovation Pipeline (3 databases)
 
 1. **💡 Ideas Registry** - Innovation starting point
    - Status: Concept | Active | Not Active | Archived
    - Viability: High | Medium | Low | Needs Research
-   - Relations: Research Hub, Example Builds, Software Tracker
+   - Relations: Research Hub, Example Builds, Software Tracker, Agent Registry, Actions Registry
    - Key Rollup: Estimated Cost (from linked software)
 
 2. **🔬 Research Hub** - Feasibility investigation
    - Status: Concept | Active | Not Active | Completed
    - Viability Assessment: Highly Viable | Moderately Viable | Not Viable | Inconclusive
    - Next Steps: Build Example | More Research | Archive | Abandon
-   - Relations: Ideas Registry, Software Tracker
+   - Relations: Ideas Registry, Software Tracker, Agent Registry
 
 3. **🛠️ Example Builds** - Working prototypes/demos
    - Status: Concept | Active | Not Active | Completed | Archived
    - Build Type: Prototype | POC | Demo | MVP | Reference Implementation
    - Viability: Production Ready | Needs Work | Reference Only
    - Reusability: Highly Reusable | Partially Reusable | One-Off
-   - Relations: Ideas Registry, Research Hub, Software Tracker, Knowledge Vault
+   - Relations: Ideas Registry, Research Hub, Software Tracker, Knowledge Vault, Repository Inventory, Agent Registry, Actions Registry, Integration Registry
    - Key Rollup: Total Cost (from linked software)
 
-4. **💰 Software & Cost Tracker** - Financial hub (central cost source)
+#### Knowledge Management (3 databases)
+
+4. **📚 Knowledge Vault** - Archived learnings
+   - Status: Draft | Published | Deprecated | Archived
+   - Content Type: Tutorial | Case Study | Technical Doc | Process | Template | Post-Mortem | Reference
+   - Evergreen/Dated: Categorizes longevity
+   - Relations: Ideas, Research, Builds, Software Tracker, Agent Registry, Actions Registry, Pattern Library
+
+5. **📦 Repository Inventory** - GitHub repository portfolio tracking
+   - Status: Active | Archived | Deprecated
+   - Viability Score: 0-100 (Test Coverage + Activity + Documentation + Dependencies)
+   - Claude Maturity: Expert | Advanced | Intermediate | Basic | None
+   - Reusability: Highly Reusable | Partially Reusable | One-Off
+   - Relations: Example Builds, Software Tracker, Agent Registry, Actions Registry, Pattern Library
+   - Key Metrics: Stars, Forks, Open Issues, Last Pushed Date
+
+6. **🎨 Pattern Library** - Reusable architectural patterns
+   - Status: Active | Deprecated
+   - Pattern Type: Architectural | Design | Integration | Data
+   - Reusability Score: 0-100
+   - Usage Count: Number of repositories using this pattern
+   - Relations: Repository Inventory, Example Builds, Knowledge Vault
+   - Key Properties: Implementation Complexity, Microsoft Alignment
+
+#### Financial Management (1 database)
+
+7. **💰 Software & Cost Tracker** - Financial hub (central cost source)
    - Status: Active | Trial | Inactive | Cancelled
    - Category: Development | Infrastructure | Productivity | Analytics | Communication | Security | Storage | AI/ML | Design
    - Microsoft Service: Azure | M365 | Power Platform | GitHub | Dynamics | None
    - Formulas: Total Monthly Cost = Cost × License Count, Annual Cost = Cost × 12
-   - Relations FROM: All other databases
+   - Relations FROM: All other databases (central cost reference)
 
-5. **📚 Knowledge Vault** - Archived learnings
-   - Status: Draft | Published | Deprecated | Archived
-   - Content Type: Tutorial | Case Study | Technical Doc | Process | Template | Post-Mortem | Reference
-   - Evergreen/Dated: Categorizes longevity
-   - Relations: Ideas, Research, Builds, Software Tracker
+#### Technical Infrastructure (4 databases)
 
-6. **🔗 Integration Registry** - System connections
+8. **🔗 Integration Registry** - System connections
    - Integration Type: API | Webhook | Database | File Sync | Automation | Embed
    - Authentication Method: Azure AD | Service Principal | API Key | OAuth
    - Security Review Status: Approved | Pending | N/A
-   - Relations: Software Tracker, Example Builds
+   - Relations: Software Tracker, Example Builds, Repository Inventory
 
-7. **🎯 OKRs & Strategic Initiatives** - Alignment tracker
+9. **🤖 Agent Registry** - AI agent specialists inventory
+   - Agent Type: Innovation | Research | Build | Cost | Knowledge | Integration | Schema | Workflow | Documentation
+   - Status: Active | Deprecated
+   - Specialization: Primary domain and capabilities
+   - Usage Count: Number of times agent has been invoked
+   - Relations: Ideas Registry, Research Hub, Example Builds, Knowledge Vault, Repository Inventory, Actions Registry
+   - Key Metrics: Success Rate, Average Duration, Files Generated
+
+10. **⚡ Actions Registry** - Slash command workflows
+   - Command Category: Innovation | Autonomous | Repository | Cost | Compliance | Knowledge | Team
+   - Status: Active | Deprecated
+   - Delegates To: Primary and supporting agents
+   - Usage Count: Command invocation frequency
+   - Relations: Agent Registry, Ideas Registry, Example Builds, Knowledge Vault, Repository Inventory
+   - Key Metrics: Success Rate, Average Duration, User Satisfaction
+
+11. **🎯 OKRs & Strategic Initiatives** - Alignment tracker
    - Status: Concept | Active | Not Active | Completed
    - Progress %: 0-100
-   - Relations: Ideas Registry, Example Builds
+   - Relations: Ideas Registry, Example Builds, Agent Registry, Actions Registry
 
-**Database IDs**: After authenticating Notion MCP (restart Claude Code), query the workspace to document actual database IDs for programmatic access.
+**Database IDs**: After authenticating Notion MCP (restart Claude Code), query the workspace to document actual database IDs for programmatic access. See "Notion Workspace Configuration" section for current documented IDs.
 
 ## Notion MCP Commands
 
