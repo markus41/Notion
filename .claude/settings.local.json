@@ -75,7 +75,7 @@
                                    "hooks":  [
                                                  {
                                                      "type":  "command",
-                                                     "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify Calendar.wav\u0027).PlaySync()\""
+                                                     "command":  "powershell -c \"'Stop hook fired' | Out-File C:\\Users\\MarkusAhling\\stop-hook.log -Append; [System.Media.SystemSounds]::Exclamation.Play()\""
                                                  }
                                              ]
                                }

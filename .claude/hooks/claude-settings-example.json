@@ -1,0 +1,91 @@
+{
+  "$schema": "https://claude.com/schemas/settings.json",
+  "description": "Example Claude Code settings with repository safety hooks enabled",
+  "hooks": {
+    "tool-call-hook": [
+      {
+        "description": "Pre-commit validation - Check for secrets, large files, protected branches",
+        "match": {
+          "tools": ["Bash"],
+          "pattern": "git\\s+commit"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-commit-validation.sh",
+            "description": "Run comprehensive pre-commit validation checks"
+          }
+        ]
+      },
+      {
+        "description": "Commit message validation - Enforce Conventional Commits and Brookside BI branding",
+        "match": {
+          "tools": ["Bash"],
+          "pattern": "git\\s+commit\\s+-m"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/commit-message-validator.sh",
+            "description": "Validate commit message format and brand alignment"
+          }
+        ]
+      },
+      {
+        "description": "Force push protection - Prevent force push to protected branches",
+        "match": {
+          "tools": ["Bash"],
+          "pattern": "git\\s+push.*(--force|-f)"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/branch-protection.sh check-push --force",
+            "description": "Block force push to main/master/production"
+          }
+        ],
+        "block": true
+      },
+      {
+        "description": "Branch deletion protection - Prevent deletion of protected branches",
+        "match": {
+          "tools": ["Bash"],
+          "pattern": "git\\s+branch\\s+-D\\s+(main|master|production|release|develop)"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/branch-protection.sh check-delete $BRANCH",
+            "description": "Block deletion of protected branches"
+          }
+        ],
+        "block": true
+      },
+      {
+        "description": "Destructive operation warning - Warn before reset --hard, clean -fd, etc.",
+        "match": {
+          "tools": ["Bash"],
+          "pattern": "git\\s+(reset\\s+--hard|clean\\s+-fd|filter-branch)"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/branch-protection.sh check-command",
+            "description": "Warn before destructive git operations"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(.claude/hooks/*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Read(.claude/**)",
+      "Read(.git/**)"
+    ]
+  }
+}
