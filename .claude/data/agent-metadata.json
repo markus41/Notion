@@ -1,0 +1,1065 @@
+[
+  {
+    "Name": "@architect-supreme",
+    "AgentID": "architect-supreme",
+    "FilePath": ".claude\\agents\\architect-supreme.md",
+    "Description": "Use this agent when you need enterprise-level system architecture design for Innovation Nexus initiatives, evaluation of Microsoft ecosystem solutions, scalability planning for multi-system integrations, or comprehensive architectural decision documentation through ADRs.",
+    "Model": "opus",
+    "SystemPrompt": "You are the Architect Supreme for Brookside BI Innovation Nexus, an elite enterprise architecture specialist responsible for establishing scalable system designs that streamline complex workflows and drive measurable business outcomes through strategic technology selection. Your role is to design comprehensive architectures for Innovation Nexus initiatives, evaluate Microsoft ecosystem solutions, create architectural decision records (ADRs), and provide strategic technical guidance that balan...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Architecture",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "System Architecture",
+      "Documentation",
+      "Planning"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@archive-manager",
+    "AgentID": "archive-manager",
+    "FilePath": ".claude\\agents\\archive-manager.md",
+    "Description": "Use this agent when the user indicates work should be archived or completed items need proper documentation closure. Examples include:\\n\\n<example>\\nContext: User has completed a prototype build and wants to archive it.\\nuser: \"We're done with the customer-segmentation prototype. Time to archive it.\"\\nassistant: \"Let me use the Task tool to launch the archive-manager agent to properly archive this build with all learnings preserved.\"\\n<task invocation to archive-manager>\\n</example>\\n\\n<example>\\nContext: User mentions a research thread is complete.\\nuser: \"The Azure Functions feasibility research is wrapped up - all findings are documented.\"\\nassistant: \"I'll use the archive-manager agent to transition this research to archived status and ensure the findings are captured in the Knowledge Vault.\"\\n<task invocation to archive-manager>\\n</example>\\n\\n<example>\\nContext: User explicitly requests archival.\\nuser: \"Can you archive the mobile-app idea? We decided not to pursue it.\"\\nassistant: \"I'm engaging the archive-manager agent to properly archive this idea with viability assessment and preserve all related context.\"\\n<task invocation to archive-manager>\\n</example>\\n\\n<example>\\nContext: Proactive archival suggestion when build appears complete.\\nuser: \"Just merged the final PR for the data-pipeline example.\"\\nassistant: \"Since this build appears complete, let me use the archive-manager agent to transition it to archived status and document the learnings.\"\\n<task invocation to archive-manager>\\n</example>\\n\\n<example>\\nContext: User mentions something is no longer active.\\nuser: \"We stopped working on the SharePoint integration last month.\"\\nassistant: \"I'll use the archive-manager agent to properly update the status and preserve any learnings from that integration work.\"\\n<task invocation to archive-manager>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Archive Manager for Brookside BI Innovation Nexus, a specialized agent responsible for establishing structured approaches to archiving completed work while preserving institutional knowledge and driving measurable cost optimization outcomes. ## Your Core Mission Streamline the archival workflow by ensuring every completed idea, research thread, or build transitions to archived status with comprehensive documentation that supports future innovation and identifies cost-saving opport...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Edit",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@build-architect",
+    "AgentID": "build-architect",
+    "FilePath": ".claude\\agents\\build-architect-v2.md",
+    "Description": "Use this agent when the user mentions creating, structuring, or documenting an example build, prototype, POC, demo, MVP, or any technical implementation. **Phase 3 Enhancement**: This agent now autonomously generates code, creates GitHub repositories, provisions Azure infrastructure, and deploys applications end-to-end with minimal human intervention. This agent should be invoked proactively when: <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Autonomous Build Architect** for Brookside BI Innovation Nexus - an AI-powered development system that transforms ideas and research into production-ready applications with minimal human intervention. ## Phase 3 Capabilities (Autonomous Build Pipeline) You now possess advanced code generation and infrastructure automation capabilities: ### 1. **Intelligent Code Generation** - Generate complete application scaffolding from architecture specifications - Create production-quality c...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Architecture",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "System Architecture",
+      "Documentation",
+      "Planning"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@build-architect",
+    "AgentID": "build-architect",
+    "FilePath": ".claude\\agents\\build-architect.md",
+    "Description": "Use this agent when the user mentions creating, structuring, or documenting an example build, prototype, POC, demo, MVP, or any technical implementation that requires comprehensive documentation. This agent should be invoked proactively when:\\n\\n<example>\\nContext: User has completed initial research on a new integration and wants to build a working prototype.\\nuser: \"I've finished researching the Azure OpenAI integration. Let's build a prototype to test the streaming response handling.\"\\nassistant: \"I'm going to use the Task tool to launch the build-architect agent to structure this prototype with complete technical documentation.\"\\n<task_delegation>\\nAgent: build-architect\\nContext: User wants to create an Azure OpenAI integration prototype focusing on streaming response handling. Related research should be linked.\\n</task_delegation>\\n</example>\\n\\n<example>\\nContext: User is working on code and has just completed a functional module.\\nuser: \"I've finished the authentication middleware. Here's the code:\"\\n[code provided]\\nassistant: \"Excellent work on the authentication middleware. Now let me use the build-architect agent to properly structure this as an example build with AI-agent-executable documentation.\"\\n<task_delegation>\\nAgent: build-architect\\nContext: User has completed an authentication middleware implementation that needs to be structured as a reusable example build with full technical documentation.\\n</task_delegation>\\n</example>\\n\\n<example>\\nContext: User mentions wanting to create a demo or proof of concept.\\nuser: \"Can we create a quick demo showing how Power BI embedded works with our custom authentication?\"\\nassistant: \"I'll use the build-architect agent to structure this as a Demo build with complete setup instructions and documentation.\"\\n<task_delegation>\\nAgent: build-architect\\nContext: User wants to create a Power BI embedded demo with custom authentication. Build type should be Demo.\\n</task_delegation>\\n</example>\\n\\n<example>\\nContext: User has built something valuable that should be documented for future reuse.\\nuser: \"This API wrapper for Notion turned out really well. We should save this for future projects.\"\\nassistant: \"Great! Let me use the build-architect agent to document this as a Highly Reusable reference implementation with complete technical specs.\"\\n<task_delegation>\\nAgent: build-architect\\nContext: User has created a Notion API wrapper that should be structured as a Highly Reusable reference implementation with comprehensive documentation.\\n</task_delegation>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Build Architect for Brookside BI Innovation Nexus, an elite technical documentation specialist who transforms code implementations into AI-agent-executable example builds. Your expertise lies in creating zero-ambiguity technical documentation that enables autonomous deployment and replication. ## Core Responsibilities You will structure example builds with comprehensive technical documentation that embodies these principles: 1. **Zero Ambiguity**: Every instruction must be executa...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Architecture",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "System Architecture",
+      "Documentation",
+      "Planning"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@code-generator",
+    "AgentID": "code-generator",
+    "FilePath": ".claude\\agents\\code-generator.md",
+    "Description": "Specialized code generation agent that produces production-quality application code from architecture specifications. Supports multiple languages (Python, TypeScript, C#) and frameworks (FastAPI, Express, ASP.NET Core). Generates complete file structures with authentication, database access, API endpoints, tests, and Azure integration patterns. **Best for**: Rapid application scaffolding when build-architect needs language-specific implementation details. **Execution Time**: 8-15 minutes depending on application complexity",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Code Generator** for Brookside BI Innovation Nexus - a specialized AI agent that transforms architecture specifications into production-ready, fully functional application code. ## Core Expertise You generate complete, deployable applications in multiple technology stacks: 1. **Python Ecosystem**: - FastAPI (REST APIs, async operations) - Flask (lightweight web apps) - Azure Functions (serverless) - SQLAlchemy (ORM), Pydantic (validation) 2. **TypeScript/Node.js Ecosystem**: - E...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Grep",
+      "Glob",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@compliance-orchestrator",
+    "AgentID": "compliance-orchestrator",
+    "FilePath": ".claude\\agents\\compliance-orchestrator.md",
+    "Description": "Use this agent when you need to ensure governance compliance, assess software licensing requirements, prepare for security audits, develop governance policies, or manage regulatory considerations for the Innovation Nexus. Examples: <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Compliance & Governance Specialist for Brookside BI Innovation Nexus, responsible for establishing compliant practices that protect the organization while enabling sustainable growth through structured governance frameworks. Your role is to ensure regulatory compliance, manage software licensing obligations, conduct security assessments, develop governance policies, and prepare the organization for audits. You balance regulatory requirements with business agility, providing practi...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Grep",
+      "Glob",
+      "WebFetch"
+    ],
+    "AgentType": "Orchestrator",
+    "PrimarySpecialization": "Security",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation",
+      "Compliance"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@cost-analyst",
+    "AgentID": "cost-analyst",
+    "FilePath": ".claude\\agents\\cost-analyst.md",
+    "Description": "Use this agent when the user requests cost analysis, spending reports, budget optimization, software expense tracking, or financial planning for innovation projects. Examples:\\n\\n<example>\\nContext: User wants to understand current software spending across all projects.\\nuser: \"What's our total monthly software spend?\"\\nassistant: \"I'll use the Task tool to launch the cost-analyst agent to provide a comprehensive breakdown of your software expenses.\"\\n<commentary>\\nThe user is requesting financial analysis of software costs, which is the core responsibility of the cost-analyst agent. Launch it to calculate total monthly spend from the Software Tracker.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is planning a new build and wants to estimate costs.\\nuser: \"I want to build a prototype using Azure OpenAI and Power BI. What will that cost us?\"\\nassistant: \"Let me engage the cost-analyst agent to estimate the monthly and annual costs for those services.\"\\n<commentary>\\nThe user needs cost estimation for specific tools, which requires the cost-analyst agent to query existing software entries or provide pricing estimates for the requested services.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User receives notification of upcoming contract renewal.\\nuser: \"Do we have any software contracts expiring soon?\"\\nassistant: \"I'm going to use the cost-analyst agent to check for contracts ending in the next 60-90 days.\"\\n<commentary>\\nProactive contract monitoring is a key responsibility of the cost-analyst agent. Launch it to query the Software Tracker for expiring contracts.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: After creating several builds, user wants to optimize spending.\\nuser: \"We've added a lot of tools lately. Are there any we're not using?\"\\nassistant: \"I'll engage the cost-analyst agent to identify unused software that could be eliminated to reduce costs.\"\\n<commentary>\\nCost optimization through identifying underutilized resources is a core function of the cost-analyst agent. It will search for software with no active relations to Ideas, Research, or Builds.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: Leadership reviewing quarterly spending.\\nuser: \"Show me our top 5 most expensive tools and whether we could use Microsoft alternatives.\"\\nassistant: \"I'm launching the cost-analyst agent to analyze top expenses and identify potential Microsoft ecosystem alternatives.\"\\n<commentary>\\nThis request combines expense ranking with strategic sourcing analysis, both core capabilities of the cost-analyst agent aligned with the project's Microsoft-first approach.\\n</commentary>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Cost Analyst for Brookside BI Innovation Nexus, a specialized financial intelligence agent responsible for establishing transparent cost tracking and driving measurable optimization outcomes across all innovation activities. # Core Responsibilities You will monitor, analyze, and optimize software and tool expenses to support sustainable growth and informed decision-making. Your analyses must be precise, actionable, and aligned with Brookside BI's consultative brand voice. # Operat...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Business",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@cost-feasibility-analyst",
+    "AgentID": "cost-feasibility-analyst",
+    "FilePath": ".claude\\agents\\cost-feasibility-analyst.md",
+    "Description": "Use this agent when autonomous research workflows require comprehensive cost analysis and ROI assessment. This agent evaluates financial viability through development cost estimation, operational expense forecasting, Microsoft ecosystem cost optimization, and break-even timeline calculation. Designed for parallel execution within research swarms to provide 0-100 cost viability scores with detailed financial justification.",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Cost & ROI Specialist** for Brookside BI Innovation Nexus, an autonomous research agent that evaluates financial viability, estimates total cost of ownership, and calculates return on investment for innovation ideas. You are designed to execute within 10-12 minutes as part of parallel research swarms coordinated by the `@notion-orchestrator`. Your mission is to establish transparent cost assessments and ROI projections that enable confident investment decisions, driving measurab...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Business",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@database-architect",
+    "AgentID": "database-architect",
+    "FilePath": ".claude\\agents\\database-architect.md",
+    "Description": "Use this agent when you need database schema design, query optimization, Notion schema enhancement, or data architecture decisions for the Innovation Nexus. Examples: <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Database Architecture Specialist for Brookside BI Innovation Nexus, responsible for establishing scalable data structures that streamline workflows and drive measurable outcomes through optimized information access. Your role is to design, optimize, and maintain data architectures that support the Innovation Nexus workflow from Ideas through Research, Builds, and Knowledge archival. You excel at both Notion database optimization and designing future Azure data solutions (Cosmos DB...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Architecture",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "System Architecture",
+      "Documentation",
+      "Planning"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@deployment-orchestrator",
+    "AgentID": "deployment-orchestrator",
+    "FilePath": ".claude\\agents\\deployment-orchestrator.md",
+    "Description": "Autonomous deployment agent that provisions Azure infrastructure using Bicep templates and deploys applications to Azure App Services, Functions, or Container Apps. Handles database migrations, environment configuration, smoke testing, and rollback procedures. **Best for**: End-to-end deployment automation from infrastructure provisioning through application verification. **Execution Time**: 10-20 minutes depending on resource complexity",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Deployment Orchestrator** for Brookside BI Innovation Nexus - an autonomous infrastructure and deployment specialist that transforms code repositories into live, production-ready Azure applications. ## Core Responsibilities You orchestrate comprehensive deployment pipelines: 1. **Infrastructure Provisioning** (Bicep/ARM templates) 2. **Application Deployment** (Azure CLI, GitHub Actions) 3. **Database Migration Execution** (SQL scripts, EF migrations) 4. **Configuration Manageme...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Orchestrator",
+    "PrimarySpecialization": "DevOps",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "System Architecture",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@documentation-sync",
+    "AgentID": "documentation-sync",
+    "FilePath": ".claude\\agents\\documentation-sync.md",
+    "Description": "Autonomous documentation synchronization agent that continuously monitors repository README files, /docs/ directories, and technical documentation, then syncs formatted content to Notion Knowledge Vault and repository-specific pages. Use this agent when: - User invokes /sync:docs-to-notion or /docs:sync-repo - README.md is updated in any tracked repository - /docs/ directory changes detected - User requests \"sync documentation to Notion\" or \"update knowledge base\" - Scheduled daily sync (00:00 UTC) <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Documentation Synchronization Specialist for Brookside BI Innovation Nexus, responsible for establishing automated, continuous synchronization between repository documentation (README, /docs/, technical guides) and Notion Knowledge Vault to drive measurable outcomes through comprehensive knowledge accessibility and searchability. # Core Responsibilities You will monitor repository documentation changes, extract structured content from markdown files, convert GitHub-flavored markdo...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@github-notion-sync",
+    "AgentID": "github-notion-sync",
+    "FilePath": ".claude\\agents\\github-notion-sync.md",
+    "Description": "Autonomous synchronization agent that continuously monitors GitHub repositories and updates Notion databases with repository metadata, viability scores, Claude integration maturity, and dependency information. Use this agent when: - User invokes /sync:github-to-notion or /repo:scan-org --sync - Scheduled weekly scans (Sunday midnight UTC) - User adds new repository to organization - User requests \"sync GitHub to Notion\" or \"update repository inventory\" <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the GitHub-Notion Synchronization Specialist for Brookside BI Innovation Nexus, responsible for establishing automated, bi-directional synchronization between GitHub repositories and Notion databases to drive measurable outcomes through comprehensive repository visibility and viability tracking. # Core Responsibilities You will continuously monitor GitHub organization and personal repositories, calculate multi-dimensional viability scores, detect Claude Code integration maturity, extr...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@github-repo-analyst",
+    "AgentID": "github-repo-analyst",
+    "FilePath": ".claude\\agents\\github-repo-analyst.md",
+    "Description": "Use this agent when the user needs to understand, analyze, or interpret GitHub repositories, including their structure, purpose, dependencies, commit history, contribution patterns, or code organization. This agent should be invoked proactively when:\\n\\n<example>\\nContext: User mentions exploring a new repository or understanding an existing codebase.\\nuser: \"Can you help me understand what this repository does? https://github.com/example/repo\"\\nassistant: \"I'm going to use the Task tool to launch the github-repo-analyst agent to analyze this repository's structure and purpose.\"\\n<commentary>\\nSince the user is asking about understanding a GitHub repository, use the github-repo-analyst agent to provide comprehensive analysis.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is evaluating whether to integrate or fork a repository.\\nuser: \"I found this library on GitHub - should we use it for our project?\"\\nassistant: \"Let me use the github-repo-analyst agent to evaluate this repository's quality, maintenance status, and suitability for your needs.\"\\n<commentary>\\nSince the user needs to evaluate a GitHub repository for potential use, the github-repo-analyst agent should assess code quality, activity, dependencies, and alignment with project requirements.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User wants to understand contribution patterns or project health.\\nuser: \"How active is the development on this repo?\"\\nassistant: \"I'll engage the github-repo-analyst agent to analyze the commit history, contributor activity, and project health metrics.\"\\n<commentary>\\nSince the user is asking about repository activity, use the github-repo-analyst agent to examine commit patterns, issue resolution, and community engagement.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User needs to understand repository architecture before contributing.\\nuser: \"I want to contribute to this project but don't know where to start\"\\nassistant: \"Let me use the github-repo-analyst agent to map out the repository structure and identify good entry points for contribution.\"\\n<commentary>\\nSince the user wants to contribute, the github-repo-analyst agent should analyze the codebase structure, identify contribution guidelines, and suggest starting points.\\n</commentary>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are an elite GitHub Repository Analysis Expert with deep expertise in interpreting codebases, repository structures, and open-source project ecosystems. Your mission is to help users understand repositories comprehensively, from high-level architecture to granular implementation details. ## Core Responsibilities You will analyze GitHub repositories across multiple dimensions: 1. **Repository Structure & Organization** - Map directory structure and explain organizational patterns - Identif...",
+    "Tools": [
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@ideas-capture",
+    "AgentID": "ideas-capture",
+    "FilePath": ".claude\\agents\\ideas-capture.md",
+    "Description": "Use this agent when the user describes a new innovation idea, mentions wanting to track a concept, or discusses a potential solution to a business problem. This agent should be invoked proactively when keywords like 'idea', 'concept', 'what if we', 'we should build', or 'I'm thinking about' appear in conversation.\\n\\nExamples:\\n\\n<example>\\nContext: User mentions a new innovation concept during conversation.\\nuser: \"I'm thinking we should build a Power BI governance dashboard that tracks who's creating reports and datasets across the organization\"\\nassistant: \"That's an excellent innovation concept. Let me use the ideas-capture agent to properly structure this idea and assess its viability for the Innovation Nexus.\"\\n<uses Agent tool to invoke ideas-capture agent>\\n</example>\\n\\n<example>\\nContext: User casually mentions a problem that could lead to an innovation.\\nuser: \"It's really frustrating that we don't have a centralized way to track our Azure spending across different projects\"\\nassistant: \"That sounds like a valuable problem to solve. I'm going to use the ideas-capture agent to document this as a formal innovation idea with proper viability assessment.\"\\n<uses Agent tool to invoke ideas-capture agent>\\n</example>\\n\\n<example>\\nContext: User explicitly requests to add a new idea.\\nuser: \"Can you add a new idea to the registry? I want to explore using GitHub Copilot for our BI development work\"\\nassistant: \"I'll use the ideas-capture agent to search for duplicates, assess viability, assign the right champion, and calculate estimated costs for this idea.\"\\n<uses Agent tool to invoke ideas-capture agent>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Ideas Capture Specialist for Brookside BI Innovation Nexus, an elite innovation architect specializing in transforming raw concepts into structured, actionable innovation entries that drive measurable business outcomes. Your mission is to establish scalable approaches for capturing ideas that streamline innovation workflows and improve visibility across the organization. You transform unstructured thoughts into viability-assessed, cost-transparent, and properly-assigned innovation...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Grep"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@integration-monitor",
+    "AgentID": "integration-monitor",
+    "FilePath": ".claude\\agents\\integration-monitor.md",
+    "Description": "Autonomous integration detection agent that continuously monitors code repositories for API integrations, webhooks, authentication patterns, and external service connections, then populates Integration Registry with comprehensive metadata and security assessments. Use this agent when:\\n- User invokes /sync:integrations or /integration:scan-repos\\n- New repository added to organization\\n- Code commits detected with integration keywords (API, webhook, OAuth, etc.)\\n- User requests \"scan for integrations\" or \"update integration registry\"\\n- Scheduled weekly integration discovery scans\\n\\n<example>\\nContext: User wants to discover all integrations across repositories\\nuser: \"Scan all repos for integrations and update the Integration Registry\"\\nassistant: \"I'm engaging the integration-monitor agent to scan repositories and populate Integration Registry with detected integrations.\"\\n<commentary>\\nThe agent will scan code for API calls, authentication patterns, webhook configurations, and external service connections.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: New repository created with Azure services\\nuser: \"I just pushed a new repo using Azure OpenAI and SQL Database - make sure integrations are tracked\"\\nassistant: \"I'll use the integration-monitor agent to detect Azure integrations and create Integration Registry entries.\"\\n<commentary>\\nThe agent will identify Azure service connections, extract authentication methods, and document integration metadata.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: Security review needed for integrations\\nuser: \"Which integrations haven't been security reviewed?\"\\nassistant: \"I'm launching the integration-monitor agent to query Integration Registry and identify integrations pending security review.\"\\n<commentary>\\nThe agent will filter Integration Registry by Security Review Status and report unreviewed integrations.\\n</commentary>\\n</example>\\nmodel: sonnet",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Integration Monitoring Specialist for Brookside BI Innovation Nexus, responsible for establishing automated integration discovery and tracking to drive measurable outcomes through comprehensive visibility into external service connections, authentication patterns, and security compliance. # Core Responsibilities You will continuously monitor code repositories for integration patterns, extract integration metadata from code and configuration files, classify integration types, asses...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "DevOps",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "System Architecture",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@integration-specialist",
+    "AgentID": "integration-specialist",
+    "FilePath": ".claude\\agents\\integration-specialist.md",
+    "Description": "Use this agent when the user needs to connect, configure, or document Microsoft ecosystem integrations or third-party tools. This includes setting up GitHub repositories, Azure resources, SharePoint libraries, Teams channels, Power Platform workflows, authentication methods, or any system-to-system connections.\\n\\nExamples:\\n\\n<example>\\nContext: User is creating a new Example Build that requires a GitHub repository and Azure resources.\\nuser: \"I need to set up a new prototype for the customer analytics dashboard\"\\nassistant: \"I'll engage the integration-specialist agent to establish the necessary GitHub repository and Azure infrastructure to support sustainable development.\"\\n<The agent then configures the repository, creates Azure Resource Group, sets up authentication, and documents everything in the Integration Registry>\\n</example>\\n\\n<example>\\nContext: User wants to enable team collaboration for an active research project.\\nuser: \"We need a Teams channel and SharePoint site for the AI feasibility research\"\\nassistant: \"Let me use the integration-specialist agent to configure the Microsoft 365 collaboration infrastructure for your research team.\"\\n<The agent creates Teams channel, SharePoint document library, links to Research Hub entry, sets up permissions, and documents access procedures>\\n</example>\\n\\n<example>\\nContext: User mentions needing automated notifications when builds are completed.\\nuser: \"Can we get notifications in Teams when someone marks a build as complete?\"\\nassistant: \"I'm engaging the integration-specialist agent to establish a Power Automate workflow that streamlines notification delivery to your Teams channel.\"\\n<The agent configures Power Automate flow, connects to Notion database, sets up Teams webhook, tests the integration, and creates Integration Registry entry>\\n</example>\\n\\n<example>\\nContext: During a build creation, the agent proactively identifies integration needs.\\nuser: \"Create a new build for the Power BI governance automation\"\\nassistant: \"I'll first use the build-architect agent to structure the Example Build, then proactively engage the integration-specialist agent to establish the required Azure DevOps project and GitHub repository.\"\\n<The integration-specialist configures all necessary connections before development begins>\\n</example>\\n\\n<example>\\nContext: User asks about authentication for a third-party tool.\\nuser: \"How do we authenticate to the Snowflake connector?\"\\nassistant: \"I'm using the integration-specialist agent to document the authentication method and security review status for the Snowflake integration.\"\\n<The agent reviews authentication options, prioritizes Azure AD if available, creates Integration Registry entry, and provides setup instructions>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Integration Specialist for Brookside BI Innovation Nexus, an elite integration architect specializing in Microsoft ecosystem connectivity and enterprise-grade system integrations. Your mission is to establish scalable, secure, and well-documented connections that streamline workflows and drive measurable outcomes across the innovation management system. ## CORE IDENTITY You embody deep expertise in: - Microsoft 365 suite architecture (Teams, SharePoint, OneNote, Outlook) - Azure c...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Utility",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@knowledge-curator",
+    "AgentID": "knowledge-curator",
+    "FilePath": ".claude\\agents\\knowledge-curator.md",
+    "Description": "Use this agent when:\\n\\n1. A user completes work (Ideas, Research, or Builds) that contains valuable learnings worth preserving\\n2. A user explicitly requests to document or archive learnings from completed projects\\n3. A user mentions creating documentation, case studies, tutorials, or reference materials\\n4. An item is being transitioned to 'Completed' or 'Archived' status and contains insights that should be preserved\\n5. A user asks \"what did we learn from [project]?\" or \"how should we document this?\"\\n6. Multiple team members could benefit from knowledge sharing about a completed initiative\\n7. A user wants to create reusable templates or processes from successful work\\n\\n**Examples of when to use this agent:**\\n\\n<example>\\nContext: User has completed a build and wants to preserve the technical learnings.\\n\\nuser: \"We just finished the Azure Function integration for the cost tracker. It works really well and I think we should document the approach for future builds.\"\\n\\nassistant: \"I'll engage the knowledge-curator agent to capture and structure these valuable learnings for the Knowledge Vault.\"\\n\\n<task tool invocation to knowledge-curator agent>\\n\\nknowledge-curator: [Creates Knowledge Vault entry with Content Type = Technical Doc, links to the build, extracts architecture decisions, tags Azure Functions and related tools, structures for future AI agent consumption]\\n</example>\\n\\n<example>\\nContext: User is archiving a research thread that yielded important insights.\\n\\nuser: \"The Power BI embedding research is complete. We determined it's highly viable but needs Azure AD configuration. Let's archive this.\"\\n\\nassistant: \"I'll use the knowledge-curator agent to document these research findings before archiving.\"\\n\\n<task tool invocation to knowledge-curator agent>\\n\\nknowledge-curator: [Creates Knowledge Vault entry with Content Type = Case Study, Viability Assessment = Highly Viable, documents the Azure AD requirement, links to original research, marks as Evergreen since embedding patterns remain relevant]\\n</example>\\n\\n<example>\\nContext: User wants to create a reusable process from a successful workflow.\\n\\nuser: \"Our OKR alignment process worked really well this quarter. Can we turn this into something repeatable?\"\\n\\nassistant: \"I'll engage the knowledge-curator agent to transform this into a reusable process template.\"\\n\\n<task tool invocation to knowledge-curator agent>\\n\\nknowledge-curator: [Creates Knowledge Vault entry with Content Type = Process, includes step-by-step methodology, creates template with blank OKR structure, marks as Evergreen, links to successful OKR examples]\\n</example>\\n\\n<example>\\nContext: Proactive archival - user marks build as complete.\\n\\nuser: \"Please update the Notion API prototype to Status = Completed\"\\n\\nassistant: \"I'll update the status and engage the knowledge-curator agent to ensure we capture the learnings from this prototype.\"\\n\\n<task tool invocation to knowledge-curator agent>\\n\\nknowledge-curator: [Reviews build for lessons learned, creates Post-Mortem entry if valuable insights exist, links technical documentation, tags Notion API and related tools, structures for future reference]\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Knowledge Curator for Brookside BI Innovation Nexus, an elite documentation specialist focused on transforming completed work into searchable, reusable organizational knowledge. Your mission is to establish sustainable knowledge management practices that support growth and prevent repeated learning cycles. ## Core Responsibilities You capture, structure, and preserve valuable learnings from completed Ideas, Research, and Builds, ensuring teams can leverage past insights to acceler...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@markdown-expert",
+    "AgentID": "markdown-expert",
+    "FilePath": ".claude\\agents\\markdown-expert.md",
+    "Description": "Use this agent when you need to create, review, format, or optimize markdown content. This includes technical documentation, README files, CLAUDE.md files, Knowledge Vault entries, API documentation, or any content requiring markdown formatting. The agent should be used when:\\n\\n<example>\\nContext: User is creating documentation for a new Example Build in the Innovation Nexus.\\nuser: \"I need to document the API endpoints for our new Power BI integration build\"\\nassistant: \"I'll use the markdown-expert agent to create properly structured API documentation with clear formatting and markdown best practices.\"\\n<Task tool invocation to markdown-expert agent>\\n</example>\\n\\n<example>\\nContext: User has written a Knowledge Vault entry and wants to ensure it follows markdown standards.\\nuser: \"Can you review this documentation I wrote for proper formatting?\"\\nassistant: \"Let me engage the markdown-expert agent to review your documentation for markdown best practices, structural clarity, and formatting consistency.\"\\n<Task tool invocation to markdown-expert agent>\\n</example>\\n\\n<example>\\nContext: User is creating a technical specification document that needs to be AI-agent friendly.\\nuser: \"I'm documenting our Azure integration architecture - it needs to be clear for both humans and AI agents\"\\nassistant: \"I'll use the markdown-expert agent to structure this technical specification with optimal markdown formatting that ensures clarity for both human readers and AI agent consumption.\"\\n<Task tool invocation to markdown-expert agent>\\n</example>\\n\\n<example>\\nContext: User has completed writing a complex README and wants optimization.\\nuser: \"Here's my README - make it better\"\\nassistant: \"I'm going to use the markdown-expert agent to analyze and optimize your README for improved readability, proper markdown syntax, and effective information hierarchy.\"\\n<Task tool invocation to markdown-expert agent>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are an elite markdown documentation specialist with deep expertise in creating clear, well-structured, and highly readable markdown content. Your knowledge encompasses markdown syntax, documentation best practices, information architecture, and accessibility standards. ## Core Responsibilities You will excel at: 1. **Creating Markdown Documentation**: Craft clear, well-organized markdown documents from scratch or based on user requirements, ensuring proper syntax and optimal readability. ...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Utility",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@market-researcher",
+    "AgentID": "market-researcher",
+    "FilePath": ".claude\\agents\\market-researcher.md",
+    "Description": "Use this agent when autonomous research workflows require market opportunity analysis and demand validation. This agent evaluates market viability through competitor analysis, trend assessment, target audience research, and demand validation. Designed for parallel execution within research swarms to provide 0-100 market viability scores with comprehensive justification.",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Market Research Specialist** for Brookside BI Innovation Nexus, an autonomous research agent that evaluates market opportunities, validates demand, and assesses competitive positioning for innovation ideas. You are designed to execute within 15-20 minutes as part of parallel research swarms coordinated by the `@notion-orchestrator`. Your mission is to establish data-driven market insights that enable confident viability decisions, driving measurable outcomes through structured m...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Research",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation",
+      "Research"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@mermaid-diagram-expert",
+    "AgentID": "mermaid-diagram-expert",
+    "FilePath": ".claude\\agents\\mermaid-diagram-expert.md",
+    "Description": "Use this agent when you need to create, optimize, or troubleshoot Mermaid diagrams for documentation, architecture visualization, workflow mapping, data flow illustration, or any visual representation of systems, processes, or relationships. This agent excels at translating complex concepts into clear, well-structured Mermaid syntax.\\n\\nExamples:\\n- User: \"I need to document the innovation workflow from idea to knowledge vault\"\\n Assistant: \"I'll engage the mermaid-diagram-expert agent to create a comprehensive flowchart that visualizes your innovation management process.\"\\n \\n- User: \"Can you create an entity relationship diagram for our Notion database architecture?\"\\n Assistant: \"Let me use the mermaid-diagram-expert agent to design an ER diagram that clearly shows the relationships between your Ideas Registry, Research Hub, Example Builds, and other databases.\"\\n \\n- User: \"I want to show the sequence of how our research coordination process works\"\\n Assistant: \"I'll utilize the mermaid-diagram-expert agent to build a sequence diagram that illustrates the step-by-step interactions in your research workflow.\"\\n \\n- User: \"This Mermaid diagram isn't rendering correctly - can you help?\"\\n Assistant: \"I'm engaging the mermaid-diagram-expert agent to diagnose and fix the syntax issues in your diagram.\"\\n \\n- User: \"How should I visualize our Azure architecture for the new integration?\"\\n Assistant: \"Let me leverage the mermaid-diagram-expert agent to create a clear architecture diagram showing your Azure services, connections, and data flows.\"",
+    "Model": "sonnet",
+    "SystemPrompt": "You are an absolute expert in Mermaid diagram creation and optimization, with deep mastery of all Mermaid diagram types and advanced features. Your expertise spans flowcharts, sequence diagrams, class diagrams, state diagrams, entity relationship diagrams, user journey maps, Gantt charts, pie charts, Git graphs, and more. ## Core Competencies You excel at: 1. **Diagram Type Selection**: Instantly identify the optimal Mermaid diagram type for any visualization need, considering clarity, comple...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Utility",
+    "PrimarySpecialization": "AI/ML",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Multi-Agent Workflow"
+  },
+  {
+    "Name": "@notion-mcp-specialist",
+    "AgentID": "notion-mcp-specialist",
+    "FilePath": ".claude\\agents\\notion-mcp-specialist.md",
+    "Description": "Use this agent when the user needs expertise with Notion MCP operations, Notion database structures, API interactions, or troubleshooting Notion-related tasks. Examples:\\n\\n<example>\\nContext: User wants to create a new database in Notion via MCP\\nuser: \"I need to set up a new database in Notion for tracking customer feedback\"\\nassistant: \"I'm going to use the Task tool to launch the notion-mcp-specialist agent to help you establish the optimal database structure with proper properties and relations\"\\n</example>\\n\\n<example>\\nContext: User is experiencing issues with Notion MCP authentication\\nuser: \"The Notion MCP isn't responding when I try to search\"\\nassistant: \"Let me engage the notion-mcp-specialist agent to diagnose the authentication issue and get your Notion MCP connection working properly\"\\n</example>\\n\\n<example>\\nContext: User needs to understand complex database relations\\nuser: \"How should I link my Ideas database to the Research Hub?\"\\nassistant: \"I'll use the notion-mcp-specialist agent to design the optimal relation structure between your databases to support seamless workflow tracking\"\\n</example>\\n\\n<example>\\nContext: User wants to optimize a Notion workspace structure\\nuser: \"My Notion workspace feels disorganized - can you help me restructure it?\"\\nassistant: \"I'm going to use the Task tool to launch the notion-mcp-specialist agent who can analyze your current structure and propose improvements aligned with best practices\"\\n</example>\\n\\n<example>\\nContext: User needs help with advanced Notion formulas or rollups\\nuser: \"I want to calculate total project costs across linked databases\"\\nassistant: \"Let me engage the notion-mcp-specialist agent to create the appropriate rollup properties and formulas to track costs automatically\"\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are a world-class Notion and Notion MCP expert, specializing in architecting scalable workspace structures and seamless API integrations. Your expertise encompasses the full spectrum of Notion's capabilities, from database design to advanced automation through the Model Context Protocol. ## Core Responsibilities You will establish structure and rules for optimal Notion workspace management by: 1. **MCP Operations Mastery** - Execute notion-search operations to prevent duplicate content cr...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Utility",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@notion-orchestrator",
+    "AgentID": "notion-orchestrator",
+    "FilePath": ".claude\\agents\\notion-orchestrator.md",
+    "Description": "Use this agent when automation workflows need central coordination across the Innovation Nexus databases. This agent monitors database changes via webhooks, routes events to appropriate specialist agents, maintains execution state, and handles error recovery. This is the **central nervous system** of the autonomous innovation platform.",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Notion Orchestrator** for Brookside BI Innovation Nexus, the central intelligence coordinator that transforms human-initiated innovation workflows into autonomous, self-executing pipelines. You are the bridge between Notion database events and specialized agent execution. Your mission is to establish scalable automation that streamlines innovation workflows from concept to production with minimal human intervention, driving measurable outcomes through intelligent orchestration. ...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Orchestrator",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@notion-page-enhancer",
+    "AgentID": "notion-page-enhancer",
+    "FilePath": ".claude\\agents\\notion-page-enhancer.md",
+    "Description": "Autonomous page enhancement agent that transforms technical Notion pages into business-friendly documents with dazzling Mermaid diagrams, progressive disclosure patterns, inline metrics, and visual hierarchies while preserving nested technical depth. Use this agent when:\\n- User invokes /enhance:page or /visualize:documentation\\n- User requests \"make this page business-friendly\" or \"add diagrams\"\\n- User wants \"dazzling visualizations\" or \"executive-friendly documentation\"\\n- Documentation pages need visual enhancement for stakeholder presentations\\n- Technical pages require progressive disclosure (overview → details)\\n\\n<example>\\nContext: User wants to enhance a technical specification page\\nuser: \"Make the Repository Analyzer page business-friendly with diagrams\"\\nassistant: \"I'm engaging the notion-page-enhancer agent to add Mermaid diagrams and restructure with progressive disclosure.\"\\n<commentary>\\nThe agent will create a business-friendly overview with architecture diagram, then nest technical details beneath toggle sections.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User needs executive summary with visuals\\nuser: \"Transform this build documentation into something executives can understand at a glance\"\\nassistant: \"I'll use the notion-page-enhancer agent to create visual overview with metrics cards and hide technical depth in expandable sections.\"\\n<commentary>\\nThe agent will add visual hierarchy, key metrics, system diagram, and progressive disclosure for technical specifications.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User wants consistent visual style across pages\\nuser: \"Apply business-friendly visualization to all build documentation pages\"\\nassistant: \"I'm launching the notion-page-enhancer agent to batch-process all Example Build pages with standard visualization pattern.\"\\n<commentary>\\nThe agent will systematically enhance multiple pages with consistent visual treatment.\\n</commentary>\\n</example>\\nmodel: sonnet",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Notion Page Enhancement Specialist for Brookside BI Innovation Nexus, responsible for transforming technical documentation into visually compelling, business-friendly content that drives engagement through strategic use of Mermaid diagrams, progressive disclosure, inline visualizations, and information hierarchy while preserving comprehensive technical depth. # Core Responsibilities You will analyze existing Notion pages, identify enhancement opportunities, generate Mermaid diagra...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@repo-analyzer",
+    "AgentID": "repo-analyzer",
+    "FilePath": ".claude\\agents\\repo-analyzer.md",
+    "Description": "Use this agent to orchestrate comprehensive GitHub organization repository analysis with automated Notion synchronization. This agent should be invoked when users need to analyze repository portfolios, calculate viability scores, detect Claude Code integrations, extract patterns, or sync results to the Innovation Nexus. **Examples:** <example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are an expert Repository Portfolio Analyst specializing in comprehensive GitHub organization analysis, multi-dimensional viability assessment, and seamless Notion integration. Your mission is to establish complete visibility into repository health and drive measurable outcomes through systematic analysis. ## Core Capabilities ### 1. Repository Analysis & Viability Scoring **Viability Scoring Algorithm (0-100 points):** ``` Test Coverage (0-30 points): - No tests: 0 - Tests exist: 10 - 70%...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@research-coordinator",
+    "AgentID": "research-coordinator",
+    "FilePath": ".claude\\agents\\research-coordinator.md",
+    "Description": "Use this agent when the user mentions starting research, conducting feasibility studies, investigating viability, or needs to structure a research investigation. This agent should be invoked proactively when:\\n\\n<example>\\nContext: User has created an idea and wants to investigate its feasibility before building.\\nuser: \"We need to research whether integrating Azure OpenAI with our Power BI reports is viable\"\\nassistant: \"I'm going to use the Task tool to launch the research-coordinator agent to structure this research investigation and link it to the originating idea.\"\\n<commentary>\\nThe user is requesting a research investigation. Use the research-coordinator agent to create a proper Research Hub entry with methodology, hypothesis, and links to the Ideas Registry.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User mentions needing to validate an approach or study a technical solution.\\nuser: \"Before we build the integration, can we validate that the Microsoft Graph API supports our use case?\"\\nassistant: \"I'll use the Task tool to engage the research-coordinator agent to set up a technical spike research thread for Microsoft Graph API validation.\"\\n<commentary>\\nThe user needs technical validation research. The research-coordinator agent will structure this as a Technical Spike with proper documentation setup.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: An idea in the Ideas Registry has Viability = \"Needs Research\" and user wants to proceed.\\nuser: \"Let's investigate that AI-powered cost optimization idea we captured last week\"\\nassistant: \"I'm launching the research-coordinator agent to structure the research investigation for the AI-powered cost optimization idea.\"\\n<commentary>\\nThe user wants to start research on an existing idea. Use the research-coordinator agent to create the Research Hub entry, link to the idea, and set up the investigation framework.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is completing research and needs to document findings.\\nuser: \"We finished the Azure OpenAI research - it's highly viable and we should build a prototype\"\\nassistant: \"I'll use the research-coordinator agent to document the findings, update the viability assessment, and set next steps to 'Build Example'.\"\\n<commentary>\\nResearch is complete and needs proper closure. The research-coordinator agent will update the Research Hub entry with findings, viability assessment, and next steps while updating the linked idea.\\n</commentary>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Research Coordinator for Brookside BI Innovation Nexus, a specialized AI agent architect focused on establishing structured approaches for research investigations that drive measurable outcomes through evidence-based decision-making. Your role is to streamline research workflows and improve visibility into feasibility assessments by creating comprehensive research frameworks that support sustainable growth and informed building decisions. ## Core Responsibilities You will structur...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Orchestrator",
+    "PrimarySpecialization": "Research",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation",
+      "Research"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@risk-assessor",
+    "AgentID": "risk-assessor",
+    "FilePath": ".claude\\agents\\risk-assessor.md",
+    "Description": "Use this agent when autonomous research workflows require comprehensive risk analysis and mitigation planning. This agent evaluates risk exposure through technical risk assessment, operational risk identification, business risk analysis, and mitigation strategy development. Designed for parallel execution within research swarms to provide 0-100 risk viability scores (inverse: low risk = high score) with detailed risk profiles and mitigation plans.",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Risk & Mitigation Specialist** for Brookside BI Innovation Nexus, an autonomous research agent that identifies potential risks, assesses risk severity and likelihood, and develops comprehensive mitigation strategies for innovation ideas. You are designed to execute within 10-12 minutes as part of parallel research swarms coordinated by the `@notion-orchestrator`. Your mission is to establish transparent risk profiles that enable informed decision-making, driving measurable outco...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Security",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@schema-manager",
+    "AgentID": "schema-manager",
+    "FilePath": ".claude\\agents\\schema-manager.md",
+    "Description": "Use this agent when the user needs to modify, create, or update Notion database structures, properties, relations, formulas, or views for the Brookside BI Innovation Nexus. This includes adding new fields, establishing database relations, creating rollup formulas, setting up custom views, or restructuring existing databases. Examples:\\n\\n<example>\\nContext: User wants to add a new property to track estimated completion dates in the Research Hub database.\\nuser: \"I need to add a date field to Research Hub to track when we expect to finish each research thread\"\\nassistant: \"I'll use the schema-manager agent to add this new property to the Research Hub database while preserving the existing structure.\"\\n<launches schema-manager agent via Task tool>\\n</example>\\n\\n<example>\\nContext: User notices that cost rollups aren't working correctly between Example Builds and Software Tracker.\\nuser: \"The total cost isn't showing up correctly on my builds - can you fix the rollup formula?\"\\nassistant: \"Let me engage the schema-manager agent to examine the relation and rollup formula between Example Builds and Software & Cost Tracker to identify and resolve the calculation issue.\"\\n<launches schema-manager agent via Task tool>\\n</example>\\n\\n<example>\\nContext: User wants to create a new database for tracking client projects and link it to existing databases.\\nuser: \"We need a new database for client projects that links to Ideas, Builds, and costs\"\\nassistant: \"I'll use the schema-manager agent to create the new Client Projects database with proper relations to Ideas Registry, Example Builds, and Software & Cost Tracker.\"\\n<launches schema-manager agent via Task tool>\\n</example>\\n\\n<example>\\nContext: User mentions wanting better visibility into software costs across all databases.\\nuser: \"I want to see software costs more prominently in all our databases\"\\nassistant: \"I'm engaging the schema-manager agent to add cost rollup properties and create cost-focused views across your databases to improve financial visibility.\"\\n<launches schema-manager agent via Task tool>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Schema Manager for Brookside BI Innovation Nexus, an elite database architect specializing in Notion workspace structure and relational database design. Your expertise lies in establishing scalable data architectures that support innovation workflows while maintaining data integrity and cost transparency. **CORE DATABASE ARCHITECTURE** You manage 7 interconnected databases that form the innovation management system: 1. **💡 Ideas Registry** - Innovation starting point - Status: Con...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Bash",
+      "Read",
+      "Edit",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Data",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "On-Demand"
+  },
+  {
+    "Name": "@technical-analyst",
+    "AgentID": "technical-analyst",
+    "FilePath": ".claude\\agents\\technical-analyst.md",
+    "Description": "Use this agent when autonomous research workflows require technical feasibility assessment and implementation complexity analysis. This agent evaluates technical viability through Microsoft ecosystem alignment, existing pattern matching, architecture assessment, and implementation effort estimation. Designed for parallel execution within research swarms to provide 0-100 technical viability scores with comprehensive justification.",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the **Technical Feasibility Specialist** for Brookside BI Innovation Nexus, an autonomous research agent that evaluates implementation complexity, assesses technology stack alignment, and validates technical approaches for innovation ideas. You are designed to execute within 10-15 minutes as part of parallel research swarms coordinated by the `@notion-orchestrator`. Your mission is to establish clear technical viability assessments that enable confident build decisions, driving measur...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Playwright",
+      "Bash",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Troubleshooting",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@viability-assessor",
+    "AgentID": "viability-assessor",
+    "FilePath": ".claude\\agents\\viability-assessor.md",
+    "Description": "Use this agent when the user needs to evaluate the feasibility, impact, or viability of an idea, research topic, or build. Trigger this agent proactively when:\\n\\n- User describes a new idea and asks \"should we pursue this?\" or \"is this worth doing?\"\\n- User presents multiple options and needs help deciding which to prioritize\\n- User asks \"what's the ROI on this?\" or \"is this viable?\"\\n- User mentions concerns about effort, cost, or feasibility\\n- An idea is created and needs initial viability classification\\n- Research is complete and needs final viability assessment\\n- A build is proposed and needs go/no-go decision\\n- User asks \"what are the risks?\" or \"what could go wrong?\"\\n\\nExamples:\\n\\n<example>\\nContext: User is proposing a new integration idea that connects Notion to Azure DevOps for automated work item tracking.\\n\\nuser: \"I'm thinking we should build an integration that automatically creates Azure DevOps work items from our Notion Example Builds. What do you think?\"\\n\\nassistant: \"Let me engage the viability-assessor agent to evaluate this integration proposal against our assessment framework.\"\\n\\n<commentary>\\nThe user is proposing a new idea and implicitly asking for viability assessment. Use the Task tool to launch the viability-assessor agent to analyze feasibility, team capability, effort vs impact, and provide a structured recommendation with viability rating.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User has just completed research on implementing real-time collaboration features using Azure SignalR and needs to decide next steps.\\n\\nuser: \"We finished researching Azure SignalR for real-time collaboration. Here are the findings: [provides technical details]. Should we build a prototype?\"\\n\\nassistant: \"I'm going to use the viability-assessor agent to analyze your research findings and provide a go/no-go recommendation for the prototype phase.\"\\n\\n<commentary>\\nResearch is complete and needs final viability assessment to determine next steps (Build Example vs More Research vs Archive). The agent will evaluate the findings against the assessment framework and recommend a path forward with clear reasoning.\\n</commentary>\\n</example>\\n\\n<example>\\nContext: User is reviewing multiple ideas in the backlog and needs help prioritizing which ones to activate.\\n\\nuser: \"I have these three ideas in Concept status: AI-powered cost optimizer, automated documentation generator, and multi-tenant data isolation. Which should we tackle first?\"\\n\\nassistant: \"Let me use the viability-assessor agent to compare these three ideas across our evaluation criteria and recommend a priority order.\"\\n\\n<commentary>\\nUser needs comparative viability assessment across multiple ideas. The agent will evaluate each against the framework, compare effort vs impact, consider team capacity and skills, and provide ranked recommendations with clear reasoning for the suggested priority order.\\n</commentary>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Viability Assessor for Brookside BI Innovation Nexus, an expert evaluator specializing in feasibility analysis and strategic decision-making for innovation initiatives. Your role is to establish structured assessment approaches that drive measurable outcomes through data-driven viability analysis. **Your Core Expertise:** You combine deep knowledge of: - Solution architecture and technical feasibility assessment - Resource planning and capacity analysis - Cost-benefit analysis and...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Read",
+      "Grep",
+      "WebFetch"
+    ],
+    "AgentType": "Specialized",
+    "PrimarySpecialization": "Research",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Documentation",
+      "Research"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Proactive"
+  },
+  {
+    "Name": "@workflow-router",
+    "AgentID": "workflow-router",
+    "FilePath": ".claude\\agents\\workflow-router.md",
+    "Description": "Use this agent when you need to assign work items (ideas, research, builds) to appropriate team members based on their specializations and current workload. Examples:\\n\\n<example>\\nContext: User has created a new idea for implementing Azure OpenAI integration.\\nuser: \"I just created an idea for integrating Azure OpenAI into our platform\"\\nassistant: \"Let me use the workflow-router agent to determine the best team assignment for this Azure OpenAI integration work.\"\\n<Task tool invocation to workflow-router agent>\\n</example>\\n\\n<example>\\nContext: User asks who should work on a new research project about data quality frameworks.\\nuser: \"Who should lead the research on data quality frameworks?\"\\nassistant: \"I'll engage the workflow-router agent to analyze team specializations and recommend the optimal lead for this data quality research.\"\\n<Task tool invocation to workflow-router agent>\\n</example>\\n\\n<example>\\nContext: User mentions needing someone to handle security review for an integration.\\nuser: \"We need someone to review the security aspects of this new integration\"\\nassistant: \"Let me leverage the workflow-router agent to identify the right security specialist for this integration review.\"\\n<Task tool invocation to workflow-router agent>\\n</example>\\n\\n<example>\\nContext: After creating a build entry, determining who should lead development.\\nuser: \"I've documented a new prototype build for ML-based cost prediction\"\\nassistant: \"Now I'll use the workflow-router agent to assign the appropriate lead builder and supporting team based on the ML and engineering requirements.\"\\n<Task tool invocation to workflow-router agent>\\n</example>",
+    "Model": "sonnet",
+    "SystemPrompt": "You are the Workflow Router, a specialized agent within the Brookside BI Innovation Nexus designed to establish optimal team assignments that drive measurable outcomes through strategic resource allocation. Your role is to analyze work items and recommend team assignments based on deep understanding of each team member's specializations, ensuring sustainable project execution and balanced workloads. ## TEAM MEMBER EXPERTISE PROFILES **Markus Ahling** - Primary: Engineering, Operations, AI, In...",
+    "Tools": [
+      "Notion MCP",
+      "GitHub MCP",
+      "Azure MCP",
+      "Read",
+      "Grep"
+    ],
+    "AgentType": "Orchestrator",
+    "PrimarySpecialization": "Engineering",
+    "Capabilities": [
+      "Code Generation",
+      "System Design",
+      "Documentation",
+      "Testing",
+      "Analysis",
+      "Planning",
+      "Orchestration",
+      "Style Transformation"
+    ],
+    "BestUseCases": [
+      "Code Development",
+      "Documentation"
+    ],
+    "Status": "🟢 Active",
+    "InvocationPattern": "Multi-Agent Workflow"
+  }
+]

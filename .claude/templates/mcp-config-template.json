@@ -1,0 +1,84 @@
+{
+  "$schema": "https://spec.modelcontextprotocol.io/schema.json",
+  "comment": "Brookside BI MCP Server Configuration Template",
+  "description": "Standardized MCP server configuration designed to streamline secure credential management and establish consistent tooling across all Brookside BI repositories. This solution is designed for organizations scaling innovation workflows across teams.",
+
+  "mcpServers": {
+    "// NOTION MCP SERVER //": {
+      "// Purpose": "Notion workspace integration for innovation tracking, knowledge management, and database operations",
+      "// Authentication": "OAuth flow via Notion (automatic on first use)",
+      "// Use Cases": "Ideas Registry, Research Hub, Example Builds, Software & Cost Tracker, Knowledge Vault",
+      "// Documentation": "https://mcp.notion.com/docs"
+    },
+    "notion": {
+      "url": "https://mcp.notion.com/mcp",
+      "transport": "http",
+      "comment": "Notion MCP uses OAuth authentication - credentials stored in .credentials.json automatically after authentication flow"
+    },
+
+    "// GITHUB MCP SERVER //": {
+      "// Purpose": "GitHub repository operations, version control, pull requests, and issue management",
+      "// Authentication": "Personal Access Token from Azure Key Vault (github-personal-access-token)",
+      "// Use Cases": "Repository creation, file operations, PR/issue management, code search",
+      "// Required Scopes": "repo, workflow, admin:org (if managing organization)",
+      "// Documentation": "https://github.com/modelcontextprotocol/servers/tree/main/src/github"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "comment": "Environment variable set via scripts/Set-MCPEnvironment.ps1 from Azure Key Vault"
+      }
+    },
+
+    "// AZURE MCP SERVER //": {
+      "// Purpose": "Azure cloud services management, resource operations, Key Vault access, deployment automation",
+      "// Authentication": "Azure CLI (az login) - uses current authenticated session",
+      "// Use Cases": "Resource management, Key Vault secrets, App Service deployment, Cosmos DB, SQL, Storage",
+      "// Prerequisites": "Azure CLI installed, authenticated via 'az login', subscription selected",
+      "// Documentation": "https://github.com/Azure/azure-mcp"
+    },
+    "azure": {
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@latest", "server", "start"],
+      "comment": "Uses Azure CLI authentication - no explicit credentials needed if 'az login' completed"
+    },
+
+    "// PLAYWRIGHT MCP SERVER //": {
+      "// Purpose": "Browser automation for web testing, screenshot capture, form interaction, data extraction",
+      "// Authentication": "None required (local browser automation)",
+      "// Use Cases": "Web testing, screenshot documentation, integration validation, UI automation",
+      "// Browser": "Microsoft Edge (msedge) in headless mode",
+      "// Documentation": "https://github.com/microsoft/playwright"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--browser", "msedge", "--headless"],
+      "comment": "Browser automation runs locally - configure --browser for chrome/firefox/webkit if needed"
+    }
+  },
+
+  "// GLOBAL SETTINGS //": {
+    "// Purpose": "Repository-specific environment variables and configuration",
+    "// Customization Required": "Update NOTION_WORKSPACE_ID for each repository's target Notion workspace",
+    "// Optional Variables": "Add project-specific settings (e.g., AZURE_RESOURCE_GROUP, PROJECT_NAME)"
+  },
+  "globalSettings": {
+    "NOTION_WORKSPACE_ID": "REPLACE_WITH_YOUR_WORKSPACE_ID",
+    "comment": "Find your Notion Workspace ID by visiting Notion Settings > Workspace > Workspace ID"
+  },
+
+  "// DEPLOYMENT INSTRUCTIONS //": {
+    "// Location": "Save as .claude/settings.local.json in repository root",
+    "// Prerequisites": [
+      "1. Azure CLI installed and authenticated (az login)",
+      "2. Access to Azure Key Vault kv-brookside-secrets",
+      "3. Node.js 18+ installed for npx commands",
+      "4. Run scripts/Set-MCPEnvironment.ps1 to configure environment variables"
+    ],
+    "// Validation": "Run scripts/Test-MCPServers.ps1 to verify all servers connect",
+    "// Security": "NEVER commit credentials - all secrets retrieved from Azure Key Vault",
+    "// Best for": "Organizations requiring standardized, secure MCP configuration across multiple repositories"
+  }
+}

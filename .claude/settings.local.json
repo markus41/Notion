@@ -65,7 +65,7 @@
                                            "hooks":  [
                                                          {
                                                              "type":  "command",
-                                                             "command":  "powershell -c \"[System.Media.SoundPlayer]::new(\u0027C:\\Windows\\Media\\Windows Notify Messaging.wav\u0027).PlaySync()\""
+                                                             "command":  "powershell -c \"'Notification hook fired' | Out-File C:\\Users\\MarkusAhling\\notification-hook.log -Append; [System.Media.SystemSounds]::Exclamation.Play()\""
                                                          }
                                                      ]
                                        }
@@ -160,6 +160,22 @@
                                                                "type":  "command",
                                                                "command":  "bash .claude/hooks/branch-protection.sh check-command",
                                                                "description":  "Warn before destructive git operations"
+                                                           }
+                                                       ]
+                                         },
+                                         {
+                                             "description":  "Auto-log agent activity - Capture agent work when subagents complete responses",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Task"
+                                                                     ],
+                                                           "pattern":  ".*"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "pwsh .claude/hooks/auto-log-agent-activity.ps1",
+                                                               "description":  "Automatically log agent work to 3-tier tracking system (Notion + Markdown + JSON)"
                                                            }
                                                        ]
                                          }
