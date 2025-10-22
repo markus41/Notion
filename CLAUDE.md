@@ -799,6 +799,206 @@ This project uses 27+ specialized sub-agents for specific tasks. The system will
 5. Present: "Archived '[Name]'. Learnings captured in Knowledge Vault: [link]."
 ```
 
+## Agent Activity Center
+
+**Purpose**: Centralized tracking system for Claude Code agent work to establish transparency, enable seamless handoffs, and maintain institutional memory across the Innovation Nexus ecosystem.
+
+**Best for**: Organizations requiring systematic visibility into AI agent contributions, workflow continuity across sessions, and data-driven insights for optimizing agent productivity and resource allocation.
+
+### 3-Tier Tracking Architecture
+
+The Agent Activity Center establishes sustainable tracking through three complementary systems:
+
+**Tier 1: Notion Database** (Primary Source of Truth)
+- **Database**: "🤖 Agent Activity Hub" *(to be created)*
+- **Purpose**: Team-accessible source of truth with rich relations to Ideas/Research/Builds
+- **Properties**: Session ID, Agent Name, Status, Duration, Deliverables, Metrics, Next Steps, Blockers, Handoffs
+- **Relations**: Links to Ideas Registry, Research Hub, Example Builds, Software Tracker
+- **Best for**: Team collaboration, stakeholder visibility, cross-database insights
+
+**Tier 2: Markdown Log** (Quick Reference)
+- **Location**: [.claude/logs/AGENT_ACTIVITY_LOG.md](.claude/logs/AGENT_ACTIVITY_LOG.md)
+- **Purpose**: Human-readable chronological log for quick reference
+- **Structure**: Active Sessions section, Completed Sessions section, Activity Summary statistics
+- **Best for**: Developers, quick status checks, historical review
+
+**Tier 3: JSON State** (Programmatic Access)
+- **Location**: [.claude/data/agent-state.json](.claude/data/agent-state.json)
+- **Purpose**: Machine-readable state for automation and API integration
+- **Schema**: `activeSessions`, `completedSessions`, `handoffQueue`, `statistics`
+- **Best for**: CI/CD integration, automated reporting, programmatic queries
+
+### Session Management
+
+**Session ID Format**: `agent-name-YYYY-MM-DD-HHMM`
+
+**Examples:**
+- `cost-analyst-2025-10-21-1630`
+- `markdown-expert-2025-10-22-0945`
+- `orch-2025-10-21-1545` (orchestration workflows)
+
+**Status Workflow:**
+```
+In Progress → Completed    (all deliverables finished)
+            → Blocked      (external dependency blocking progress)
+            → Handed Off   (work passed to another agent)
+```
+
+**Status Definitions:**
+- **In Progress**: Work actively underway, agent has not completed all deliverables
+- **Completed**: All deliverables finished, next steps documented, no blockers
+- **Blocked**: Cannot proceed due to external dependency, escalation identified
+- **Handed Off**: Work passed to another specialized agent with context and dependencies
+
+### Logging Operations
+
+**Primary Method** (Recommended):
+```bash
+/agent:log-activity [agent-name] [status] [work-description]
+```
+
+**Manual Method**:
+Use template at [.claude/utils/log-agent-activity.md](.claude/utils/log-agent-activity.md)
+
+**Slash Commands:**
+- `/agent:log-activity [agent] [status] [description]` - Log agent work across all 3 tiers
+- `/agent:activity-summary [timeframe] [agent]` - Generate activity reports (today/week/month/all)
+
+**Command Documentation:**
+- [Agent Log Activity Command](.claude/commands/agent/log-activity.md) - Comprehensive logging guide
+- [Agent Activity Summary Command](.claude/commands/agent/activity-summary.md) - Reporting and analytics
+
+### What to Log
+
+**Always Log:**
+- ✅ Session start (status: `in-progress`)
+- ✅ Blockers encountered (status: `blocked`)
+- ✅ Work completion (status: `completed`)
+- ✅ Agent handoffs (status: `handed-off`)
+- ✅ Significant milestones during long-running work
+
+**Information Required:**
+- **Work Description**: 1-2 sentence summary
+- **Deliverables**: Specific files, database entries, URLs
+- **Next Steps**: Actionable items with owners when known
+- **Performance Metrics**: Duration, files created/updated, lines generated
+- **Related Work**: Links to Ideas/Research/Builds/Software
+- **Blockers** (if applicable): Description, severity, impact, escalation path
+- **Handoff Context** (if applicable): Next agent, dependencies, context needed
+
+### Performance Metrics Tracked
+
+**Automatic Calculations:**
+- Duration (start to completion timestamp)
+- Files Created (count)
+- Files Updated (count)
+- Lines Generated (estimated from file sizes)
+- Success Rate (completed sessions / total sessions)
+- Parallel Efficiency (for multi-agent orchestration)
+
+**Agent-Specific Metrics:**
+- `@cost-analyst`: Savings identified, tools analyzed, contracts reviewed
+- `@markdown-expert`: Files audited, quality score, brand compliance
+- `@build-architect`: Builds created, deployments, cost tracking
+- `@knowledge-curator`: Vault entries created, reusability scores
+- `@research-coordinator`: Research completed, viability assessments
+
+### Activity Summaries
+
+**Generate Reports:**
+```bash
+# Daily standup
+/agent:activity-summary today
+
+# Weekly team sync
+/agent:activity-summary week all
+
+# Monthly retrospective
+/agent:activity-summary month all
+
+# Specific agent performance
+/agent:activity-summary all @cost-analyst
+```
+
+**Summary Includes:**
+- Total sessions by status (completed, active, blocked, handed-off)
+- Total work duration and average session duration
+- Files created and updated counts
+- Success rate and completion percentage
+- Active sessions requiring attention
+- Blocked sessions needing escalation
+- Top performers by impact
+- Workload distribution across agents
+
+**Alert Thresholds:**
+- ⚠️ Long-running sessions (>7 days in-progress)
+- 🔴 Critical blockers (severity = Critical)
+- 📊 Workload imbalance (agent has >3x average sessions)
+- ⏰ Stalled sessions (no updates in 48+ hours)
+
+### Integration with Innovation Nexus
+
+**Cross-Database Insights:**
+
+Agent activity automatically correlates with:
+- **Ideas Registry**: Ideas championed, viability assessments
+- **Research Hub**: Research threads, findings documented
+- **Example Builds**: Builds created, deployments tracked
+- **Software & Cost Tracker**: Tools used, cost optimization
+- **Knowledge Vault**: Documentation created, learnings archived
+
+**Workflow Continuity:**
+
+When agents complete work, the Activity Center:
+1. Updates all 3 tracking tiers simultaneously
+2. Links to related Innovation Nexus database entries
+3. Preserves handoff context for next agent
+4. Tracks metrics for performance analysis
+5. Generates insights for continuous improvement
+
+### Best Practices
+
+**For Agents:**
+- ✅ Log immediately when starting work (don't batch)
+- ✅ Be specific in deliverables (actual files, not vague descriptions)
+- ✅ Document blockers with severity and impact
+- ✅ Provide clear next steps with owners
+- ✅ Link to related Innovation Nexus items
+- ✅ Update status when work transitions
+- ✅ Include quantifiable metrics
+
+**For Team Leads:**
+- ✅ Review active sessions daily
+- ✅ Address blocked sessions within 24 hours
+- ✅ Generate weekly summaries for stakeholders
+- ✅ Monitor workload distribution
+- ✅ Identify patterns and optimization opportunities
+- ✅ Use insights for agent specialization decisions
+
+### Current Activity
+
+**Latest Session**: orch-2025-10-21-1545
+- **Agent**: @orchestration-coordinator
+- **Status**: ✅ Completed
+- **Duration**: 37 minutes 37 seconds
+- **Deliverables**: 13 files created, 2 files updated (~40,177 lines)
+- **Impact**: 100% MCP API documentation coverage, 52% time savings through parallel execution
+
+**View Full Log**: [.claude/logs/AGENT_ACTIVITY_LOG.md](.claude/logs/AGENT_ACTIVITY_LOG.md)
+
+**View JSON State**: [.claude/data/agent-state.json](.claude/data/agent-state.json)
+
+### Related Resources
+
+- [Agent Activity Log Template](.claude/utils/log-agent-activity.md) - Standardized logging format
+- [Agent Log Activity Command](.claude/commands/agent/log-activity.md) - Automated 3-tier logging
+- [Agent Activity Summary Command](.claude/commands/agent/activity-summary.md) - Reporting and analytics
+- [Agent State JSON](.claude/data/agent-state.json) - Programmatic state tracking
+- [Agent Activity Log](.claude/logs/AGENT_ACTIVITY_LOG.md) - Human-readable activity history
+- [Notion Agent Activity Hub](https://notion.so) - Team collaboration database *(to be created)*
+
+---
+
 ## Brookside BI Brand Guidelines
 
 All interactions and outputs must consistently reflect Brookside BI's brand identity:
