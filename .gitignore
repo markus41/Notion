@@ -29,3 +29,13 @@ venv/
 # MCP Foundry (separate repository)
 mcp-foundry/
 UsersMarkusAhlingNotionmcp-foundry/
+
+# Deployment artifacts
+*.zip
+*.log
+deployment-output.txt
+*.backup-*
+
+# Azure Function deployment packages
+brookside-repo-analyzer/deployment/*.zip
+brookside-repo-analyzer/deployment/azure_function_deploy/

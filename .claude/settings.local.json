@@ -162,6 +162,22 @@
                                                                "description":  "Warn before destructive git operations"
                                                            }
                                                        ]
+                                         },
+                                         {
+                                             "description":  "Auto-log agent activity - Capture agent work when subagents complete responses",
+                                             "match":  {
+                                                           "tools":  [
+                                                                         "Task"
+                                                                     ],
+                                                           "pattern":  ".*"
+                                                       },
+                                             "hooks":  [
+                                                           {
+                                                               "type":  "command",
+                                                               "command":  "pwsh .claude/hooks/auto-log-agent-activity.ps1",
+                                                               "description":  "Automatically log agent work to 3-tier tracking system (Notion + Markdown + JSON)"
+                                                           }
+                                                       ]
                                          }
                                      ]
               },

@@ -15,22 +15,16 @@ from datetime import datetime
 
 import azure.functions as func
 
-# Import core analyzer components
-from src.analyzers.claude_detector import ClaudeCapabilitiesDetector
-from src.analyzers.cost_calculator import CostCalculator
-from src.analyzers.pattern_miner import PatternMiner
-from src.analyzers.repo_analyzer import RepositoryAnalyzer
-from src.auth import CredentialManager
-from src.config import get_settings
-from src.github_mcp_client import GitHubMCPClient
-from src.notion_client import NotionIntegrationClient
-
 # Configure logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Create Function App
 app = func.FunctionApp()
+
+# NOTE: All application imports deferred to function bodies to ensure
+# proper Azure Functions Python V2 discovery during indexing phase.
+# This pattern prevents module-level side effects from blocking discovery.
 
 
 @app.schedule(
@@ -53,6 +47,16 @@ async def weekly_repository_scan(timer: func.TimerRequest) -> None:
     Args:
         timer: Azure Timer trigger with schedule information
     """
+    # Defer imports to function body for Python V2 discovery compatibility
+    from src.analyzers.claude_detector import ClaudeCapabilitiesDetector
+    from src.analyzers.cost_calculator import CostCalculator
+    from src.analyzers.pattern_miner import PatternMiner
+    from src.analyzers.repo_analyzer import RepositoryAnalyzer
+    from src.auth import CredentialManager
+    from src.config import get_settings
+    from src.github_mcp_client import GitHubMCPClient
+    from src.notion_client import NotionIntegrationClient
+
     logger.info("Starting weekly repository scan...")
     logger.info(f"Timer trigger at: {datetime.utcnow().isoformat()}")
 
@@ -173,6 +177,9 @@ async def health_check(req: func.HttpRequest) -> func.HttpResponse:
     Returns:
         HTTP 200 with status information
     """
+    # Defer imports to function body for Python V2 discovery compatibility
+    from src.config import get_settings
+
     logger.info("Health check requested")
 
     try:
@@ -219,6 +226,14 @@ async def manual_repository_scan(req: func.HttpRequest) -> func.HttpResponse:
     Returns:
         HTTP 200 with scan results summary
     """
+    # Defer imports to function body for Python V2 discovery compatibility
+    from src.analyzers.cost_calculator import CostCalculator
+    from src.analyzers.repo_analyzer import RepositoryAnalyzer
+    from src.auth import CredentialManager
+    from src.config import get_settings
+    from src.github_mcp_client import GitHubMCPClient
+    from src.notion_client import NotionIntegrationClient
+
     logger.info("Manual repository scan triggered")
 
     try:

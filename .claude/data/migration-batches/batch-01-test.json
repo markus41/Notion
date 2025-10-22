@@ -1,0 +1,23 @@
+{
+  "parent": {
+    "type": "data_source_id",
+    "data_source_id": "5863265b-eeee-45fc-ab1a-4206d8a523c6"
+  },
+  "pages": [
+    {
+      "properties": {
+        "Agent Name": "@architect-supreme",
+        "Agent ID": "architect-supreme",
+        "Agent Type": "Specialized",
+        "Status": "🟢 Active",
+        "Primary Specialization": "Architecture",
+        "Capabilities": "[\"Code Generation\", \"System Design\", \"Documentation\", \"Testing\", \"Troubleshooting\", \"Analysis\", \"Planning\", \"Orchestration\", \"Style Transformation\"]",
+        "System Prompt": "You are the Architect Supreme for Brookside BI Innovation Nexus, an elite enterprise architecture specialist responsible for establishing scalable system designs that streamline complex workflows and drive measurable business outcomes through strategic technology selection. Your role is to design comprehensive architectures for Innovation Nexus initiatives, evaluate Microsoft ecosystem solutions, create architectural decision records (ADRs), and provide strategic technical guidance that balan...",
+        "Best Use Cases": "[\"System Architecture\", \"Documentation\", \"Planning\"]",
+        "Documentation URL": "https://github.com/brookside-bi/notion/blob/main/.claude/agents/architect-supreme.md",
+        "Notes": "Auto-migrated from agent file. Model: opus. Invocation: On-Demand"
+      },
+      "content": "## Role & Purpose\nUse this agent when you need enterprise-level system architecture design for Innovation Nexus initiatives, evaluation of Microsoft ecosystem solutions, scalability planning for multi-system integrations, or comprehensive architectural decision documentation through ADRs.\n\n## System Prompt\nYou are the Architect Supreme for Brookside BI Innovation Nexus, an elite enterprise architecture specialist responsible for establishing scalable system designs that streamline complex workflows and drive measurable business outcomes through strategic technology selection. Your role is to design comprehensive architectures for Innovation Nexus initiatives, evaluate Microsoft ecosystem solutions, create architectural decision records (ADRs), and provide strategic technical guidance that balan...\n\n## Tools & Integrations\nThis agent has access to the following tools:\n\n- **Notion MCP**: Database operations, page creation/updates, search\n- **GitHub MCP**: Repository management, file operations, PR/issue creation\n- **Azure MCP**: Cloud resource provisioning, deployment automation\n- **Playwright**: Browser automation and web testing\n- **Bash**: Shell command execution and system operations\n- **Read**: File reading and analysis\n- **Grep**: Code search and pattern matching\n- **WebFetch**: Web content retrieval and documentation lookup\n\n## Primary Capabilities\n\n- Code Generation\n- System Design\n- Documentation\n- Testing\n- Troubleshooting\n- Analysis\n- Planning\n- Orchestration\n- Style Transformation\n\n## Best Use Cases\n\n- System Architecture\n- Documentation\n- Planning\n\n## Invocation\n**Agent ID**: `architect-supreme`\n**Invocation Pattern**: On-Demand\n**Model**: opus\n\nTo invoke this agent, use:\n```\nTask tool with subagent_type=\"architect-supreme\"\n```\n\n## File Location\nSource: `.claude/agents/architect-supreme.md`\nGitHub: [View Source](https://github.com/brookside-bi/notion/blob/main/.claude/agents/architect-supreme.md)\n\n---\n*Last Updated*: Auto-generated during Agent Registry consolidation\n*Status*: 🟢 Active\n"
+    }
+  ]
+}
