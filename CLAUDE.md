@@ -26,6 +26,15 @@
 # Knowledge & Archival
 /knowledge:archive [item] [idea|research|build]  # Complete lifecycle with learnings
 
+# Documentation Management
+/docs:update-complex <scope> <description> [flags]  # Multi-file docs with diagrams & PR
+  # Flags: --diagrams --full-refresh --create-pr --sync-notion --commit
+
+# Output Styles & Testing
+/test-agent-style <agent> <style|?> [--ultrathink]  # Test agent+style effectiveness
+/style:compare <agent> "<task>" [--ultrathink]      # Side-by-side style comparison
+/style:report [--agent=name] [--timeframe=30d]      # Performance analytics
+
 # Team Coordination
 /team:assign [work-description] [database]   # Route work by specialization
 ```
@@ -40,8 +49,9 @@
 | `@cost-analyst` | Software spend optimization | User asks about "costs", "spending", "budget" |
 | `@knowledge-curator` | Archive learnings | Build completes or "document learnings" |
 | `@archive-manager` | Complete work lifecycle | User says "archive", "done with", "complete" |
+| `@documentation-orchestrator` | Multi-file documentation updates | User mentions "update docs", "documentation refresh" |
 
-**Full Agent Directory**: [27+ specialized agents](.claude/agents/) including Phase 3 autonomous pipeline (build-architect-v2, code-generator, deployment-orchestrator) and research swarm (market-researcher, technical-analyst, cost-feasibility-analyst, risk-assessor).
+**Full Agent Directory**: [38 specialized agents](.claude/agents/) including Phase 3 autonomous pipeline (build-architect-v2, code-generator, deployment-orchestrator), research swarm (market-researcher, technical-analyst, cost-feasibility-analyst, risk-assessor), and output styles orchestrator (style-orchestrator).
 
 ---
 
@@ -127,6 +137,8 @@
 🔗 Integration Registry  → (Query programmatically)
 🤖 Agent Registry        → 5863265b-eeee-45fc-ab1a-4206d8a523c6
 🤖 Agent Activity Hub    → 7163aa38-f3d9-444b-9674-bde61868bd2b
+🎨 Output Styles Registry → 199a7a80-224c-470b-9c64-7560ea51b257
+🧪 Agent Style Tests     → b109b417-2e3f-4eba-bab1-9d4c047a65c4
 🎯 OKRs & Initiatives    → (Query programmatically)
 ```
 
@@ -447,6 +459,272 @@ Intelligent Filtering (duration >2min, files changed, approved agents)
   ↓ (Deliver: Key findings + Viability + Go/No-Go)
 # Decision: Build immediately OR Archive with rationale
 ```
+
+---
+
+## Output Styles System
+
+### Overview
+
+Establish dynamic communication pattern adaptation for agents through systematic output style testing and intelligent recommendation. Organizations scaling AI agent deployments benefit from empirical effectiveness data across multiple communication approaches, enabling data-driven optimization for specific agent+task+audience combinations.
+
+**Best for**: Teams requiring consistent, measurable communication quality where different scenarios demand distinct presentation approaches (executive reports vs technical implementations vs compliance documentation vs training materials).
+
+### Available Output Styles
+
+| Style | ID | Target Audience | Best Use Cases |
+|-------|----|-----------------|--------------------|
+| 📘 **Technical Implementer** | `technical-implementer` | Developers, Engineers | Code generation, API docs, technical specs, architecture diagrams |
+| 💼 **Strategic Advisor** | `strategic-advisor` | Executives, Leadership | Business analysis, ROI calculations, strategic recommendations, cost optimization |
+| 🎨 **Visual Architect** | `visual-architect` | Cross-functional Teams | System diagrams, data flow visualization, architecture presentations |
+| 🎓 **Interactive Teacher** | `interactive-teacher` | New Team Members, Trainees | Onboarding docs, tutorials, educational content, knowledge transfer |
+| ✅ **Compliance Auditor** | `compliance-auditor` | Auditors, Compliance Officers | SOC2 documentation, ISO 27001 controls, GDPR evidence, regulatory reporting |
+
+**Style Definitions**: [.claude/styles/](.claude/styles)
+
+### Style-Orchestrator Agent
+
+Intelligent recommendation engine that analyzes task context, target audience, agent capabilities, and historical performance to suggest optimal output styles.
+
+**Invocation Pattern**:
+```bash
+# Let the orchestrator recommend (automatic in commands)
+@style-orchestrator recommend this combination
+
+# Manual agent invocation
+Task @style-orchestrator "Recommend style for @cost-analyst analyzing Q4 spending for executives"
+```
+
+**Scoring Algorithm** (0-100 for each style):
+```
+Total Score = (30 × Task-Style Fit) +
+              (25 × Agent Compatibility) +
+              (20 × Historical Performance) +
+              (15 × Audience Alignment) +
+              (10 × Capability Match)
+```
+
+**Agent Specification**: [@style-orchestrator](.claude/agents/style-orchestrator.md)
+
+### Testing & Analytics Commands
+
+#### 1. Test Single Agent+Style Combination
+```bash
+/test-agent-style <agent-name> <style-name|?> [options]
+
+# Options:
+--task="description"     # Custom test task (default: generic task for agent)
+--interactive            # Provide real-time feedback during test
+--ultrathink            # Enable deep analysis with tier classification
+--sync                  # Sync results to Notion immediately
+--metrics-only          # Skip full output, return metrics only
+
+# Examples:
+/test-agent-style @cost-analyst strategic-advisor
+/test-agent-style @viability-assessor ? --ultrathink  # Test all 5 styles
+/test-agent-style @build-architect visual-architect --task="Design microservices architecture" --interactive
+```
+
+**Collected Metrics**:
+- **Behavioral**: Technical density (0-1), Formality score (0-1), Clarity score (0-1), Visual elements count, Code blocks count
+- **Effectiveness**: Goal achievement (0-1), Audience appropriateness (0-1), Style consistency (0-1), Overall effectiveness (0-100)
+- **Performance**: Output length (tokens), Generation time (ms), User satisfaction (1-5 stars)
+- **UltraThink Analysis**: Semantic appropriateness, Audience alignment, Brand consistency, Practical effectiveness, Innovation potential, Tier classification (Gold/Silver/Bronze/Needs Improvement)
+
+**Notion Sync**: Results automatically populate **Agent Style Tests** database with full metrics and relations
+
+#### 2. Compare Multiple Styles Side-by-Side
+```bash
+/style:compare <agent-name> "<task-description>" [options]
+
+# Options:
+--styles=list           # Comma-separated styles (default: all 5)
+--ultrathink           # Enable deep analysis
+--sync                 # Sync all results to Notion
+--format=type          # table|detailed|summary (default: table)
+
+# Examples:
+/style:compare @viability-assessor "Assess AI cost optimization platform idea"
+/style:compare @build-architect "Design microservices architecture" --styles=visual-architect,technical-implementer,strategic-advisor
+/style:compare @compliance-orchestrator "Document SOC2 controls" --ultrathink --sync
+```
+
+**Output Format**:
+```
+| Style | Effectiveness | Clarity | Technical | Formality | Time | Tier |
+|-------|--------------|---------|-----------|-----------|------|------|
+| Strategic Advisor | 94/100 | 88% | 25% | 65% | 2.3s | 🥇 Gold |
+| Visual Architect | 82/100 | 85% | 45% | 55% | 3.1s | 🥈 Silver |
+| Technical Impl. | 71/100 | 75% | 85% | 40% | 2.8s | 🥉 Bronze |
+
+🎯 Recommendation: Strategic Advisor
+   → Best for executive-focused cost analysis with business value emphasis
+```
+
+#### 3. Generate Performance Analytics Reports
+```bash
+/style:report [options]
+
+# Options (at least one required):
+--agent=name            # Report for specific agent
+--style=name            # Report for specific style across all agents
+--timeframe=period      # 7d|30d|90d|all (default: 30d)
+--format=type          # summary|detailed|executive (default: summary)
+--export=path          # Export to markdown file
+
+# Examples:
+/style:report --agent=@cost-analyst --timeframe=30d
+/style:report --style=strategic-advisor --timeframe=90d
+/style:report --timeframe=all --format=executive
+```
+
+**Report Components**:
+1. **Performance Summary**: Average effectiveness, best/worst styles, trends
+2. **Style Breakdown Table**: Tests, avg metrics, satisfaction, status
+3. **Trend Analysis**: 30-day comparison, improvement/decline patterns
+4. **Actionable Recommendations**: High/medium/low priority optimizations
+5. **Historical Comparison**: Quarter-over-quarter performance
+
+### Notion Database Schema
+
+**🎨 Output Styles Registry** (Data Source: `199a7a80-224c-470b-9c64-7560ea51b257`):
+```yaml
+Style Name: Title
+Style ID: Text (technical-implementer, strategic-advisor, etc.)
+Category: Select (Technical/Business/Visual/Educational/Compliance)
+Target Audience: Multi-select (Developers, Executives, Auditors, etc.)
+Performance Score: Number 0-100
+Usage Count: Number
+Average Satisfaction: Number 1-5
+Compatible Agents: Relation → Agent Registry
+Best Use Cases: Text
+Status: Select (Active/Deprecated/Testing)
+```
+
+**🧪 Agent Style Tests** (Data Source: `b109b417-2e3f-4eba-bab1-9d4c047a65c4`):
+```yaml
+Test Name: Title [Format: AgentName-StyleName-YYYYMMDD]
+Agent: Relation → Agent Registry
+Style: Relation → Output Styles Registry
+Test Date: Date
+Task Description: Text
+Output Length: Number (tokens)
+Technical Density: Number 0-1
+Formality Score: Number 0-1
+Clarity Score: Number 0-1
+Visual Elements Count: Number
+Code Blocks Count: Number
+Goal Achievement: Number 0-1
+Audience Appropriateness: Number 0-1
+Style Consistency: Number 0-1
+Generation Time: Number (ms)
+User Satisfaction: Number 1-5
+Overall Effectiveness: Formula (average of metrics)
+Test Output: Text (long)
+Notes: Text
+Status: Select (Passed/Failed/Needs Review)
+UltraThink Tier: Select (Gold/Silver/Bronze/Needs Improvement)
+```
+
+### Integration Patterns
+
+**When agents complete work requiring specific communication:**
+1. Invoke @style-orchestrator to recommend optimal style
+2. Apply recommended style transformation rules
+3. Log test results to Agent Style Tests (if feedback requested)
+4. Use historical performance data for future recommendations
+
+**When creating documentation:**
+```typescript
+// ❌ Generic output without style consideration
+generateDocumentation(content)
+
+// ✅ Style-aware output with intelligent recommendation
+const style = await styleOrchestrator.recommend({
+  agent: '@markdown-expert',
+  taskType: 'documentation',
+  audience: 'developers',
+  outputType: 'technical-specification'
+});
+generateDocumentation(content, { style: style.id });
+```
+
+**Quarterly optimization workflow:**
+```bash
+# 1. Generate portfolio report
+/style:report --timeframe=90d --format=executive
+
+# 2. Identify underperformers (<60 effectiveness or declining trends)
+
+# 3. Deep-dive on specific issues
+/style:report --agent=@problem-agent --format=detailed
+
+# 4. Run targeted re-tests
+/test-agent-style @problem-agent problem-style --ultrathink --interactive
+
+# 5. Update style definitions based on insights
+# Edit .claude/styles/[style].md with improved rules
+```
+
+### UltraThink Deep Analysis
+
+**Purpose**: Extended reasoning with tier classification for nuanced effectiveness evaluation beyond simple metrics
+
+**Tier Classification**:
+- 🥇 **Gold** (90-100): Production-ready, exemplary effectiveness, minimal refinement needed
+- 🥈 **Silver** (75-89): Strong performance, minor adjustments for optimization
+- 🥉 **Bronze** (60-74): Acceptable baseline, requires targeted improvements
+- ⚪ **Needs Improvement** (0-59): Significant gaps, consider alternative styles
+
+**Analysis Components**:
+1. **Semantic Appropriateness** (0-100): Content accuracy and logical flow
+2. **Audience Alignment** (0-100): Tone, complexity, and terminology fit
+3. **Brand Consistency** (0-100): Adherence to Brookside BI guidelines
+4. **Practical Effectiveness** (0-100): Actionability and real-world utility
+5. **Innovation Potential** (0-100): Novel approaches and optimization opportunities
+
+**Enable via**: `--ultrathink` flag on test commands
+
+### Performance Metrics Definitions
+
+**Technical Density** (0-1): Ratio of technical terms, code blocks, acronyms, and implementation details to total content
+- 0.0-0.2: Business-focused, minimal technical detail
+- 0.3-0.5: Balanced technical and business content
+- 0.6-0.8: Technical focus with some context
+- 0.9-1.0: Highly technical, implementation-focused
+
+**Formality Score** (0-1): Presence of formal language patterns vs. casual/conversational tone
+- 0.0-0.2: Very casual (contractions, colloquialisms)
+- 0.3-0.5: Professional but approachable
+- 0.6-0.8: Formal business communication
+- 0.9-1.0: Legal/compliance formal language
+
+**Clarity Score** (0-1): Flesch Reading Ease approximation adjusted for AI-generated content
+- 0.0-0.3: Complex, requires expert knowledge
+- 0.4-0.6: Moderate complexity, business audience
+- 0.7-0.9: Clear, accessible to general audience
+- 0.9-1.0: Very clear, simple language
+
+**Overall Effectiveness** (0-100): Weighted average of goal achievement (35%), audience appropriateness (30%), style consistency (20%), and clarity (15%)
+
+### Command Specifications
+
+**Full Documentation**:
+- [/test-agent-style](.claude/commands/style/test-agent-style.md)
+- [/style:compare](.claude/commands/style/compare.md)
+- [/style:report](.claude/commands/style/report.md)
+
+### Success Metrics
+
+**You're driving measurable communication optimization when:**
+- ✅ Each agent has tested performance data across all 5 styles
+- ✅ Recommendations are data-driven from historical effectiveness
+- ✅ Declining trends are identified and investigated proactively
+- ✅ Style-agent combinations consistently achieve >75 effectiveness
+- ✅ Audience-specific tasks use appropriately matched styles
+- ✅ UltraThink tier classifications guide production readiness decisions
+- ✅ Quarterly reviews drive continuous style refinement
+- ✅ All agents maintain Brookside BI brand voice across styles
 
 ---
 
