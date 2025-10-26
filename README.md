@@ -485,14 +485,49 @@ C:\Users\MarkusAhling\Notion\
 
 ## Documentation
 
-**Key Documentation Files:**
-- `CLAUDE.md`: Comprehensive guide for Claude Code agents and users (26,000+ words)
-- `.claude/agents/*.md`: Individual agent specifications
-- `.claude/commands/*/*.md`: Slash command documentation
-- `.claude/docs/patterns/*.md`: Architectural pattern implementations
-- `.claude/templates/*.md`: Reusable documentation templates
+### Essential Guides
+**Located in repository root** - Start here for quick access:
 
-**External Resources:**
+- **[QUICKSTART.md](QUICKSTART.md)** - Get started in 15 minutes
+- **[CLAUDE.md](CLAUDE.md)** - Comprehensive agent instructions and workspace guide (25,000+ words)
+- **[GIT-STRUCTURE.md](GIT-STRUCTURE.md)** - Git branching strategy, commit conventions, and repository organization
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and standards
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
+- **[README-START-HERE.md](README-START-HERE.md)** - Webhook + APIM deployment quickstart
+
+### Technical Documentation
+**Organized by purpose** - For developers and agents:
+
+- **[.claude/docs/](.claude/docs/)** - Agent operations, configurations, and system documentation
+  - Agent activity logging and tracking
+  - Integration quick reference
+  - Repository analyzer updates
+  - MCP standardization specifications
+
+- **[.claude/agents/](.claude/agents/)** - 38+ specialized agent specifications
+- **[.claude/commands/](.claude/commands/)** - Slash command implementations
+- **[.claude/docs/patterns/](.claude/docs/patterns/)** - Architectural pattern implementations
+- **[.claude/templates/](.claude/templates/)** - Reusable documentation templates
+
+### Infrastructure Documentation
+**Located in infrastructure/docs/** - Deployment and architecture:
+
+- [webhook-architecture.md](infrastructure/docs/webhook-architecture.md) - Webhook + APIM architecture
+- [DEPLOYMENT-MANUAL.md](infrastructure/DEPLOYMENT-MANUAL.md) - Infrastructure deployment guide
+
+### Historical Archive
+**Located in .archive/** - Completed initiatives and reference material:
+
+- **[.archive/README.md](.archive/README.md)** - Complete archive index (33 documents)
+- Phase 3 completion reports and implementation summaries
+- Assessment reports and analysis
+- Session summaries and brainstorm results
+- Experimental features and prototype concepts
+
+**Note**: Documentation was reorganized on 2025-10-26 to reduce root-level sprawl from 42 files to 8 essential guides.
+
+### External Resources
 - [Notion Workspace](https://notion.so/brookside-bi) (requires authentication)
 - [GitHub Organization](https://github.com/brookside-bi)
 - [Azure Portal](https://portal.azure.com)
