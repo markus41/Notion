@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "staging"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "prefix": {
+      "value": "brookside"
+    },
+    "modelDeployment": {
+      "value": {
+        "modelName": "gpt-4",
+        "modelVersion": "0125-preview",
+        "deploymentName": "gpt-4-turbo",
+        "scaleType": "Standard",
+        "capacity": 20
+      }
+    },
+    "enableDiagnostics": {
+      "value": true
+    },
+    "logAnalyticsWorkspaceId": {
+      "value": "/subscriptions/cfacbbe8-a2a3-445f-a188-68b3b35f0c84/resourceGroups/rg-brookside-monitoring/providers/Microsoft.OperationalInsights/workspaces/law-brookside-staging"
+    },
+    "enablePrivateEndpoint": {
+      "value": false
+    },
+    "subnetId": {
+      "value": ""
+    },
+    "budgetAlerts": {
+      "value": {
+        "threshold50": 75,
+        "threshold75": 112,
+        "threshold90": 150
+      }
+    },
+    "tags": {
+      "value": {
+        "Environment": "staging",
+        "ManagedBy": "ClaudeCode",
+        "Project": "InnovationNexus",
+        "CostCenter": "Engineering",
+        "Workload": "AI-Integration",
+        "DeploymentMethod": "Bicep",
+        "LastDeployed": "2025-10-26"
+      }
+    }
+  }
+}

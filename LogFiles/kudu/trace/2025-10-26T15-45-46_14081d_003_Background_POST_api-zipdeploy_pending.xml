@@ -1,0 +1,30 @@
+<step title="BackgroundTrace" date="2025-10-26T15:45:46.811" instance="14081d" url="/api/zipdeploy" method="POST" >
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2025-10-26T15:45:46.991" /><!-- duration: 11ms -->
+  <step title="Creating temporary deployment" date="2025-10-26T15:45:47.013" /><!-- duration: 191ms -->
+  <step title="Performing fetch based deployment" date="2025-10-26T15:45:47.428" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/5fd5a426-3526-409c-9634-f1d8564f0f0e.zip (0.13 MB) to /tmp/zipdeploy/extracted" date="2025-10-26T15:45:48.884" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 91" date="2025-10-26T15:45:49.096" /><!-- duration: 17ms -->
+    </step><!-- duration: 240ms -->
+    <step title="Deployment timer started" date="2025-10-26T15:45:51.195" >
+      <step title="DeploymentManager.Deploy(id:16e2f75b-4e7c-4725-b7bb-690ce5657cc2)" date="2025-10-26T15:45:51.226" >
+        <step title="Collecting changeset information" date="2025-10-26T15:45:51.266" /><!-- duration: 223ms -->
+        <step title="Updating submodules" date="2025-10-26T15:45:51.548" /><!-- duration: 1356ms -->
+        <step title="Determining deployment builder" date="2025-10-26T15:45:54.161" >
+          <step title="Builder is OryxBuilder" date="2025-10-26T15:45:54.194" /><!-- duration: 28ms -->
+        </step><!-- duration: 102ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2025-10-26T15:45:54.363" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2025-10-26T15:45:54.596" >
+            <step title="Building" date="2025-10-26T15:45:54.978" >
+              <step title="Executing external process" date="2025-10-26T15:45:55.963" type="process" path="bash" arguments="-c &quot;oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform nodejs --platform-version 20 -p virtualenv_name= --log-file /tmp/build-debug.log  -i /tmp/8de14a6bf7ae402 -p compress_node_modules=tar-gz | tee /tmp/oryx-build.log ; exit $PIPESTATUS &quot;" >
+                <step title="Error occurred" date="2025-10-26T15:46:33.590" type="error" text="Deployment has been stopped due to SCM container restart. The restart can happen due to a management operation on site. Do not perform a management operation and a deployment operation in quick succession. Adding a small delay can help avoid any conflicts." /><!-- duration: 31ms -->
+                <step title="Killing external process" date="2025-10-26T15:46:33.641" >
+                  <step title="Error occurred" date="2025-10-26T15:46:34.013" type="error" text="GetParentProcessLinux (902) failed.: Could not find a part of the path &apos;/proc/902/stat&apos;." stackTrace="   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64&amp; fileLength, UnixFileMode&amp; filePermissions, Boolean failForSymlink, Boolean&amp; wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.ReadLines(String path)
+   at Kudu.Core.Infrastructure.ProcessExtensions.GetParentProcessLinux(Process process, ITracer tracer) in /tmp/KuduLite/Kudu.Core/Infrastructure/ProcessExtensions.cs:line 155" /><!-- duration: 49ms -->
+                  <step title="Abort Process &apos;gzip(900)&apos;." date="2025-10-26T15:46:34.174" /><!-- duration: 21ms -->
+                  <step title="Abort Process &apos;oryx(852)&apos;." date="2025-10-26T15:46:34.225" /><!-- duration: 20ms -->
+                  <step title="Abort Process &apos;tee(853)&apos;." date="2025-10-26T15:46:34.265" /><!-- duration: 78ms -->
+                  <step title="Process dump" date="2025-10-26T15:46:34.648" exitCode="137" type="processOutput" /><!-- duration: 37ms -->

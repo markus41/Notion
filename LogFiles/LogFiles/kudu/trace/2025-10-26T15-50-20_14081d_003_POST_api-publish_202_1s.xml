@@ -1,0 +1,16 @@
+<step title="Incoming Request" date="2025-10-26T15:50:20.576" instance="14081d" url="/api/publish?type=zip&amp;async=True" method="POST" type="request" pid="825,1,5" Accept="*/*" Host="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" User-Agent="AZURECLI/2.77.0 (MSI)" Accept-Encoding="gzip, deflate" Authorization="Bea..." Cache-Control="no-cache" Content-Type="application/octet-stream" Cookie="ARRAffinity=14081d20018b15b1623fc720b48f16fa62465e5170c988d77c1ce70393fc7d40; ARRAffinitySameSite=14081d20018b15b1623fc720b48f16fa62465e5170c988d77c1ce70393fc7d40" Content-Length="136402" x-ms-client-request-id="6dba0786-b283-11f0-b14a-dc567bd6348a" x-ms-artifact-checksum="5c476bc06627a9eed88307366ea286fa709a85b46e3368577aa18c2721e1517a" X-ARR-LOG-ID="6dba0786-b283-11f0-b14a-dc567bd6348a" CLIENT-IP="73.235.38.158:65229" X-SITE-DEPLOYMENT-ID="app-dsp-backend-dev-dfb8575d" WAS-DEFAULT-HOSTNAME="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/publish?type=zip&amp;async=True" X-Client-IP="73.235.38.158" X-Client-Port="65229" >
+  <step title="OneDeploy" date="2025-10-26T15:50:20.917" >
+    <step title="None repository commit" date="2025-10-26T15:50:20.939" >
+      <step title="Commit id: 5daaec05-d47b-4367-ba20-46276759d121" date="2025-10-26T15:50:20.942" Message="N/A" AuthorName="N/A" AuthorEmail="N/A" /><!-- duration: 2ms -->
+    </step><!-- duration: 7ms -->
+    <step title="Starting PushDeployAsync" date="2025-10-26T15:50:20.948" /><!-- duration: 2ms -->
+    <step title="Writing artifact to /tmp/zipdeploy/2c62e97b-39c2-44b2-b349-d85b5599f8c7.zip" date="2025-10-26T15:50:20.967" >
+      <step title="Writing multipart request body to /tmp/zipdeploy/2c62e97b-39c2-44b2-b349-d85b5599f8c7.zip" date="2025-10-26T15:50:20.978" /><!-- duration: 21ms -->
+    </step><!-- duration: 364ms -->
+    <step title="Start deployment in the background" date="2025-10-26T15:50:21.378" >
+      <step title="Acquiring Deployment Lock" date="2025-10-26T15:50:21.580" /><!-- duration: 12ms -->
+      <step title="Acquired Deployment Lock" date="2025-10-26T15:50:21.701" /><!-- duration: 2ms -->
+    </step><!-- duration: 515ms -->
+  </step><!-- duration: 1006ms -->
+  <step title="Outgoing response" date="2025-10-26T15:50:21.965" type="response" statusCode="202" statusText="Accepted" /><!-- duration: 10ms -->
+</step><!-- duration: 1407ms -->

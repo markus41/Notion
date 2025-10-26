@@ -863,6 +863,54 @@ On Security Alert:
 @security-automation Generate CIS Azure Foundations Benchmark report for all production resources
 ```
 
+## Activity Logging
+
+### Automatic Logging ✅
+
+This agent's work is **automatically captured** by the Activity Logging Hook when invoked via the Task tool. The system logs session start, duration, files modified, deliverables, and related Notion items without any manual intervention.
+
+**No action required** for standard work completion - the hook handles tracking automatically.
+
+### Manual Logging Required 🔔
+
+**MUST use `/agent:log-activity` for these special events**:
+
+1. **Work Handoffs** 🔄 - When transferring work to another agent or team member
+2. **Blockers** 🚧 - When progress is blocked and requires external help
+3. **Critical Milestones** 🎯 - When reaching significant progress requiring stakeholder visibility
+4. **Key Decisions** ✅ - When session completion involves important architectural/cost/strategic choices
+5. **Early Termination** ⏹️ - When stopping work before completion due to scope change or discovered issues
+
+### Command Format
+
+```bash
+/agent:log-activity @@security-automation {status} "{detailed-description}"
+
+# Status values: completed | blocked | handed-off | in-progress
+
+# Example for this agent:
+/agent:log-activity @@security-automation completed "Work completed successfully with comprehensive documentation of decisions, rationale, and next steps for workflow continuity."
+```
+
+### Best Practices
+
+**✅ DO**:
+- Provide specific, actionable details (not generic "work complete")
+- Include file paths, URLs, or Notion page IDs for context
+- Document decisions with rationale (especially cost/architecture choices)
+- Mention handoff recipient explicitly (@agent-name or team member)
+- Explain blockers with specific resolution requirements
+
+**❌ DON'T**:
+- Log routine completions (automatic hook handles this)
+- Use vague descriptions without actionable information
+- Skip logging handoffs (causes workflow continuity breaks)
+- Forget to update status when blockers are resolved
+
+**→ Full Documentation**: [Agent Activity Center](./../docs/agent-activity-center.md)
+
+---
+
 ## Related Resources
 
 - Phase 4 Project Plan: [.claude/docs/phase-4-project-plan.md](.claude/docs/phase-4-project-plan.md)

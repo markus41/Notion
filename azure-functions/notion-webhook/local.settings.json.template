@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "KEY_VAULT_NAME": "kv-brookside-secrets",
+    "AGENT_ACTIVITY_HUB_ID": "72b879f213bd4edb9c59b43089dbef21",
+    "NOTION_API_KEY": "secret_<your-notion-api-key>",
+    "NOTION_WEBHOOK_SECRET": "<your-webhook-secret>",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": ""
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
+  }
+}

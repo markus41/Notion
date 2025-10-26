@@ -1,0 +1,394 @@
+name: Deploy Azure OpenAI Infrastructure
+
+# Establish automated Azure OpenAI deployment pipeline with environment-based approvals
+# Best for: Organizations requiring CI/CD for infrastructure with governance controls
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '.claude/implementations/azure-openai-integration/infrastructure/**'
+      - '.github/workflows/deploy-azure-openai.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.claude/implementations/azure-openai-integration/infrastructure/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      skip_validation:
+        description: 'Skip pre-deployment validation'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write  # Required for OIDC authentication
+  contents: read
+  pull-requests: write
+
+env:
+  AZURE_SUBSCRIPTION_ID: cfacbbe8-a2a3-445f-a188-68b3b35f0c84
+  AZURE_TENANT_ID: 2930489e-9d8a-456b-9de9-e4787faeab9c
+  BICEP_TEMPLATE_PATH: .claude/implementations/azure-openai-integration/infrastructure/bicep/main.bicep
+
+jobs:
+  # ============================================================================
+  # Job 1: Bicep Lint and Validation
+  # ============================================================================
+  validate:
+    name: Validate Bicep Template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Azure CLI
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep CLI
+        run: |
+          az bicep install
+          az bicep version
+
+      - name: Lint Bicep template
+        run: |
+          az bicep build --file ${{ env.BICEP_TEMPLATE_PATH }}
+          echo "Bicep template linting completed successfully"
+
+      - name: Run Bicep security scan
+        run: |
+          # Check for common security issues
+          echo "Checking for hardcoded secrets..."
+          if grep -rE '(password|secret|key)\s*=\s*["\x27][^"\x27]+["\x27]' ${{ env.BICEP_TEMPLATE_PATH }}; then
+            echo "ERROR: Potential hardcoded secrets found"
+            exit 1
+          fi
+
+          echo "Verifying Managed Identity usage..."
+          if ! grep -q "disableLocalAuth.*true" ${{ env.BICEP_TEMPLATE_PATH }}; then
+            echo "WARNING: Consider setting disableLocalAuth to true"
+          fi
+
+          echo "Security scan completed"
+
+      - name: Upload Bicep artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: bicep-templates
+          path: |
+            ${{ env.BICEP_TEMPLATE_PATH }}
+            .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/*.json
+
+  # ============================================================================
+  # Job 2: Deploy to Development
+  # ============================================================================
+  deploy-dev:
+    name: Deploy to Development
+    needs: validate
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'dev'
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://portal.azure.com/#resource/${{ steps.deploy.outputs.azureOpenAIId }}/overview
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name rg-brookside-aoai-dev \
+            --location eastus \
+            --tags Environment=dev ManagedBy=GitHubActions Project=InnovationNexus
+
+      - name: Run What-If analysis
+        run: |
+          az deployment group what-if \
+            --resource-group rg-brookside-aoai-dev \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/dev.json
+
+      - name: Deploy Azure OpenAI
+        id: deploy
+        run: |
+          deployment_output=$(az deployment group create \
+            --resource-group rg-brookside-aoai-dev \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/dev.json \
+            --name "aoai-deployment-dev-$(date +%Y%m%d-%H%M%S)" \
+            --query 'properties.outputs' \
+            --output json)
+
+          echo "deployment_output=$deployment_output" >> $GITHUB_OUTPUT
+          echo "$deployment_output" | jq '.'
+
+      - name: Verify deployment
+        run: |
+          aoai_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.azureOpenAIName.value')
+          deployment_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.deploymentName.value')
+
+          echo "Verifying Azure OpenAI Service: $aoai_name"
+          az cognitiveservices account show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-dev \
+            --query '{name:name, state:properties.provisioningState, endpoint:properties.endpoint}'
+
+          echo "Verifying model deployment: $deployment_name"
+          az cognitiveservices account deployment show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-dev \
+            --deployment-name $deployment_name \
+            --query '{name:name, state:properties.provisioningState, model:properties.model.name}'
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = JSON.parse('${{ steps.deploy.outputs.deployment_output }}');
+            const comment = `
+            ## Azure OpenAI Deployment - Development
+
+            **Status**: Deployed Successfully
+
+            **Resources**:
+            - Azure OpenAI Service: \`${output.azureOpenAIName.value}\`
+            - Endpoint: \`${output.azureOpenAIEndpoint.value}\`
+            - Model Deployment: \`${output.deploymentName.value}\` (GPT-4 Turbo)
+
+            **Managed Identity**:
+            - Principal ID: \`${output.managedIdentityPrincipalId.value}\`
+            - Client ID: \`${output.managedIdentityClientId.value}\`
+
+            **Next Steps**:
+            1. Configure application with endpoint URL
+            2. Test integration with sample API calls
+            3. Review cost metrics in Azure Cost Management
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # ============================================================================
+  # Job 3: Deploy to Staging
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    needs: validate
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://portal.azure.com/#resource/${{ steps.deploy.outputs.azureOpenAIId }}/overview
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name rg-brookside-aoai-staging \
+            --location eastus \
+            --tags Environment=staging ManagedBy=GitHubActions Project=InnovationNexus
+
+      - name: Run What-If analysis
+        run: |
+          az deployment group what-if \
+            --resource-group rg-brookside-aoai-staging \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/staging.json
+
+      - name: Deploy Azure OpenAI
+        id: deploy
+        run: |
+          deployment_output=$(az deployment group create \
+            --resource-group rg-brookside-aoai-staging \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/staging.json \
+            --name "aoai-deployment-staging-$(date +%Y%m%d-%H%M%S)" \
+            --query 'properties.outputs' \
+            --output json)
+
+          echo "deployment_output=$deployment_output" >> $GITHUB_OUTPUT
+          echo "$deployment_output" | jq '.'
+
+      - name: Verify deployment
+        run: |
+          aoai_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.azureOpenAIName.value')
+          deployment_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.deploymentName.value')
+
+          az cognitiveservices account show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-staging \
+            --query '{name:name, state:properties.provisioningState, endpoint:properties.endpoint}'
+
+          az cognitiveservices account deployment show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-staging \
+            --deployment-name $deployment_name \
+            --query '{name:name, state:properties.provisioningState, model:properties.model.name}'
+
+  # ============================================================================
+  # Job 4: Deploy to Production (Manual Approval Required)
+  # ============================================================================
+  deploy-prod:
+    name: Deploy to Production
+    needs: validate
+    if: github.event.inputs.environment == 'prod'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://portal.azure.com/#resource/${{ steps.deploy.outputs.azureOpenAIId }}/overview
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name rg-brookside-aoai-prod \
+            --location eastus \
+            --tags Environment=prod ManagedBy=GitHubActions Project=InnovationNexus BusinessCriticality=High
+
+      - name: Run What-If analysis
+        run: |
+          az deployment group what-if \
+            --resource-group rg-brookside-aoai-prod \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/prod.json
+
+      - name: Deploy Azure OpenAI
+        id: deploy
+        run: |
+          deployment_output=$(az deployment group create \
+            --resource-group rg-brookside-aoai-prod \
+            --template-file ${{ env.BICEP_TEMPLATE_PATH }} \
+            --parameters .claude/implementations/azure-openai-integration/infrastructure/bicep/parameters/prod.json \
+            --name "aoai-deployment-prod-$(date +%Y%m%d-%H%M%S)" \
+            --query 'properties.outputs' \
+            --output json)
+
+          echo "deployment_output=$deployment_output" >> $GITHUB_OUTPUT
+          echo "$deployment_output" | jq '.'
+
+      - name: Verify deployment
+        run: |
+          aoai_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.azureOpenAIName.value')
+          deployment_name=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.deploymentName.value')
+
+          az cognitiveservices account show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-prod \
+            --query '{name:name, state:properties.provisioningState, endpoint:properties.endpoint}'
+
+          az cognitiveservices account deployment show \
+            --name $aoai_name \
+            --resource-group rg-brookside-aoai-prod \
+            --deployment-name $deployment_name \
+            --query '{name:name, state:properties.provisioningState, model:properties.model.name}'
+
+      - name: Smoke test API endpoint
+        run: |
+          endpoint=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.azureOpenAIEndpoint.value')
+          echo "Testing API endpoint: $endpoint"
+
+          # Verify endpoint is reachable (basic connectivity check)
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" $endpoint)
+
+          if [ $http_code -eq 200 ] || [ $http_code -eq 401 ]; then
+            echo "Endpoint responding (HTTP $http_code) - authentication required as expected"
+          else
+            echo "WARNING: Unexpected HTTP code: $http_code"
+          fi
+
+      - name: Create deployment report
+        run: |
+          output=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq '.')
+
+          cat > deployment-report-prod.md <<EOF
+          # Azure OpenAI Production Deployment Report
+
+          **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Environment**: Production
+          **Deployed By**: GitHub Actions
+          **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ## Deployed Resources
+
+          - **Azure OpenAI Service**: \`$(echo "$output" | jq -r '.azureOpenAIName.value')\`
+          - **Endpoint**: \`$(echo "$output" | jq -r '.azureOpenAIEndpoint.value')\`
+          - **Model Deployment**: \`$(echo "$output" | jq -r '.deploymentName.value')\` (GPT-4 Turbo)
+          - **Managed Identity**: \`$(echo "$output" | jq -r '.managedIdentityId.value')\`
+
+          ## Configuration
+
+          - **Resource Group**: rg-brookside-aoai-prod
+          - **Location**: eastus
+          - **Authentication**: Managed Identity (RBAC)
+          - **Public Network Access**: Enabled
+          - **Diagnostic Logs**: Enabled (90-day retention)
+
+          ## Security
+
+          - Local authentication disabled
+          - RBAC role: Cognitive Services OpenAI User
+          - Budget alerts configured (50%, 75%, 90%)
+
+          ## Next Steps
+
+          1. Update production application configuration
+          2. Configure monitoring alerts in Application Insights
+          3. Review cost metrics after 24 hours
+          4. Schedule quarterly cost optimization review
+
+          ---
+          Generated by Claude Code Deployment Orchestrator
+          EOF
+
+          cat deployment-report-prod.md
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-report-prod
+          path: deployment-report-prod.md

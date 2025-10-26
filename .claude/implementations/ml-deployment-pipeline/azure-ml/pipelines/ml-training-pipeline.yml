@@ -1,0 +1,425 @@
+# Azure Machine Learning Training Pipeline
+# Establishes automated model training workflow for viability scoring, cost optimization, and pattern mining
+# across Brookside BI Innovation Nexus environments.
+#
+# Purpose: Orchestrate end-to-end ML workflow from data validation through model registration
+# Best for: Organizations requiring scalable, reproducible ML model training with quality gates
+# Version: 1.0.0
+# Last Updated: 2025-10-26
+
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+# Pipeline metadata establishing traceability and governance
+display_name: Brookside BI Viability Scoring Pipeline
+description: |
+  Automated ML training pipeline for innovation viability assessment.
+  Supports XGBoost classification with automated feature engineering,
+  quality gates, and conditional deployment based on accuracy thresholds.
+
+  Model Types:
+  - Viability Scoring (0-100 classification)
+  - Cost Optimization (regression)
+  - Pattern Mining (clustering)
+
+experiment_name: viability_scoring_pipeline
+tags:
+  environment: ${environment}
+  model_type: viability_scoring
+  framework: xgboost
+  version: 1.0.0
+  managed_by: BrooksideBI
+  cost_center: Innovation
+
+# Environment-specific settings established through pipeline parameters
+settings:
+  default_compute: cpu-cluster-${environment}
+  default_datastore: azureml:workspaceblobstore
+  continue_on_step_failure: false
+  force_rerun: false
+
+# Input parameters enabling flexible pipeline execution across environments
+inputs:
+  # Data inputs from Notion workspace exports
+  raw_data_path:
+    type: uri_folder
+    description: Path to raw training data from Notion Ideas/Research databases
+    mode: ro_mount
+
+  # Model configuration parameters
+  training_config:
+    type: uri_file
+    description: YAML configuration for model hyperparameters
+    mode: download
+
+  # Environment specification
+  environment:
+    type: string
+    default: dev
+    enum: [dev, staging, prod]
+    description: Target deployment environment
+
+  # Quality gate thresholds
+  min_accuracy:
+    type: number
+    default: 0.85
+    description: Minimum accuracy threshold for model registration (0-1)
+
+  min_precision:
+    type: number
+    default: 0.80
+    description: Minimum precision threshold for high-viability predictions
+
+  min_recall:
+    type: number
+    default: 0.75
+    description: Minimum recall threshold to avoid false negatives
+
+# Output artifacts enabling downstream consumption and deployment
+outputs:
+  validated_data:
+    type: uri_folder
+    mode: rw_mount
+    description: Data passing quality checks and schema validation
+
+  engineered_features:
+    type: uri_folder
+    mode: rw_mount
+    description: Transformed features ready for model training
+
+  trained_model:
+    type: mlflow_model
+    mode: rw_mount
+    description: Registered MLflow model with version tracking
+
+  evaluation_metrics:
+    type: uri_file
+    mode: rw_mount
+    description: JSON file containing model performance metrics
+
+  deployment_config:
+    type: uri_file
+    mode: rw_mount
+    description: Generated deployment configuration for approved models
+
+# Pipeline job steps establishing end-to-end ML workflow
+jobs:
+  #############################################################################
+  # STEP 1: DATA VALIDATION
+  # Establish data quality and schema compliance before training
+  #############################################################################
+  data_validation:
+    type: command
+    display_name: Validate Training Data Quality
+    description: |
+      Enforce data quality gates to ensure reliable model training.
+      Validates schema compliance, checks for data drift, detects anomalies,
+      and verifies minimum data requirements for statistical significance.
+
+    inputs:
+      raw_data: ${{parent.inputs.raw_data_path}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      validated_data: ${{parent.outputs.validated_data}}
+      validation_report:
+        type: uri_file
+        mode: rw_mount
+
+    code: ./validation
+    environment: azureml:AzureML-sklearn-1.5@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python validate_data.py
+      --input-data ${{inputs.raw_data}}
+      --output-data ${{outputs.validated_data}}
+      --validation-report ${{outputs.validation_report}}
+      --environment ${{inputs.environment}}
+      --min-samples 1000
+      --max-missing-ratio 0.10
+      --schema-file schemas/viability_schema.json
+
+    # Resource allocation optimized for data processing workloads
+    resources:
+      instance_count: 1
+      shm_size: 2g
+
+    # Quality gates blocking pipeline progression on validation failures
+    distribution:
+      type: pytorch
+
+    limits:
+      timeout: 300  # 5 minutes maximum for validation
+
+  #############################################################################
+  # STEP 2: FEATURE ENGINEERING
+  # Transform raw data into model-ready features using domain knowledge
+  #############################################################################
+  feature_engineering:
+    type: command
+    display_name: Engineer Viability Features
+    description: |
+      Automated feature extraction establishing predictive signals for
+      innovation viability. Incorporates Notion metadata, research findings,
+      cost analysis, and historical success patterns.
+
+    inputs:
+      validated_data: ${{parent.jobs.data_validation.outputs.validated_data}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      engineered_features: ${{parent.outputs.engineered_features}}
+      feature_metadata:
+        type: uri_file
+        mode: rw_mount
+        description: Feature importance and transformation metadata
+
+    code: ./feature_engineering
+    environment: azureml:AzureML-sklearn-1.5@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python engineer_features.py
+      --input-data ${{inputs.validated_data}}
+      --output-features ${{outputs.engineered_features}}
+      --feature-metadata ${{outputs.feature_metadata}}
+      --environment ${{inputs.environment}}
+      --encoding-strategy target
+      --scaling-method robust
+      --feature-selection-threshold 0.05
+
+    resources:
+      instance_count: 1
+
+    limits:
+      timeout: 600  # 10 minutes for feature engineering
+
+  #############################################################################
+  # STEP 3: MODEL TRAINING
+  # Train XGBoost classifier with hyperparameter optimization
+  #############################################################################
+  model_training:
+    type: command
+    display_name: Train Viability Scoring Model
+    description: |
+      Establish production-ready XGBoost model for innovation viability
+      assessment. Supports multi-class classification (0-100 score bins)
+      with early stopping and cross-validation for generalization.
+
+    inputs:
+      training_data: ${{parent.jobs.feature_engineering.outputs.engineered_features}}
+      training_config: ${{parent.inputs.training_config}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      trained_model:
+        type: mlflow_model
+        mode: rw_mount
+      training_metrics:
+        type: uri_file
+        mode: rw_mount
+      feature_importance:
+        type: uri_file
+        mode: rw_mount
+
+    code: ./training
+    environment: azureml:AzureML-xgboost-1.7@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python train_model.py
+      --training-data ${{inputs.training_data}}
+      --config ${{inputs.training_config}}
+      --model-output ${{outputs.trained_model}}
+      --metrics-output ${{outputs.training_metrics}}
+      --feature-importance ${{outputs.feature_importance}}
+      --environment ${{inputs.environment}}
+      --cv-folds 5
+      --early-stopping-rounds 50
+      --max-iterations 1000
+      --enable-mlflow
+      --log-artifacts
+
+    # Enable GPU for faster training in production environments
+    resources:
+      instance_count: 1
+      instance_type: ${{parent.inputs.environment == 'prod' && 'Standard_NC6' || 'Standard_D4s_v3'}}
+
+    limits:
+      timeout: 3600  # 1 hour maximum for training
+
+  #############################################################################
+  # STEP 4: MODEL EVALUATION
+  # Comprehensive performance assessment with quality gates
+  #############################################################################
+  model_evaluation:
+    type: command
+    display_name: Evaluate Model Performance
+    description: |
+      Enforce quality standards through multi-metric evaluation.
+      Validates accuracy, precision, recall, F1, AUC-ROC against
+      configurable thresholds. Generates performance reports and
+      comparison metrics against baseline models.
+
+    inputs:
+      trained_model: ${{parent.jobs.model_training.outputs.trained_model}}
+      test_data: ${{parent.jobs.feature_engineering.outputs.engineered_features}}
+      min_accuracy: ${{parent.inputs.min_accuracy}}
+      min_precision: ${{parent.inputs.min_precision}}
+      min_recall: ${{parent.inputs.min_recall}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      evaluation_metrics: ${{parent.outputs.evaluation_metrics}}
+      confusion_matrix:
+        type: uri_file
+        mode: rw_mount
+      performance_report:
+        type: uri_file
+        mode: rw_mount
+      quality_gate_status:
+        type: uri_file
+        mode: rw_mount
+        description: PASSED/FAILED status for pipeline gating
+
+    code: ./evaluation
+    environment: azureml:AzureML-sklearn-1.5@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python evaluate_model.py
+      --model-path ${{inputs.trained_model}}
+      --test-data ${{inputs.test_data}}
+      --metrics-output ${{outputs.evaluation_metrics}}
+      --confusion-matrix ${{outputs.confusion_matrix}}
+      --performance-report ${{outputs.performance_report}}
+      --quality-gate-status ${{outputs.quality_gate_status}}
+      --min-accuracy ${{inputs.min_accuracy}}
+      --min-precision ${{inputs.min_precision}}
+      --min-recall ${{inputs.min_recall}}
+      --environment ${{inputs.environment}}
+      --baseline-model-name viability_scoring_baseline
+      --generate-shap-values
+
+    resources:
+      instance_count: 1
+
+    limits:
+      timeout: 900  # 15 minutes for evaluation
+
+  #############################################################################
+  # STEP 5: MODEL REGISTRATION
+  # Register approved models to MLflow Model Registry with metadata
+  #############################################################################
+  model_registration:
+    type: command
+    display_name: Register Model to MLflow Registry
+    description: |
+      Conditional registration of models passing quality gates.
+      Establishes model versioning, lineage tracking, and metadata
+      tagging for governance and deployment automation.
+
+    inputs:
+      trained_model: ${{parent.jobs.model_training.outputs.trained_model}}
+      evaluation_metrics: ${{parent.jobs.model_evaluation.outputs.evaluation_metrics}}
+      quality_gate_status: ${{parent.jobs.model_evaluation.outputs.quality_gate_status}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      registered_model_info:
+        type: uri_file
+        mode: rw_mount
+        description: Model name, version, and registration metadata
+
+    code: ./registration
+    environment: azureml:AzureML-mlflow-1.30@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python register_model.py
+      --model-path ${{inputs.trained_model}}
+      --metrics-path ${{inputs.evaluation_metrics}}
+      --quality-gate-status ${{inputs.quality_gate_status}}
+      --registered-model-info ${{outputs.registered_model_info}}
+      --model-name viability_scoring_model
+      --environment ${{inputs.environment}}
+      --tags "framework=xgboost,use_case=viability_scoring,managed_by=BrooksideBI"
+      --description "Innovation viability scoring model trained on Notion Ideas/Research data"
+      --register-only-if-passed
+
+    resources:
+      instance_count: 1
+
+    limits:
+      timeout: 300  # 5 minutes for registration
+
+  #############################################################################
+  # STEP 6: DEPLOYMENT CONFIGURATION
+  # Generate environment-specific deployment artifacts
+  #############################################################################
+  deployment_preparation:
+    type: command
+    display_name: Prepare Deployment Configuration
+    description: |
+      Generate deployment artifacts for approved models including
+      endpoint configurations, scaling policies, and monitoring rules.
+      Supports canary and blue-green deployment strategies.
+
+    inputs:
+      registered_model_info: ${{parent.jobs.model_registration.outputs.registered_model_info}}
+      quality_gate_status: ${{parent.jobs.model_evaluation.outputs.quality_gate_status}}
+      environment: ${{parent.inputs.environment}}
+
+    outputs:
+      deployment_config: ${{parent.outputs.deployment_config}}
+      endpoint_spec:
+        type: uri_file
+        mode: rw_mount
+      scaling_policy:
+        type: uri_file
+        mode: rw_mount
+
+    code: ./deployment
+    environment: azureml:AzureML-sklearn-1.5@latest
+    compute: azureml:cpu-cluster-${{parent.inputs.environment}}
+
+    command: >-
+      python prepare_deployment.py
+      --model-info ${{inputs.registered_model_info}}
+      --quality-gate-status ${{inputs.quality_gate_status}}
+      --deployment-config ${{outputs.deployment_config}}
+      --endpoint-spec ${{outputs.endpoint_spec}}
+      --scaling-policy ${{outputs.scaling_policy}}
+      --environment ${{inputs.environment}}
+      --deployment-strategy ${{inputs.environment == 'prod' && 'blue-green' || 'canary'}}
+      --initial-traffic-percentage 10
+      --auto-scale-min-instances ${{inputs.environment == 'prod' && 2 || 1}}
+      --auto-scale-max-instances ${{inputs.environment == 'prod' && 10 || 3}}
+      --enable-app-insights
+
+    resources:
+      instance_count: 1
+
+    limits:
+      timeout: 300  # 5 minutes for deployment prep
+
+# Compute targets establishing scalable infrastructure for ML workloads
+# Note: Compute clusters should be pre-provisioned via Azure Portal or Infrastructure as Code
+
+# Sample compute cluster definition (create via Azure CLI):
+# az ml compute create --name cpu-cluster-dev --type amlcompute \
+#   --min-instances 0 --max-instances 4 --size Standard_D4s_v3 \
+#   --idle-time-before-scale-down 600 --tier LowPriority
+
+# Cost optimization strategies:
+# - Dev/Staging: LowPriority VMs (60-80% cost savings)
+# - Production: Dedicated VMs with Reserved Capacity (37% savings vs pay-as-you-go)
+# - Auto-scale to zero during off-hours
+# - Use Spot instances for training (not inference)
+
+# Monitoring and alerting configuration (integrate with Azure Monitor)
+# - Data drift detection (monthly)
+# - Model performance degradation (accuracy drop >5%)
+# - Endpoint availability (99.9% SLA)
+# - Cost anomaly detection (>20% increase week-over-week)

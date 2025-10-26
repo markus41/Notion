@@ -1,0 +1,656 @@
+# GitHub Actions MLOps CI/CD Workflow
+# Establishes automated model deployment pipeline for Azure Machine Learning endpoints
+# across dev, staging, and production environments with approval gates and rollback automation.
+#
+# Purpose: Orchestrate continuous integration and deployment for ML models with quality gates
+# Best for: Organizations requiring automated ML model lifecycle management with governance
+# Version: 1.0.0
+# Last Updated: 2025-10-26
+
+name: ML Model Deployment Pipeline
+
+on:
+  # Trigger on ML code changes to main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'ml/**'
+      - '.github/workflows/ml-deployment.yml'
+      - 'azure-ml/pipelines/**'
+
+  # Enable PR validation before merge
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ml/**'
+      - 'azure-ml/pipelines/**'
+
+  # Support manual workflow dispatch with environment selection
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+        default: 'dev'
+      skip_tests:
+        description: 'Skip test execution (emergency deployments only)'
+        required: false
+        type: boolean
+        default: false
+      force_deploy:
+        description: 'Deploy even if quality gates fail (requires approval)'
+        required: false
+        type: boolean
+        default: false
+
+# Establish pipeline-wide environment variables for Azure integration
+env:
+  AZURE_SUBSCRIPTION_ID: cfacbbe8-a2a3-445f-a188-68b3b35f0c84
+  AZURE_TENANT_ID: 2930489e-9d8a-456b-9de9-e4787faeab9c
+  AZURE_ML_WORKSPACE: ml-brookside-prod
+  AZURE_RESOURCE_GROUP: rg-brookside-ml
+  AZURE_KEYVAULT_NAME: kv-brookside-secrets
+  PYTHON_VERSION: '3.10'
+  MIN_COVERAGE_THRESHOLD: 80
+  MAX_DEPLOYMENT_TIMEOUT: 3600  # 1 hour
+
+# Define reusable job defaults establishing consistency
+defaults:
+  run:
+    shell: bash
+    working-directory: ./ml
+
+# Concurrency control preventing simultaneous deployments to same environment
+concurrency:
+  group: ml-deployment-${{ github.event.inputs.environment || 'auto' }}
+  cancel-in-progress: false  # Never cancel in-progress deployments
+
+jobs:
+  #############################################################################
+  # JOB 1: CODE QUALITY CHECKS
+  # Establish code standards enforcement before deployment
+  #############################################################################
+  code_quality:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate blame analysis
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install code quality tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install black==24.4.2 ruff==0.4.8 mypy==1.10.0
+          pip install -r requirements-dev.txt
+
+      - name: Run Black formatter check
+        run: |
+          echo "Validating code formatting with Black..."
+          black --check --diff --color ml/
+
+      - name: Run Ruff linter
+        run: |
+          echo "Enforcing code quality with Ruff..."
+          ruff check ml/ --output-format=github
+
+      - name: Run MyPy type checker
+        run: |
+          echo "Validating type annotations with MyPy..."
+          mypy ml/ --strict --show-error-codes
+
+      - name: Check for security vulnerabilities
+        run: |
+          pip install bandit==1.7.8
+          echo "Scanning for security issues with Bandit..."
+          bandit -r ml/ -f json -o bandit-report.json
+          bandit -r ml/ -f screen
+
+      - name: Upload code quality reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-quality-reports
+          path: |
+            bandit-report.json
+          retention-days: 30
+
+  #############################################################################
+  # JOB 2: UNIT TESTING
+  # Validate individual component functionality with coverage enforcement
+  #############################################################################
+  unit_tests:
+    name: Unit Tests (Coverage ${{ env.MIN_COVERAGE_THRESHOLD }}%)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: code_quality
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install pytest==8.2.2 pytest-cov==5.0.0 pytest-mock==3.14.0
+
+      - name: Run unit tests with coverage
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "Executing unit tests with ${{ env.MIN_COVERAGE_THRESHOLD }}% coverage requirement..."
+          pytest tests/unit/ \
+            --cov=ml \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --cov-fail-under=${{ env.MIN_COVERAGE_THRESHOLD }} \
+            --junitxml=test-results.xml \
+            --verbose
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            test-results.xml
+            htmlcov/
+          retention-days: 30
+
+      - name: Publish test summary
+        if: always()
+        uses: test-summary/action@v2
+        with:
+          paths: test-results.xml
+
+  #############################################################################
+  # JOB 3: INTEGRATION TESTING
+  # Validate Azure ML workspace integration with mocked services
+  #############################################################################
+  integration_tests:
+    name: Integration Tests (Azure ML Mock)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: unit_tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install pytest==8.2.2 pytest-mock==3.14.0 responses==0.25.0
+
+      - name: Run integration tests
+        if: ${{ !inputs.skip_tests }}
+        env:
+          AZURE_ML_WORKSPACE_MOCK: 'true'
+        run: |
+          echo "Executing integration tests with Azure ML workspace mocks..."
+          pytest tests/integration/ \
+            --junitxml=integration-test-results.xml \
+            --verbose
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: integration-test-results.xml
+          retention-days: 30
+
+  #############################################################################
+  # JOB 4: MODEL TRAINING EXECUTION
+  # Submit Azure ML pipeline job for model training
+  #############################################################################
+  model_training:
+    name: Train Model (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: integration_tests
+
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+      fail-fast: false
+
+    environment:
+      name: ${{ matrix.environment }}
+      url: https://ml.azure.com/workspaces/${{ env.AZURE_ML_WORKSPACE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure ML defaults
+        run: |
+          az configure --defaults workspace=${{ env.AZURE_ML_WORKSPACE }} \
+            group=${{ env.AZURE_RESOURCE_GROUP }}
+
+      - name: Install Azure ML CLI extension
+        run: |
+          az extension add --name ml --version 2.25.0 --yes
+
+      - name: Submit training pipeline job
+        id: training_job
+        run: |
+          echo "Submitting Azure ML training pipeline for ${{ matrix.environment }}..."
+
+          job_name=$(az ml job create \
+            --file ../azure-ml/pipelines/ml-training-pipeline.yml \
+            --set inputs.environment=${{ matrix.environment }} \
+            --set inputs.min_accuracy=0.85 \
+            --set inputs.min_precision=0.80 \
+            --set inputs.min_recall=0.75 \
+            --query name -o tsv)
+
+          echo "job_name=$job_name" >> $GITHUB_OUTPUT
+          echo "Training job submitted: $job_name"
+
+      - name: Wait for training completion
+        run: |
+          echo "Monitoring training job: ${{ steps.training_job.outputs.job_name }}..."
+
+          az ml job stream \
+            --name ${{ steps.training_job.outputs.job_name }} \
+            --web
+
+      - name: Check training job status
+        id: job_status
+        run: |
+          status=$(az ml job show \
+            --name ${{ steps.training_job.outputs.job_name }} \
+            --query status -o tsv)
+
+          echo "job_status=$status" >> $GITHUB_OUTPUT
+          echo "Training job status: $status"
+
+          if [ "$status" != "Completed" ]; then
+            echo "Training job failed with status: $status"
+            exit 1
+          fi
+
+      - name: Download evaluation metrics
+        if: success()
+        run: |
+          az ml job download \
+            --name ${{ steps.training_job.outputs.job_name }} \
+            --output-name evaluation_metrics \
+            --download-path ./outputs
+
+      - name: Upload training artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-artifacts-${{ matrix.environment }}
+          path: ./outputs/
+          retention-days: 90
+
+  #############################################################################
+  # JOB 5: MODEL VALIDATION
+  # A/B test new model against baseline for performance comparison
+  #############################################################################
+  model_validation:
+    name: Validate Model (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: model_training
+
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+      fail-fast: false
+
+    environment:
+      name: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Download training artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: training-artifacts-${{ matrix.environment }}
+          path: ./outputs
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install validation tools
+        run: |
+          pip install azureml-mlflow==1.55.0 mlflow==2.13.0
+          pip install -r requirements.txt
+
+      - name: Compare with baseline model
+        id: ab_test
+        run: |
+          python scripts/compare_models.py \
+            --challenger-metrics ./outputs/evaluation_metrics.json \
+            --baseline-model-name viability_scoring_baseline \
+            --environment ${{ matrix.environment }} \
+            --output comparison_results.json
+
+      - name: Upload comparison results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ab-test-results-${{ matrix.environment }}
+          path: comparison_results.json
+          retention-days: 30
+
+  #############################################################################
+  # JOB 6: DEPLOYMENT TO MANAGED ENDPOINT
+  # Deploy approved model to Azure ML managed online endpoint
+  #############################################################################
+  deploy_model:
+    name: Deploy to ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: model_validation
+
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+      fail-fast: false
+      max-parallel: 1  # Sequential deployments to prevent conflicts
+
+    environment:
+      name: ${{ matrix.environment }}
+      url: https://ml.azure.com/endpoints/${{ steps.endpoint.outputs.endpoint_name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure ML defaults
+        run: |
+          az configure --defaults workspace=${{ env.AZURE_ML_WORKSPACE }} \
+            group=${{ env.AZURE_RESOURCE_GROUP }}
+
+      - name: Download deployment configuration
+        uses: actions/download-artifact@v4
+        with:
+          name: training-artifacts-${{ matrix.environment }}
+          path: ./outputs
+
+      - name: Create or update managed endpoint
+        id: endpoint
+        run: |
+          endpoint_name="viability-scoring-${{ matrix.environment }}"
+          echo "endpoint_name=$endpoint_name" >> $GITHUB_OUTPUT
+
+          # Check if endpoint exists
+          if az ml online-endpoint show --name $endpoint_name &>/dev/null; then
+            echo "Endpoint $endpoint_name exists, updating..."
+            az ml online-endpoint update \
+              --name $endpoint_name \
+              --auth-mode key
+          else
+            echo "Creating new endpoint $endpoint_name..."
+            az ml online-endpoint create \
+              --name $endpoint_name \
+              --auth-mode key
+          fi
+
+      - name: Deploy model to endpoint (Canary strategy)
+        if: matrix.environment != 'prod'
+        run: |
+          deployment_name="deploy-$(date +%Y%m%d-%H%M%S)"
+
+          az ml online-deployment create \
+            --name $deployment_name \
+            --endpoint ${{ steps.endpoint.outputs.endpoint_name }} \
+            --model azureml:viability_scoring_model@latest \
+            --instance-type Standard_DS3_v2 \
+            --instance-count 1 \
+            --environment-variable ENVIRONMENT=${{ matrix.environment }} \
+            --app-insights-enabled
+
+          # Route 10% traffic to new deployment (canary)
+          az ml online-endpoint update \
+            --name ${{ steps.endpoint.outputs.endpoint_name }} \
+            --traffic "$deployment_name=10"
+
+      - name: Deploy model to endpoint (Blue-Green strategy)
+        if: matrix.environment == 'prod'
+        run: |
+          deployment_name="blue-$(date +%Y%m%d-%H%M%S)"
+
+          # Deploy to blue slot (0% traffic)
+          az ml online-deployment create \
+            --name $deployment_name \
+            --endpoint ${{ steps.endpoint.outputs.endpoint_name }} \
+            --model azureml:viability_scoring_model@latest \
+            --instance-type Standard_DS3_v2 \
+            --instance-count 2 \
+            --environment-variable ENVIRONMENT=prod \
+            --app-insights-enabled \
+            --all-traffic  # This will be 0% initially
+
+          echo "deployment_name=$deployment_name" >> $GITHUB_OUTPUT
+
+  #############################################################################
+  # JOB 7: SMOKE TESTING
+  # Validate deployed endpoint with canary traffic
+  #############################################################################
+  smoke_tests:
+    name: Smoke Tests (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: deploy_model
+
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+      fail-fast: true
+
+    environment:
+      name: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get endpoint scoring URI
+        id: endpoint_uri
+        run: |
+          endpoint_name="viability-scoring-${{ matrix.environment }}"
+
+          scoring_uri=$(az ml online-endpoint show \
+            --name $endpoint_name \
+            --query scoring_uri -o tsv)
+
+          echo "scoring_uri=$scoring_uri" >> $GITHUB_OUTPUT
+
+      - name: Get endpoint access key
+        id: endpoint_key
+        run: |
+          endpoint_name="viability-scoring-${{ matrix.environment }}"
+
+          key=$(az ml online-endpoint get-credentials \
+            --name $endpoint_name \
+            --query primaryKey -o tsv)
+
+          echo "::add-mask::$key"
+          echo "key=$key" >> $GITHUB_OUTPUT
+
+      - name: Execute smoke tests
+        run: |
+          bash scripts/test-ml-endpoint.sh \
+            --uri "${{ steps.endpoint_uri.outputs.scoring_uri }}" \
+            --key "${{ steps.endpoint_key.outputs.key }}" \
+            --environment ${{ matrix.environment }} \
+            --max-latency 2000 \
+            --min-success-rate 0.95
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results-${{ matrix.environment }}
+          path: smoke_test_results.json
+          retention-days: 30
+
+  #############################################################################
+  # JOB 8: PRODUCTION ROLLOUT
+  # Gradually shift traffic to new deployment (prod only)
+  #############################################################################
+  production_rollout:
+    name: Production Traffic Rollout
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: smoke_tests
+    if: github.event.inputs.environment == 'prod' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+
+    environment:
+      name: prod
+      url: https://ml.azure.com/endpoints/viability-scoring-prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Gradual traffic shift (10% → 50% → 100%)
+        run: |
+          endpoint_name="viability-scoring-prod"
+
+          # Get latest deployment name
+          deployment_name=$(az ml online-endpoint show \
+            --name $endpoint_name \
+            --query 'traffic | keys(@)[0]' -o tsv)
+
+          # Shift to 50% traffic
+          echo "Shifting 50% traffic to $deployment_name..."
+          az ml online-endpoint update \
+            --name $endpoint_name \
+            --traffic "$deployment_name=50"
+
+          # Monitor for 10 minutes
+          sleep 600
+
+          # Check error rate
+          error_rate=$(bash scripts/monitor-ml-performance.sh \
+            --endpoint $endpoint_name \
+            --metric error_rate)
+
+          if (( $(echo "$error_rate > 0.05" | bc -l) )); then
+            echo "Error rate too high ($error_rate), rolling back..."
+            exit 1
+          fi
+
+          # Shift to 100% traffic
+          echo "Shifting 100% traffic to $deployment_name..."
+          az ml online-endpoint update \
+            --name $endpoint_name \
+            --traffic "$deployment_name=100"
+
+      - name: Delete old deployments
+        run: |
+          endpoint_name="viability-scoring-prod"
+
+          # Keep only the 2 most recent deployments
+          az ml online-deployment list \
+            --endpoint-name $endpoint_name \
+            --query '[].name' -o tsv \
+            | tail -n +3 \
+            | xargs -I {} az ml online-deployment delete \
+              --endpoint-name $endpoint_name \
+              --name {} \
+              --yes --no-wait
+
+  #############################################################################
+  # JOB 9: POST-DEPLOYMENT MONITORING
+  # Configure Application Insights alerts and dashboards
+  #############################################################################
+  setup_monitoring:
+    name: Configure Monitoring (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [deploy_model, production_rollout]
+    if: always() && needs.deploy_model.result == 'success'
+
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Apply monitoring configuration
+        run: |
+          bash scripts/monitor-ml-performance.sh \
+            --endpoint viability-scoring-${{ matrix.environment }} \
+            --configure-alerts \
+            --alert-email consultations@brooksidebi.com \
+            --data-drift-threshold 0.15 \
+            --accuracy-drop-threshold 0.05 \
+            --latency-threshold-ms 2000
+
+# Notification configuration for deployment status updates
+# Integrate with Microsoft Teams, Slack, or email based on organization preferences
