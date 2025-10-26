@@ -1,0 +1,112 @@
+<policies>
+    <inbound>
+        <!-- Base policies from APIM global level -->
+        <base />
+
+        <!-- Rate limiting: 100 calls per minute per subscription to prevent abuse -->
+        <rate-limit calls="100" renewal-period="60" />
+
+        <!-- Quota: 10,000 calls per month to control costs -->
+        <quota calls="10000" renewal-period="2592000" />
+
+        <!-- Validate subscription key (automatically enforced by APIM, explicit check for clarity) -->
+        <check-header name="Ocp-Apim-Subscription-Key" failed-check-httpcode="401" failed-check-error-message="Subscription key required for API access" />
+
+        <!-- Generate webhook signature (HMAC-SHA256) if not provided by client -->
+        <!-- This allows MCP clients to invoke without knowing signature generation logic -->
+        <set-variable name="webhookSecret" value="{{notion-webhook-secret}}" />
+        <set-variable name="requestBody" value="@(context.Request.Body.As&lt;string&gt;(preserveContent: true))" />
+
+        <!-- Only generate signature if Notion-Signature header doesn't exist -->
+        <choose>
+            <when condition="@(!context.Request.Headers.ContainsKey(&quot;Notion-Signature&quot;))">
+                <set-header name="Notion-Signature" exists-action="override">
+                    <value>@{
+                        var secret = (string)context.Variables["webhookSecret"];
+                        var body = (string)context.Variables["requestBody"];
+                        using (var hmac = new System.Security.Cryptography.HMACSHA256(System.Text.Encoding.UTF8.GetBytes(secret)))
+                        {
+                            var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(body));
+                            return "v1=" + BitConverter.ToString(hash).Replace("-", "").ToLower();
+                        }
+                    }</value>
+                </set-header>
+            </when>
+        </choose>
+
+        <!-- Add correlation ID for request tracing across APIM → Function → Notion -->
+        <set-header name="X-Correlation-Id" exists-action="override">
+            <value>@(Guid.NewGuid().ToString())</value>
+        </set-header>
+
+        <!-- Add request timestamp for latency analysis -->
+        <set-variable name="requestTimestamp" value="@(DateTime.UtcNow)" />
+    </inbound>
+
+    <backend>
+        <!-- Forward request to Azure Function backend -->
+        <base />
+    </backend>
+
+    <outbound>
+        <!-- Base outbound policies -->
+        <base />
+
+        <!-- IMPORTANT: Do NOT access context.Response.Body - breaks streaming responses -->
+
+        <!-- Add CORS headers for web client compatibility (if needed) -->
+        <cors allow-credentials="false">
+            <allowed-origins>
+                <origin>https://portal.azure.com</origin>
+                <origin>https://www.notion.so</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>POST</method>
+                <method>OPTIONS</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+        </cors>
+
+        <!-- Add custom header with processing duration -->
+        <set-header name="X-APIM-Duration-Ms" exists-action="override">
+            <value>@{
+                var start = (DateTime)context.Variables["requestTimestamp"];
+                var duration = (DateTime.UtcNow - start).TotalMilliseconds;
+                return duration.ToString("0");
+            }</value>
+        </set-header>
+    </outbound>
+
+    <on-error>
+        <!-- Base error handling -->
+        <base />
+
+        <!-- Log errors to Application Insights with full context -->
+        <trace source="apim-webhook-error" severity="error">
+            <message>@{
+                return $"APIM Error: {context.LastError.Message} | Reason: {context.LastError.Reason} | Source: {context.LastError.Source} | Scope: {context.LastError.Scope} | Section: {context.LastError.Section}";
+            }</message>
+            <metadata name="CorrelationId" value="@(context.Request.Headers.GetValueOrDefault(&quot;X-Correlation-Id&quot;, &quot;unknown&quot;))" />
+            <metadata name="SubscriptionId" value="@(context.Subscription?.Id ?? &quot;unknown&quot;)" />
+            <metadata name="OperationId" value="@(context.Operation?.Id ?? &quot;unknown&quot;)" />
+        </trace>
+
+        <!-- Return structured error response to client -->
+        <return-response>
+            <set-status code="500" reason="Internal Server Error" />
+            <set-header name="Content-Type" exists-action="override">
+                <value>application/json</value>
+            </set-header>
+            <set-body>@{
+                return new JObject(
+                    new JProperty("success", false),
+                    new JProperty("message", "An error occurred processing your request"),
+                    new JProperty("correlationId", context.Request.Headers.GetValueOrDefault("X-Correlation-Id", "unknown")),
+                    new JProperty("error", context.LastError.Message)
+                ).ToString();
+            }</set-body>
+        </return-response>
+    </on-error>
+</policies>

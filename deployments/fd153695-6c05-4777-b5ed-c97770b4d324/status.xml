@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<deployment>
+  <id>fd153695-6c05-4777-b5ed-c97770b4d324</id>
+  <author>N/A</author>
+  <deployer>OneDeploy</deployer>
+  <authorEmail>N/A</authorEmail>
+  <message>OneDeploy</message>
+  <progress>Zipping node_modules...</progress>
+  <status>Building</status>
+  <statusText>Building and Deploying 'fd153695-6c05-4777-b5ed-c97770b4d324'.</statusText>
+  <lastSuccessEndTime />
+  <receivedTime>2025-10-26T17:28:36.2979391Z</receivedTime>
+  <startTime>2025-10-26T17:28:37.6689666Z</startTime>
+  <endTime />
+  <complete>False</complete>
+  <is_temp>False</is_temp>
+  <is_readonly>True</is_readonly>
+  <buildSummary />
+</deployment>

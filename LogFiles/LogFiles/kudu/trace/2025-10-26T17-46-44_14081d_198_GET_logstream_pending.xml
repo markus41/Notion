@@ -1,0 +1,5 @@
+<step title="Incoming Request" date="2025-10-26T17:46:44.526" instance="14081d" url="/logstream" method="GET" type="request" pid="821,1,5" Host="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" User-Agent="AZURECLI/2.77.0 (MSI)" Accept-Encoding="identity" Authorization="Bea..." x-ms-client-request-id="796f0209-b293-11f0-9a35-dc567bd6348a" X-ARR-LOG-ID="796f0209-b293-11f0-9a35-dc567bd6348a" CLIENT-IP="73.235.38.158:59627" X-SITE-DEPLOYMENT-ID="app-dsp-backend-dev-dfb8575d" WAS-DEFAULT-HOSTNAME="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/logstream" X-Client-IP="73.235.38.158" X-Client-Port="59627" >
+  <step title="Cleanup Xml Logs" date="2025-10-26T17:46:44.556" >
+    <step title="Cleanup Infos" date="2025-10-26T17:46:44.637" totalFiles="250" totalCleanup="90" /><!-- duration: 169ms -->
+  </step><!-- duration: 290ms -->
+  <step title="LogStreamHandlerMiddleware.Invoke" date="2025-10-26T17:46:45.188" /><!-- duration: 423ms -->

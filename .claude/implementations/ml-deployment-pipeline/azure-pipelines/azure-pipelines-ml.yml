@@ -1,0 +1,549 @@
+# Azure DevOps ML Pipeline
+# Establishes parallel execution pipeline for Azure Machine Learning model deployment
+# with artifact management, environment-specific configurations, and approval gates.
+#
+# Purpose: Enterprise-grade MLOps pipeline for Azure DevOps with manual approvals
+# Best for: Organizations requiring Azure DevOps integration with governance workflows
+# Version: 1.0.0
+# Last Updated: 2025-10-26
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - ml/**
+      - azure-ml/pipelines/**
+      - azure-pipelines/**
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - ml/**
+      - azure-ml/pipelines/**
+
+# Establish pipeline-wide variables for consistency
+variables:
+  - name: azureSubscription
+    value: 'cfacbbe8-a2a3-445f-a188-68b3b35f0c84'
+  - name: azureResourceGroup
+    value: 'rg-brookside-ml'
+  - name: azureMLWorkspace
+    value: 'ml-brookside-prod'
+  - name: pythonVersion
+    value: '3.10'
+  - name: minCoverageThreshold
+    value: 80
+
+# Environment-specific variable groups (configure in Azure DevOps Library)
+# - ml-dev-vars: Development environment secrets and configuration
+# - ml-staging-vars: Staging environment secrets and configuration
+# - ml-prod-vars: Production environment secrets and configuration
+
+stages:
+  #############################################################################
+  # STAGE 1: BUILD & VALIDATE
+  # Establish code quality and artifact creation
+  #############################################################################
+  - stage: Build
+    displayName: 'Build & Validate Code'
+    jobs:
+      - job: CodeQuality
+        displayName: 'Code Quality Checks'
+        pool:
+          vmImage: 'ubuntu-latest'
+        timeoutInMinutes: 15
+
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Set up Python $(pythonVersion)'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              addToPath: true
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install black==24.4.2 ruff==0.4.8 mypy==1.10.0
+              pip install -r ml/requirements-dev.txt
+            displayName: 'Install code quality tools'
+
+          - script: |
+              black --check --diff ml/
+            displayName: 'Black formatter validation'
+
+          - script: |
+              ruff check ml/ --output-format=azure
+            displayName: 'Ruff linter validation'
+
+          - script: |
+              mypy ml/ --strict --show-error-codes
+            displayName: 'MyPy type checking'
+
+          - script: |
+              pip install bandit==1.7.8
+              bandit -r ml/ -f json -o $(Build.ArtifactStagingDirectory)/bandit-report.json
+              bandit -r ml/ -f screen
+            displayName: 'Security vulnerability scan'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish code quality reports'
+            condition: always()
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'code-quality-reports'
+
+      - job: UnitTests
+        displayName: 'Unit Tests with Coverage'
+        dependsOn: CodeQuality
+        pool:
+          vmImage: 'ubuntu-latest'
+        timeoutInMinutes: 30
+
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Set up Python $(pythonVersion)'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r ml/requirements.txt
+              pip install -r ml/requirements-dev.txt
+              pip install pytest==8.2.2 pytest-cov==5.0.0 pytest-azurepipelines==1.0.5
+            displayName: 'Install dependencies'
+
+          - script: |
+              pytest ml/tests/unit/ \
+                --cov=ml \
+                --cov-report=xml \
+                --cov-report=html \
+                --cov-fail-under=$(minCoverageThreshold) \
+                --junitxml=$(Build.ArtifactStagingDirectory)/test-results.xml
+            displayName: 'Run unit tests ($(minCoverageThreshold)% coverage)'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(Build.ArtifactStagingDirectory)/test-results.xml'
+              testRunTitle: 'Unit Tests'
+
+          - task: PublishCodeCoverageResults@2
+            displayName: 'Publish coverage results'
+            condition: succeededOrFailed()
+            inputs:
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
+              pathToSources: '$(System.DefaultWorkingDirectory)/ml'
+
+      - job: IntegrationTests
+        displayName: 'Integration Tests'
+        dependsOn: UnitTests
+        pool:
+          vmImage: 'ubuntu-latest'
+        timeoutInMinutes: 45
+
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Set up Python $(pythonVersion)'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r ml/requirements.txt
+              pip install -r ml/requirements-dev.txt
+              pip install pytest==8.2.2 pytest-azurepipelines==1.0.5
+            displayName: 'Install dependencies'
+
+          - script: |
+              pytest ml/tests/integration/ \
+                --junitxml=$(Build.ArtifactStagingDirectory)/integration-results.xml
+            displayName: 'Run integration tests'
+            env:
+              AZURE_ML_WORKSPACE_MOCK: 'true'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish integration test results'
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(Build.ArtifactStagingDirectory)/integration-results.xml'
+              testRunTitle: 'Integration Tests'
+
+      - job: BuildArtifacts
+        displayName: 'Build Deployment Artifacts'
+        dependsOn: [CodeQuality, UnitTests, IntegrationTests]
+        pool:
+          vmImage: 'ubuntu-latest'
+
+        steps:
+          - script: |
+              mkdir -p $(Build.ArtifactStagingDirectory)/ml-package
+              cp -r ml/* $(Build.ArtifactStagingDirectory)/ml-package/
+              cp -r azure-ml $(Build.ArtifactStagingDirectory)/
+              cp -r scripts $(Build.ArtifactStagingDirectory)/
+            displayName: 'Prepare deployment artifacts'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish ML artifacts'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'ml-deployment-package'
+              publishLocation: 'pipeline'
+
+  #############################################################################
+  # STAGE 2: DEPLOY TO DEVELOPMENT
+  # Automated deployment to dev environment
+  #############################################################################
+  - stage: DeployDev
+    displayName: 'Deploy to Development'
+    dependsOn: Build
+    condition: succeeded()
+    variables:
+      - group: ml-dev-vars
+      - name: environment
+        value: 'dev'
+
+    jobs:
+      - deployment: DeployModelDev
+        displayName: 'Deploy ML Model to Dev'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'ml-dev'
+        timeoutInMinutes: 120
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download deployment artifacts'
+                  inputs:
+                    artifactName: 'ml-deployment-package'
+                    targetPath: '$(Pipeline.Workspace)/artifacts'
+
+                - task: AzureCLI@2
+                  displayName: 'Submit Azure ML training pipeline'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az configure --defaults workspace=$(azureMLWorkspace) \
+                        group=$(azureResourceGroup)
+
+                      az extension add --name ml --version 2.25.0 --yes
+
+                      job_name=$(az ml job create \
+                        --file $(Pipeline.Workspace)/artifacts/azure-ml/pipelines/ml-training-pipeline.yml \
+                        --set inputs.environment=$(environment) \
+                        --query name -o tsv)
+
+                      echo "##vso[task.setvariable variable=trainingJobName]$job_name"
+                      echo "Training job submitted: $job_name"
+
+                - task: AzureCLI@2
+                  displayName: 'Wait for training completion'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az ml job stream --name $(trainingJobName)
+
+                      status=$(az ml job show \
+                        --name $(trainingJobName) \
+                        --query status -o tsv)
+
+                      if [ "$status" != "Completed" ]; then
+                        echo "Training failed with status: $status"
+                        exit 1
+                      fi
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy to managed endpoint'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-ml-model.ps1'
+                    arguments: '-Environment $(environment) -EndpointName viability-scoring-dev'
+
+                - task: PowerShell@2
+                  displayName: 'Run smoke tests'
+                  inputs:
+                    filePath: '$(Pipeline.Workspace)/artifacts/scripts/test-ml-endpoint.ps1'
+                    arguments: '-EndpointName viability-scoring-dev -Environment dev'
+
+  #############################################################################
+  # STAGE 3: DEPLOY TO STAGING
+  # Automated deployment to staging environment
+  #############################################################################
+  - stage: DeployStaging
+    displayName: 'Deploy to Staging'
+    dependsOn: DeployDev
+    condition: succeeded()
+    variables:
+      - group: ml-staging-vars
+      - name: environment
+        value: 'staging'
+
+    jobs:
+      - deployment: DeployModelStaging
+        displayName: 'Deploy ML Model to Staging'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'ml-staging'
+        timeoutInMinutes: 120
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download deployment artifacts'
+                  inputs:
+                    artifactName: 'ml-deployment-package'
+                    targetPath: '$(Pipeline.Workspace)/artifacts'
+
+                - task: AzureCLI@2
+                  displayName: 'Submit Azure ML training pipeline'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az configure --defaults workspace=$(azureMLWorkspace) \
+                        group=$(azureResourceGroup)
+
+                      job_name=$(az ml job create \
+                        --file $(Pipeline.Workspace)/artifacts/azure-ml/pipelines/ml-training-pipeline.yml \
+                        --set inputs.environment=$(environment) \
+                        --query name -o tsv)
+
+                      echo "##vso[task.setvariable variable=trainingJobName]$job_name"
+
+                - task: AzureCLI@2
+                  displayName: 'Wait for training completion'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az ml job stream --name $(trainingJobName)
+
+                      status=$(az ml job show \
+                        --name $(trainingJobName) \
+                        --query status -o tsv)
+
+                      if [ "$status" != "Completed" ]; then
+                        exit 1
+                      fi
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy to managed endpoint'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-ml-model.ps1'
+                    arguments: '-Environment $(environment) -EndpointName viability-scoring-staging'
+
+                - task: PowerShell@2
+                  displayName: 'Run smoke tests'
+                  inputs:
+                    filePath: '$(Pipeline.Workspace)/artifacts/scripts/test-ml-endpoint.ps1'
+                    arguments: '-EndpointName viability-scoring-staging -Environment staging'
+
+  #############################################################################
+  # STAGE 4: DEPLOY TO PRODUCTION
+  # Manual approval required for production deployment
+  #############################################################################
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: DeployStaging
+    condition: succeeded()
+    variables:
+      - group: ml-prod-vars
+      - name: environment
+        value: 'prod'
+
+    jobs:
+      - deployment: DeployModelProduction
+        displayName: 'Deploy ML Model to Production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'ml-production'  # Manual approval configured in Azure DevOps
+        timeoutInMinutes: 180
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download deployment artifacts'
+                  inputs:
+                    artifactName: 'ml-deployment-package'
+                    targetPath: '$(Pipeline.Workspace)/artifacts'
+
+                - task: AzureCLI@2
+                  displayName: 'Submit Azure ML training pipeline'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az configure --defaults workspace=$(azureMLWorkspace) \
+                        group=$(azureResourceGroup)
+
+                      job_name=$(az ml job create \
+                        --file $(Pipeline.Workspace)/artifacts/azure-ml/pipelines/ml-training-pipeline.yml \
+                        --set inputs.environment=$(environment) \
+                        --set inputs.min_accuracy=0.90 \
+                        --query name -o tsv)
+
+                      echo "##vso[task.setvariable variable=trainingJobName]$job_name"
+
+                - task: AzureCLI@2
+                  displayName: 'Wait for training completion'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az ml job stream --name $(trainingJobName)
+
+                      status=$(az ml job show \
+                        --name $(trainingJobName) \
+                        --query status -o tsv)
+
+                      if [ "$status" != "Completed" ]; then
+                        exit 1
+                      fi
+
+                - task: AzureCLI@2
+                  displayName: 'Deploy to managed endpoint (Blue-Green)'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-ml-model.ps1'
+                    arguments: '-Environment prod -EndpointName viability-scoring-prod -DeploymentStrategy blue-green'
+
+                - task: PowerShell@2
+                  displayName: 'Run smoke tests'
+                  inputs:
+                    filePath: '$(Pipeline.Workspace)/artifacts/scripts/test-ml-endpoint.ps1'
+                    arguments: '-EndpointName viability-scoring-prod -Environment prod'
+
+                - task: AzureCLI@2
+                  displayName: 'Gradual traffic rollout (10% → 50% → 100%)'
+                  inputs:
+                    azureSubscription: 'Azure-ML-ServiceConnection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      endpoint_name="viability-scoring-prod"
+
+                      deployment_name=$(az ml online-endpoint show \
+                        --name $endpoint_name \
+                        --query 'traffic | keys(@)[0]' -o tsv)
+
+                      # 10% traffic (already set during deployment)
+                      echo "Monitoring 10% canary traffic for 10 minutes..."
+                      sleep 600
+
+                      # Check error rate
+                      error_rate=$(bash $(Pipeline.Workspace)/artifacts/scripts/monitor-ml-performance.sh \
+                        --endpoint $endpoint_name --metric error_rate)
+
+                      if (( $(echo "$error_rate > 0.05" | bc -l) )); then
+                        echo "Error rate too high, triggering rollback..."
+                        bash $(Pipeline.Workspace)/artifacts/scripts/rollback-ml-deployment.ps1 \
+                          -EndpointName $endpoint_name
+                        exit 1
+                      fi
+
+                      # 50% traffic
+                      echo "Shifting to 50% traffic..."
+                      az ml online-endpoint update \
+                        --name $endpoint_name \
+                        --traffic "$deployment_name=50"
+
+                      sleep 600
+
+                      # 100% traffic
+                      echo "Shifting to 100% traffic..."
+                      az ml online-endpoint update \
+                        --name $endpoint_name \
+                        --traffic "$deployment_name=100"
+
+                - task: PowerShell@2
+                  displayName: 'Configure production monitoring'
+                  inputs:
+                    filePath: '$(Pipeline.Workspace)/artifacts/scripts/monitor-ml-performance.ps1'
+                    arguments: |
+                      -EndpointName viability-scoring-prod
+                      -ConfigureAlerts
+                      -AlertEmail "consultations@brooksidebi.com"
+                      -DataDriftThreshold 0.15
+                      -AccuracyDropThreshold 0.05
+
+  #############################################################################
+  # STAGE 5: POST-DEPLOYMENT VALIDATION
+  # Comprehensive monitoring and alerting configuration
+  #############################################################################
+  - stage: PostDeployment
+    displayName: 'Post-Deployment Validation'
+    dependsOn: DeployProduction
+    condition: succeeded()
+
+    jobs:
+      - job: ConfigureMonitoring
+        displayName: 'Configure Monitoring & Alerts'
+        pool:
+          vmImage: 'ubuntu-latest'
+
+        steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download monitoring scripts'
+            inputs:
+              artifactName: 'ml-deployment-package'
+              targetPath: '$(Pipeline.Workspace)/artifacts'
+
+          - task: AzureCLI@2
+            displayName: 'Apply monitoring configuration'
+            inputs:
+              azureSubscription: 'Azure-ML-ServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                for env in dev staging prod; do
+                  bash $(Pipeline.Workspace)/artifacts/scripts/monitor-ml-performance.sh \
+                    --endpoint viability-scoring-$env \
+                    --configure-alerts \
+                    --environment $env
+                done
+
+          - task: PowerShell@2
+            displayName: 'Send deployment notification'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Send notification to Microsoft Teams or email
+                $message = @"
+                MLOps Deployment Completed Successfully
+
+                Pipeline: $(Build.DefinitionName)
+                Build: $(Build.BuildNumber)
+                Environments: Dev, Staging, Production
+
+                Production Endpoint: https://ml.azure.com/endpoints/viability-scoring-prod
+                "@
+
+                Write-Host $message

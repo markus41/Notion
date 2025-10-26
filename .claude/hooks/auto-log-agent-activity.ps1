@@ -51,25 +51,50 @@ $script:Config = @{
     StateFile = Join-Path (Join-Path (Join-Path $PSScriptRoot "..") "data") "agent-state.json"
     ActivityLogFile = Join-Path (Join-Path (Join-Path $PSScriptRoot "..") "logs") "AGENT_ACTIVITY_LOG.md"
     QueueFile = Join-Path (Join-Path (Join-Path $PSScriptRoot "..") "data") "notion-sync-queue.jsonl"
+    WebhookEndpoint = "https://notion-webhook-brookside-prod.azurewebsites.net/api/NotionWebhook"
+    WebhookEnabled = $true
+    WebhookTimeoutSeconds = 10
     FilteredAgents = @(
-        "@ideas-capture",
-        "@research-coordinator",
+        "@activity-logger",
+        "@architect-supreme",
+        "@archive-manager",
         "@build-architect",
         "@build-architect-v2",
         "@code-generator",
-        "@deployment-orchestrator",
+        "@compliance-automation",
+        "@compliance-orchestrator",
         "@cost-analyst",
-        "@knowledge-curator",
-        "@archive-manager",
-        "@schema-manager",
-        "@integration-specialist",
-        "@workflow-router",
-        "@viability-assessor",
-        "@orchestration-coordinator",
-        "@market-researcher",
-        "@technical-analyst",
         "@cost-feasibility-analyst",
-        "@risk-assessor"
+        "@cost-optimizer-ai",
+        "@database-architect",
+        "@deployment-orchestrator",
+        "@documentation-orchestrator",
+        "@documentation-sync",
+        "@github-notion-sync",
+        "@github-repo-analyst",
+        "@ideas-capture",
+        "@infrastructure-optimizer",
+        "@integration-monitor",
+        "@integration-specialist",
+        "@knowledge-curator",
+        "@markdown-expert",
+        "@market-researcher",
+        "@mermaid-diagram-expert",
+        "@notion-mcp-specialist",
+        "@notion-orchestrator",
+        "@notion-page-enhancer",
+        "@observability-specialist",
+        "@orchestration-coordinator",
+        "@repo-analyzer",
+        "@research-coordinator",
+        "@risk-assessor",
+        "@schema-manager",
+        "@security-automation",
+        "@style-orchestrator",
+        "@technical-analyst",
+        "@ultrathink-analyzer",
+        "@viability-assessor",
+        "@workflow-router"
     )
 }
 
@@ -122,21 +147,58 @@ function Get-AgentContext {
     }
 
     # Check if this is a Task tool invocation (agent delegation)
-    if ($ToolName -eq "Task") {
+    if ($ToolName -eq "Task" -or $ToolName -eq "tool_use" -or $ToolName -eq "invoke") {
+        Write-HookLog "Detected Task/agent invocation tool: $ToolName" -Level DEBUG
+
+        if ([string]::IsNullOrWhiteSpace($ToolParams)) {
+            Write-HookLog "ToolParams is null or empty - cannot extract agent context" -Level WARNING
+            return $context
+        }
+
         try {
             $params = $ToolParams | ConvertFrom-Json -ErrorAction Stop
+            Write-HookLog "Successfully parsed JSON parameters" -Level DEBUG
 
+            # Try multiple field names for agent identification
+            $agentName = $null
             if ($params.subagent_type) {
-                $context.AgentName = "@$($params.subagent_type)"
+                $agentName = $params.subagent_type
+                Write-HookLog "Found subagent_type: $agentName" -Level DEBUG
+            }
+            elseif ($params.agent) {
+                $agentName = $params.agent
+                Write-HookLog "Found agent: $agentName" -Level DEBUG
+            }
+            elseif ($params.name) {
+                $agentName = $params.name
+                Write-HookLog "Found name: $agentName" -Level DEBUG
+            }
+
+            if ($agentName) {
+                # Normalize agent name (ensure @ prefix)
+                if (-not $agentName.StartsWith("@")) {
+                    $agentName = "@$agentName"
+                }
+
+                $context.AgentName = $agentName
                 $context.IsAgentInvocation = $true
-                $context.WorkDescription = $params.description
+                $context.WorkDescription = if ($params.description) { $params.description } elseif ($params.prompt) { $params.prompt } elseif ($params.task) { $params.task } else { "Agent work" }
+
+                Write-HookLog "Agent context extracted: AgentName='$($context.AgentName)', Description='$($context.WorkDescription)'" -Level DEBUG
 
                 Write-HookLog "Detected agent invocation: $($context.AgentName)" -Level INFO
             }
+            else {
+                Write-HookLog "No agent identifier found in parameters (checked: subagent_type, agent, name)" -Level WARNING
+            }
         }
         catch {
-            Write-HookLog "Failed to parse Task tool parameters: $_" -Level WARNING
+            Write-HookLog "Failed to parse Task tool parameters as JSON: $_" -Level ERROR
+            Write-HookLog "Raw ToolParams content (first 500 chars): $($ToolParams.Substring(0, [Math]::Min(500, $ToolParams.Length)))" -Level ERROR
         }
+    }
+    else {
+        Write-HookLog "Not a Task/agent invocation tool (ToolName='$ToolName'), skipping agent context extraction" -Level DEBUG
     }
 
     return $context
@@ -345,7 +407,10 @@ function Queue-NotionSync {
         [hashtable]$AgentContext
     )
 
-    Write-HookLog "Queueing Notion sync for: $SessionId" -Level DEBUG
+    Write-HookLog "Processing Notion sync for: $SessionId" -Level DEBUG
+
+    # Attempt webhook sync first (fast path with <30 second latency)
+    $webhookResult = Send-ToWebhook -AgentContext $AgentContext
 
     try {
         # Queue file path
@@ -357,7 +422,7 @@ function Queue-NotionSync {
             New-Item -ItemType Directory -Path $queueDir -Force | Out-Null
         }
 
-        # Build queue entry (JSONL format - one JSON object per line)
+        # Build queue entry with webhook status (JSONL format - one JSON object per line)
         $queueEntry = @{
             sessionId = $SessionId
             agentName = $AgentContext.AgentName
@@ -367,18 +432,65 @@ function Queue-NotionSync {
             queuedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:ssZ')
             syncStatus = "pending"
             retryCount = 0
+            webhookSynced = $webhookResult.WebhookSynced
+            webhookAttemptedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:ssZ')
         } | ConvertTo-Json -Compress
 
-        # Append to queue file (JSONL format)
+        # Append to queue file (JSONL format - always queue for resilience)
         Add-Content -Path $queueFile -Value $queueEntry -ErrorAction Stop
 
-        Write-HookLog "Successfully queued Notion sync: $SessionId" -Level INFO
+        if ($webhookResult.WebhookSynced) {
+            Write-HookLog "Successfully synced via webhook + queued as backup: $SessionId" -Level SUCCESS
+        } else {
+            Write-HookLog "Webhook failed - Queued for processor retry: $SessionId" -Level INFO
+        }
+
         return $true
     }
     catch {
         Write-HookLog "Failed to queue Notion sync: $_" -Level WARNING
         # Don't fail entire hook if queue operation fails
         return $false
+    }
+}
+
+# Establish real-time webhook synchronization with Azure Function endpoint
+function Send-ToWebhook {
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$AgentContext
+    )
+
+    Write-HookLog "Attempting webhook sync to: $($script:Config.WebhookEndpoint)" -Level DEBUG
+
+    if (-not $script:Config.WebhookEnabled) {
+        Write-HookLog "Webhook disabled, skipping real-time sync" -Level INFO
+        return @{ Success = $false; WebhookSynced = $false }
+    }
+
+    try {
+        # Convert agent context to JSON payload
+        $body = $AgentContext | ConvertTo-Json -Compress
+
+        # POST to Azure Function webhook with timeout protection
+        $response = Invoke-RestMethod -Uri $script:Config.WebhookEndpoint `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -TimeoutSec $script:Config.WebhookTimeoutSeconds `
+            -ErrorAction Stop
+
+        Write-HookLog "Webhook sync successful - Page created: $($response.pageUrl)" -Level SUCCESS
+        return @{
+            Success = $true
+            WebhookSynced = $true
+            PageUrl = $response.pageUrl
+            PageId = $response.pageId
+        }
+    }
+    catch {
+        Write-HookLog "Webhook sync failed: $_ - Activity will be retried via queue processor" -Level WARNING
+        return @{ Success = $false; WebhookSynced = $false }
     }
 }
 
@@ -450,10 +562,24 @@ function Invoke-ActivityLogger {
 # Main execution flow
 function Main {
     try {
-        Write-HookLog "Auto-log agent activity hook triggered" -Level INFO
+        Write-HookLog "========== Auto-log agent activity hook triggered ===========" -Level INFO
+
+        # Enhanced debug logging for troubleshooting
+        Write-HookLog "Environment diagnostics:" -Level DEBUG
+        Write-HookLog "  - CLAUDE_TOOL_NAME env var: '$env:CLAUDE_TOOL_NAME'" -Level DEBUG
+        Write-HookLog "  - CLAUDE_TOOL_PARAMS env var: '$env:CLAUDE_TOOL_PARAMS'" -Level DEBUG
+        Write-HookLog "  - CLAUDE_SESSION_CONTEXT env var: '$env:CLAUDE_SESSION_CONTEXT'" -Level DEBUG
+        Write-HookLog "  - ToolName parameter: '$ToolName'" -Level DEBUG
+        Write-HookLog "  - ToolParameters parameter length: $($ToolParameters.Length) chars" -Level DEBUG
+
+        if ($ToolParameters) {
+            Write-HookLog "  - ToolParameters preview: $($ToolParameters.Substring(0, [Math]::Min(200, $ToolParameters.Length)))..." -Level DEBUG
+        }
 
         # Parse agent context from tool invocation
         $agentContext = Get-AgentContext -ToolName $ToolName -ToolParams $ToolParameters
+
+        Write-HookLog "Agent context parsed: AgentName='$($agentContext.AgentName)', IsAgentInvocation=$($agentContext.IsAgentInvocation)" -Level DEBUG
 
         # Apply intelligent filtering
         if (-not (Test-ShouldLogAgent -AgentContext $agentContext)) {

@@ -1,0 +1,446 @@
+# Azure ML Monitoring Configuration
+# Establishes comprehensive monitoring and alerting rules for ML endpoints across
+# Brookside BI Innovation Nexus environments with data drift detection and auto-retraining.
+#
+# Purpose: Define monitoring thresholds, alert rules, and automatic remediation triggers
+# Best for: Organizations requiring proactive ML model quality assurance with SLA enforcement
+# Version: 1.0.0
+# Last Updated: 2025-10-26
+
+# Monitoring configuration metadata
+metadata:
+  configuration_version: "1.0.0"
+  last_updated: "2025-10-26"
+  managed_by: "BrooksideBI"
+  contact: "consultations@brooksidebi.com"
+
+# Environment-specific monitoring profiles
+environments:
+  dev:
+    monitoring_frequency: hourly
+    alert_severity_threshold: 4  # Informational only
+    enable_automatic_remediation: false
+    data_drift_check_frequency: daily
+    model_performance_evaluation: daily
+
+  staging:
+    monitoring_frequency: every_15_minutes
+    alert_severity_threshold: 3  # Warning and above
+    enable_automatic_remediation: false
+    data_drift_check_frequency: daily
+    model_performance_evaluation: daily
+
+  prod:
+    monitoring_frequency: every_5_minutes
+    alert_severity_threshold: 2  # Error and above
+    enable_automatic_remediation: true
+    data_drift_check_frequency: weekly
+    model_performance_evaluation: daily
+
+# Performance metric thresholds establishing SLA requirements
+performance_metrics:
+  # Inference latency thresholds (milliseconds)
+  latency:
+    dev:
+      p50_threshold: 1000
+      p95_threshold: 3000
+      p99_threshold: 5000
+      alert_window_minutes: 15
+      consecutive_failures: 3
+
+    staging:
+      p50_threshold: 800
+      p95_threshold: 2500
+      p99_threshold: 4000
+      alert_window_minutes: 15
+      consecutive_failures: 2
+
+    prod:
+      p50_threshold: 500
+      p95_threshold: 2000
+      p99_threshold: 3000
+      alert_window_minutes: 10
+      consecutive_failures: 2
+
+  # Error rate thresholds (percentage)
+  error_rate:
+    dev:
+      threshold: 0.10  # 10%
+      alert_window_minutes: 30
+      consecutive_failures: 3
+
+    staging:
+      threshold: 0.05  # 5%
+      alert_window_minutes: 15
+      consecutive_failures: 2
+
+    prod:
+      threshold: 0.02  # 2%
+      alert_window_minutes: 10
+      consecutive_failures: 1
+
+  # Throughput thresholds (requests per minute)
+  throughput:
+    dev:
+      min_threshold: 1
+      max_threshold: 100
+      alert_on_zero_traffic: false
+
+    staging:
+      min_threshold: 5
+      max_threshold: 500
+      alert_on_zero_traffic: true
+
+    prod:
+      min_threshold: 10
+      max_threshold: 5000
+      alert_on_zero_traffic: true
+      scale_up_threshold: 4000  # Auto-scale at 80% capacity
+
+  # Availability thresholds (percentage)
+  availability:
+    dev:
+      threshold: 95.0
+      alert_window_minutes: 60
+
+    staging:
+      threshold: 99.0
+      alert_window_minutes: 30
+
+    prod:
+      threshold: 99.9
+      alert_window_minutes: 15
+      critical_threshold: 99.0  # Escalate to critical if below this
+
+# Data drift detection configuration
+data_drift:
+  enabled: true
+  detection_methods:
+    - population_stability_index  # PSI for categorical features
+    - kolmogorov_smirnov  # K-S test for continuous features
+    - jensen_shannon_divergence  # JS divergence for distributions
+
+  # Feature-specific drift thresholds
+  feature_thresholds:
+    idea_title:
+      method: jensen_shannon_divergence
+      threshold: 0.15
+      severity: warning
+
+    research_score:
+      method: kolmogorov_smirnov
+      threshold: 0.20
+      severity: warning
+
+    estimated_cost:
+      method: kolmogorov_smirnov
+      threshold: 0.25
+      severity: info
+
+    market_size:
+      method: population_stability_index
+      threshold: 0.15
+      severity: warning
+
+    technical_complexity:
+      method: population_stability_index
+      threshold: 0.10
+      severity: error
+
+  # Global drift thresholds
+  global_drift_threshold: 0.15  # 15% of features drifting triggers alert
+  critical_drift_threshold: 0.30  # 30% triggers auto-retraining
+
+  # Drift check schedule
+  schedule:
+    dev: daily
+    staging: daily
+    prod: weekly  # Every Monday at 2 AM UTC
+
+  # Automatic remediation on drift detection
+  auto_remediation:
+    enabled_environments: [prod]
+    actions:
+      - notify_team
+      - create_retraining_job
+      - update_monitoring_dashboard
+
+# Model performance monitoring
+model_performance:
+  # Accuracy degradation thresholds
+  accuracy:
+    baseline_threshold: 0.85  # Minimum acceptable accuracy
+    degradation_alert_threshold: 0.05  # Alert if drops >5% from baseline
+    critical_threshold: 0.75  # Critical alert if below this absolute value
+
+    evaluation_frequency:
+      dev: daily
+      staging: daily
+      prod: daily
+
+  # Prediction confidence thresholds
+  confidence:
+    low_confidence_threshold: 0.60  # Flag predictions below 60% confidence
+    alert_on_low_confidence_rate: 0.10  # Alert if >10% predictions have low confidence
+    log_low_confidence_predictions: true
+
+  # Prediction distribution monitoring
+  prediction_distribution:
+    enabled: true
+    alert_on_skew: true
+    skew_threshold: 0.30  # Alert if distribution shifts >30%
+    expected_distribution:
+      high_viability: 0.15  # 15% of ideas should score 75-100
+      medium_viability: 0.50  # 50% should score 50-74
+      low_viability: 0.35  # 35% should score 0-49
+
+# Alert configuration and notification rules
+alerting:
+  # Notification channels
+  channels:
+    email:
+      enabled: true
+      recipients:
+        - consultations@brooksidebi.com
+        - markus.ahling@brooksidebi.com
+      severity_filter: [error, critical]
+
+    teams:
+      enabled: true
+      webhook_url: "#{TEAMS_WEBHOOK_URL}#"  # From Key Vault
+      severity_filter: [warning, error, critical]
+
+    slack:
+      enabled: false
+      webhook_url: "#{SLACK_WEBHOOK_URL}#"
+      severity_filter: [error, critical]
+
+  # Alert rules establishing automated responses
+  rules:
+    - name: high_error_rate
+      condition: "error_rate > threshold for alert_window_minutes"
+      severity: error
+      action: notify_and_log
+      escalation_policy:
+        - notify_team_immediately
+        - page_on_call_engineer_if_critical
+
+    - name: high_latency
+      condition: "p95_latency > threshold for alert_window_minutes"
+      severity: warning
+      action: notify_and_log
+      escalation_policy:
+        - notify_team_after_3_consecutive
+        - create_performance_investigation_ticket
+
+    - name: low_availability
+      condition: "availability < threshold for alert_window_minutes"
+      severity: critical
+      action: notify_escalate_and_auto_remediate
+      escalation_policy:
+        - immediate_page_on_call_engineer
+        - automatic_rollback_if_recent_deployment
+        - create_incident_ticket
+
+    - name: data_drift_detected
+      condition: "drift_percentage > global_drift_threshold"
+      severity: warning
+      action: notify_and_create_retraining_job
+      escalation_policy:
+        - notify_data_science_team
+        - schedule_model_retraining
+        - update_drift_dashboard
+
+    - name: accuracy_degradation
+      condition: "current_accuracy < (baseline_accuracy - degradation_alert_threshold)"
+      severity: error
+      action: notify_escalate_and_investigate
+      escalation_policy:
+        - notify_ml_engineers
+        - analyze_prediction_errors
+        - consider_rollback_to_previous_model
+
+    - name: zero_traffic
+      condition: "throughput == 0 for 15 minutes"
+      severity: critical
+      action: immediate_investigation
+      escalation_policy:
+        - check_endpoint_health
+        - verify_authentication_keys
+        - review_recent_configuration_changes
+
+# Automatic retraining triggers
+auto_retraining:
+  enabled_environments: [prod]
+
+  triggers:
+    - name: data_drift_critical
+      condition: "drift_percentage > critical_drift_threshold"
+      priority: high
+      action: immediate_retraining
+
+    - name: accuracy_below_baseline
+      condition: "accuracy < baseline_threshold"
+      priority: high
+      action: immediate_retraining
+
+    - name: scheduled_monthly
+      condition: "first_monday_of_month at 2am UTC"
+      priority: normal
+      action: scheduled_retraining
+
+  retraining_configuration:
+    use_latest_data_window_days: 90
+    min_training_samples: 5000
+    validation_split: 0.20
+    test_split: 0.10
+
+    quality_gates:
+      min_accuracy: 0.85
+      min_precision: 0.80
+      min_recall: 0.75
+
+    deployment_strategy: canary  # Start with 10% traffic
+    auto_promote_threshold: 0.90  # Promote to 100% if accuracy >90%
+
+# Cost anomaly detection
+cost_monitoring:
+  enabled: true
+  baseline_calculation_window_days: 30
+
+  thresholds:
+    daily_cost_increase_threshold: 0.20  # Alert on >20% increase
+    weekly_cost_increase_threshold: 0.15
+    monthly_cost_budget: 600  # $600/month for prod endpoint
+
+  alert_on_cost_spike: true
+  recommendations:
+    - review_instance_count_scaling
+    - analyze_traffic_patterns
+    - consider_reserved_capacity
+
+# Logging and audit configuration
+logging:
+  application_insights:
+    enabled: true
+    retention_days: 90
+    sampling_percentage: 100  # Log 100% of requests in prod
+
+    log_levels:
+      dev: DEBUG
+      staging: INFO
+      prod: WARNING
+
+    custom_dimensions:
+      - endpoint_name
+      - deployment_name
+      - model_version
+      - environment
+      - prediction_confidence
+      - inference_duration_ms
+
+  request_logging:
+    log_all_requests: true
+    log_request_body: false  # Privacy: Don't log sensitive input data
+    log_response_body: true
+    log_headers: false
+
+  audit_logging:
+    enabled: true
+    log_deployment_changes: true
+    log_configuration_changes: true
+    log_alert_triggers: true
+    log_auto_remediation_actions: true
+
+# Dashboard configuration
+dashboards:
+  azure_workbook:
+    enabled: true
+    workbook_name: "ML Endpoint Performance - {endpoint_name}"
+    auto_refresh_seconds: 300  # 5 minutes
+
+    panels:
+      - name: "Key Metrics"
+        metrics: [error_rate, latency_p95, throughput, availability]
+        visualization: scorecard
+
+      - name: "Latency Distribution"
+        metrics: [latency_p50, latency_p95, latency_p99]
+        visualization: line_chart
+        time_range: last_24_hours
+
+      - name: "Error Rate Trend"
+        metrics: [error_rate]
+        visualization: area_chart
+        time_range: last_7_days
+
+      - name: "Throughput Analysis"
+        metrics: [throughput]
+        visualization: bar_chart
+        time_range: last_24_hours
+
+      - name: "Prediction Distribution"
+        metrics: [prediction_counts_by_score_range]
+        visualization: pie_chart
+        time_range: last_24_hours
+
+      - name: "Data Drift Status"
+        metrics: [feature_drift_scores]
+        visualization: heatmap
+        time_range: last_30_days
+
+  grafana:
+    enabled: false
+    workspace_name: "brookside-ml-monitoring"
+    dashboard_uid: "ml-endpoint-performance"
+
+# Health check configuration
+health_checks:
+  enabled: true
+  interval_seconds: 60
+
+  checks:
+    - name: endpoint_availability
+      type: http
+      endpoint: "/health"
+      expected_status: 200
+      timeout_seconds: 5
+
+    - name: model_loaded
+      type: custom
+      script: "check_model_status.py"
+      timeout_seconds: 10
+
+    - name: dependency_health
+      type: custom
+      dependencies: [application_insights, azure_ml_workspace, key_vault]
+      timeout_seconds: 15
+
+# Compliance and governance
+compliance:
+  data_retention:
+    metrics: 90_days
+    logs: 180_days
+    audit_trail: 365_days
+
+  privacy:
+    anonymize_prediction_inputs: false  # Set to true if handling PII
+    encrypt_stored_data: true
+    gdpr_compliant: true
+
+  security:
+    require_authentication: true
+    enable_network_isolation: false  # Set to true for private endpoints
+    audit_access_logs: true
+
+# Integration with Notion Software Tracker
+notion_integration:
+  enabled: true
+  track_endpoint_costs: true
+  update_frequency: daily
+
+  cost_attribution:
+    database: "Software Tracker"
+    software_name_format: "Azure ML Endpoint - {endpoint_name}"
+    category: "Infrastructure"
+    microsoft_service: "Azure Machine Learning"

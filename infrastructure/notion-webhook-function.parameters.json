@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "value": "prod"
+    },
+    "keyVaultName": {
+      "value": "kv-brookside-secrets"
+    },
+    "agentActivityHubId": {
+      "value": "7163aa38-f3d9-444b-9674-bde61868bd2b"
+    }
+  }
+}

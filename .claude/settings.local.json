@@ -39,7 +39,22 @@
                                       "Bash(git log:*)",
                                       "Bash(git branch:*)",
                                       "Read(.claude/**)",
-                                      "Read(.git/**)"
+                                      "Read(.git/**)",
+                                      "mcp__notion__notion-search(*)",
+                                      "mcp__notion__notion-fetch(*)",
+                                      "mcp__notion__notion-create-pages(*)",
+                                      "mcp__notion__notion-update-page(*)",
+                                      "mcp__notion__notion-move-pages(*)",
+                                      "mcp__notion__notion-duplicate-page(*)",
+                                      "mcp__notion__notion-create-database(*)",
+                                      "mcp__notion__notion-update-database(*)",
+                                      "mcp__notion__notion-create-comment(*)",
+                                      "mcp__notion__notion-get-comments(*)",
+                                      "mcp__notion__notion-get-teams(*)",
+                                      "mcp__notion__notion-get-users(*)",
+                                      "mcp__notion__notion-list-agents(*)",
+                                      "mcp__notion__notion-get-self(*)",
+                                      "mcp__notion__notion-get-user(*)"
                                   ],
                         "deny":  [
 
@@ -183,5 +198,32 @@
               },
     "sandbox":  {
                     "enabled":  false
-                }
+                },
+    "statusline":  {
+                       "enabled":  true,
+                       "displayMode":  "full",
+                       "refreshInterval":  15,
+                       "showGitStatus":  true,
+                       "showInnovationMetrics":  true,
+                       "showCostTracking":  true,
+                       "showAgentActivity":  true,
+                       "showMCPHealth":  true,
+                       "cacheEnabled":  true,
+                       "cacheTTL":  300,
+                       "command":  "pwsh .claude/utils/statusline.ps1",
+                       "updateHooks":  [
+                                          "SessionStart",
+                                          "Notification",
+                                          "Stop"
+                                      ],
+                       "themes":  {
+                                      "default":  {
+                                                      "primary":  "38;2;41;128;185",
+                                                      "success":  "38;2;46;204;113",
+                                                      "warning":  "38;2;241;196;15",
+                                                      "error":  "38;2;231;76;60",
+                                                      "muted":  "38;2;149;165;166"
+                                                  }
+                                  }
+                   }
 }

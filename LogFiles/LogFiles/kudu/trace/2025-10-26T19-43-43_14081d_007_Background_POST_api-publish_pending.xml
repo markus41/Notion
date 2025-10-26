@@ -1,0 +1,49 @@
+<step title="BackgroundTrace" date="2025-10-26T19:43:43.930" instance="14081d" url="/api/publish" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-10-26T19:43:43.934" /><!-- duration: 8ms -->
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2025-10-26T19:43:44.002" /><!-- duration: 1ms -->
+  <step title="Creating temporary deployment" date="2025-10-26T19:43:44.007" /><!-- duration: 70ms -->
+  <step title="Performing fetch based deployment" date="2025-10-26T19:43:44.108" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/0a6f3898-7088-4e80-b20b-a4f859796d92.zip (10.04 MB) to /tmp/zipdeploy/extracted" date="2025-10-26T19:43:45.409" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 83" date="2025-10-26T19:43:46.678" /><!-- duration: 9ms -->
+    </step><!-- duration: 1289ms -->
+    <step title="Deployment timer started" date="2025-10-26T19:43:48.742" >
+      <step title="DeploymentManager.Deploy(id:e0514177-4b49-483f-8e23-fda248cfc063)" date="2025-10-26T19:43:48.761" >
+        <step title="Collecting changeset information" date="2025-10-26T19:43:48.790" /><!-- duration: 103ms -->
+        <step title="Updating submodules" date="2025-10-26T19:43:48.896" /><!-- duration: 1114ms -->
+        <step title="Determining deployment builder" date="2025-10-26T19:43:50.250" >
+          <step title="Builder is OryxBuilder" date="2025-10-26T19:43:50.387" /><!-- duration: 3ms -->
+        </step><!-- duration: 149ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2025-10-26T19:43:50.451" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2025-10-26T19:43:50.559" >
+            <step title="Building" date="2025-10-26T19:43:50.691" >
+              <step title="Executing external process" date="2025-10-26T19:43:50.976" type="process" path="bash" arguments="-c &quot;oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform nodejs --platform-version 20 -p virtualenv_name= --log-file /tmp/build-debug.log  -i /tmp/8de14c7fcb6f8ac -p compress_node_modules=tar-gz | tee /tmp/oryx-build.log ; exit $PIPESTATUS &quot;" >
+                <step title="Cpu: npm install(1069,26.960s)+build.sh(961,0.070s)+oryx(941,5.060s)+tee(942,0.000s)+bash(940,0.000s)=total(32.090s)" date="2025-10-26T19:45:19.027" /><!-- duration: 29ms -->
+                <step title="bash: no io activity for 60s, prev-cpu=-1.000s, current-cpu=32.090s" date="2025-10-26T19:45:19.066" /><!-- duration: 42ms -->
+                <step title="Cpu: npm install(1069,47.140s)+build.sh(961,0.070s)+oryx(941,5.450s)+tee(942,0.000s)+bash(940,0.000s)=total(52.660s)" date="2025-10-26T19:46:20.463" /><!-- duration: 20ms -->
+                <step title="bash: no io activity for 122s, prev-cpu=32.090s, current-cpu=52.660s" date="2025-10-26T19:46:20.564" /><!-- duration: 90ms -->
+                <step title="Cpu: npm install(1069,58.820s)+build.sh(961,0.070s)+oryx(941,6.150s)+tee(942,0.000s)+bash(940,0.000s)=total(65.040s)" date="2025-10-26T19:47:21.783" /><!-- duration: 18ms -->
+                <step title="bash: no io activity for 183s, prev-cpu=52.660s, current-cpu=65.040s" date="2025-10-26T19:47:21.832" /><!-- duration: 11ms -->
+                <step title="Cpu: npm install(1069,79.300s)+build.sh(961,0.070s)+oryx(941,6.500s)+tee(942,0.000s)+bash(940,0.000s)=total(85.860s)" date="2025-10-26T19:48:22.650" /><!-- duration: 10ms -->
+                <step title="bash: no io activity for 244s, prev-cpu=65.040s, current-cpu=85.860s" date="2025-10-26T19:48:22.689" /><!-- duration: 19ms -->
+                <step title="Cpu: npm install(1069,114.930s)+build.sh(961,0.070s)+oryx(941,7.010s)+tee(942,0.000s)+bash(940,0.000s)=total(121.750s)" date="2025-10-26T19:49:25.924" /><!-- duration: 70ms -->
+                <step title="bash: no io activity for 305s, prev-cpu=85.860s, current-cpu=121.750s" date="2025-10-26T19:49:26.590" /><!-- duration: 21ms -->
+                <step title="Cpu: npm install(1069,132.850s)+build.sh(961,0.070s)+oryx(941,8.450s)+tee(942,0.000s)+bash(940,0.000s)=total(141.340s)" date="2025-10-26T19:51:12.774" /><!-- duration: 21ms -->
+                <step title="bash: no io activity for 61s, prev-cpu=-1.000s, current-cpu=141.340s" date="2025-10-26T19:51:12.974" /><!-- duration: 23ms -->
+                <step title="Error occurred" date="2025-10-26T19:52:18.372" type="error" text="GetParentProcessLinux (1249) failed.: Could not find a part of the path &apos;/proc/1249/stat&apos;." stackTrace="   at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64&amp; fileLength, UnixFileMode&amp; filePermissions, Boolean failForSymlink, Boolean&amp; wasSymlink, Func`4 createOpenException)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at Kudu.Core.Infrastructure.ProcessExtensions.GetParentProcessLinux(Process process, ITracer tracer) in /tmp/KuduLite/Kudu.Core/Infrastructure/ProcessExtensions.cs:line 153" /><!-- duration: 8ms -->
+                <step title="Cpu: npm install(1069,138.940s)+build.sh(961,0.070s)+oryx(941,8.960s)+tee(942,0.000s)+bash(940,0.000s)=total(147.950s)" date="2025-10-26T19:52:18.590" /><!-- duration: 3ms -->
+                <step title="bash: no io activity for 124s, prev-cpu=141.340s, current-cpu=147.950s" date="2025-10-26T19:52:18.601" /><!-- duration: 131ms -->
+                <step title="Cpu: npm install(1069,142.310s)+build.sh(961,0.070s)+oryx(941,9.610s)+tee(942,0.000s)+bash(940,0.000s)=total(151.940s)" date="2025-10-26T19:53:22.188" /><!-- duration: 20ms -->
+                <step title="bash: no io activity for 191s, prev-cpu=147.950s, current-cpu=151.940s" date="2025-10-26T19:53:22.352" /><!-- duration: 60ms -->
+                <step title="Cpu: npm install(1069,164.900s)+build.sh(961,0.070s)+oryx(941,9.840s)+tee(942,0.000s)+bash(940,0.000s)=total(174.800s)" date="2025-10-26T19:54:47.660" /><!-- duration: 20ms -->
+                <step title="bash: no io activity for 61s, prev-cpu=-1.000s, current-cpu=174.800s" date="2025-10-26T19:54:47.998" /><!-- duration: 31ms -->
+                <step title="Cpu: npm install(1069,171.630s)+build.sh(961,0.070s)+oryx(941,10.110s)+tee(942,0.000s)+bash(940,0.000s)=total(181.800s)" date="2025-10-26T19:55:48.845" /><!-- duration: 20ms -->
+                <step title="bash: no io activity for 122s, prev-cpu=174.800s, current-cpu=181.800s" date="2025-10-26T19:55:49.059" /><!-- duration: 17ms -->
+                <step title="Cpu: npm install(1069,176.840s)+build.sh(961,0.070s)+oryx(941,10.560s)+tee(942,0.000s)+bash(940,0.000s)=total(187.340s)" date="2025-10-26T19:56:50.912" /><!-- duration: 73ms -->
+                <step title="bash: no io activity for 184s, prev-cpu=181.800s, current-cpu=187.340s" date="2025-10-26T19:56:51.244" /><!-- duration: 111ms -->
+                <step title="Cpu: npm install(1069,186.830s)+build.sh(961,0.070s)+oryx(941,10.740s)+tee(942,0.000s)+bash(940,0.000s)=total(197.600s)" date="2025-10-26T19:57:53.085" /><!-- duration: 29ms -->
+                <step title="bash: no io activity for 246s, prev-cpu=187.340s, current-cpu=197.600s" date="2025-10-26T19:57:53.165" /><!-- duration: 70ms -->
+                <step title="Cpu: npm install(1069,194.090s)+build.sh(961,0.070s)+oryx(941,10.870s)+tee(942,0.000s)+bash(940,0.000s)=total(205.030s)" date="2025-10-26T19:58:54.170" /><!-- duration: 12ms -->
+                <step title="bash: no io activity for 308s, prev-cpu=197.600s, current-cpu=205.030s" date="2025-10-26T19:58:54.382" /><!-- duration: 59ms -->

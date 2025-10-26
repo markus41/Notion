@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "description": "Cached Software Tracker page IDs for dependency linking",
+    "lastUpdated": "2025-10-26",
+    "source": "Notion Software & Cost Tracker",
+    "dataSourceId": "13b5e9de-2dd1-45ec-839a-4f3d50cd8d06"
+  },
+  "software": {
+    "poetry": "29586779-099a-81aa-b696-e1487cb6c70b",
+    "python": "29586779-099a-81ac-9ff0-ced75e246868",
+    "pydantic": "29586779-099a-81ac-9ff0-ced75e246868",
+    "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
+    "Azure Key Vault": "29586779-099a-8151-aa47-e7a707c12230",
+    "GitHub Enterprise": "29586779-099a-818b-a39c-f2a010682014",
+    "Node.js": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+    "TypeScript": "29586779-099a-814e-8701-d8d74bcc1c7d",
+    "Azure OpenAI Service": "29586779-099a-81cd-985a-f8ee96bbee63",
+    "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
+    "Azure SQL Database": "29486779-099a-8118-9351-e42d72196354",
+    "Azure Functions": "29386779-099a-81f7-b5bd-ceb68eccf581",
+    "Azure App Service": "29586779-099a-819f-b3ba-d51a575246ae",
+    "npm (Node Package Manager)": "29586779-099a-817b-8738-db3d9203687c",
+    "Docker Desktop": "29586779-099a-819f-935c-fe8a0fc0290c",
+    "ESLint": "29586779-099a-81eb-99f3-e0db463b2676",
+    "Prettier": "29586779-099a-8138-9204-d9c963414d94",
+    "Jest": "29586779-099a-8161-ada7-db81fb39e37c",
+    "Vitest": "29586779-099a-8116-a08b-fcbe7d5589cb",
+    "Azure Redis Cache": "29586779-099a-8145-b723-e7070bf2da5f",
+    "Azure Data Factory": "29486779-099a-811a-aed7-cacbed21849e",
+    "Azure Logic Apps": "29586779-099a-8171-82ee-d90818c698c1",
+    "Azure Service Bus": "29586779-099a-8186-aea6-f94129d157c5",
+    "Azure API Management": "29586779-099a-81ee-80c0-dbce832bc6da",
+    "Azure Container Registry": "29586779-099a-813c-bb51-e55680e330db",
+    "React": "29586779-099a-81bc-a283-c7079b678952",
+    "Notion API": "29386779-099a-811e-a792-c672b702fe57",
+    "GitHub Copilot Business": "29586779-099a-8172-98b0-d46a85c6ce41",
+    "Power Automate": "29486779-099a-814f-802a-c9c6d5abec70",
+    "Playwright": "29586779-099a-8188-a8ee-db896dde2f56"
+  },
+  "notes": {
+    "usage": "This file caches known software IDs to reduce API calls during bulk linking operations",
+    "coverage": "Partial - only includes software found in initial searches. Additional searches needed for remaining 230+ dependencies",
+    "nextSteps": [
+      "Search for remaining dependencies not yet cached",
+      "Build complete ID mapping for all 258 dependencies",
+      "Execute batch update operations for each build"
+    ]
+  }
+}
