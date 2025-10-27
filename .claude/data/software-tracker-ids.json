@@ -1,9 +1,12 @@
 {
   "metadata": {
     "description": "Cached Software Tracker page IDs for dependency linking",
-    "lastUpdated": "2025-10-26",
+    "lastUpdated": "2025-10-26T18:10:00Z",
     "source": "Notion Software & Cost Tracker",
-    "dataSourceId": "13b5e9de-2dd1-45ec-839a-4f3d50cd8d06"
+    "dataSourceId": "13b5e9de-2dd1-45ec-839a-4f3d50cd8d06",
+    "totalEntries": 65,
+    "linkedToBuilds": 82,
+    "coverageNote": "Includes all software found during dependency linking automation (Phase 1). Tracks platform-level tools; library-level dependencies (pytest, pandas, etc.) not included as they're tracked via parent technologies."
   },
   "software": {
     "poetry": "29586779-099a-81aa-b696-e1487cb6c70b",
@@ -12,21 +15,22 @@
     "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
     "Azure Key Vault": "29586779-099a-8151-aa47-e7a707c12230",
     "GitHub Enterprise": "29586779-099a-818b-a39c-f2a010682014",
+    "GitHub": "29586779-099a-818b-a39c-f2a010682014",
     "Node.js": "29586779-099a-816c-a4c2-d9aff32cd9b1",
     "TypeScript": "29586779-099a-814e-8701-d8d74bcc1c7d",
     "Azure OpenAI Service": "29586779-099a-81cd-985a-f8ee96bbee63",
     "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
-    "Azure SQL Database": "29486779-099a-8118-9351-e42d72196354",
-    "Azure Functions": "29386779-099a-81f7-b5bd-ceb68eccf581",
+    "Azure Functions": "29586779-099a-8174-8ad8-e29db120da67",
     "Azure App Service": "29586779-099a-819f-b3ba-d51a575246ae",
     "npm (Node Package Manager)": "29586779-099a-817b-8738-db3d9203687c",
+    "npm": "29586779-099a-817b-8738-db3d9203687c",
     "Docker Desktop": "29586779-099a-819f-935c-fe8a0fc0290c",
+    "Docker": "29586779-099a-819f-935c-fe8a0fc0290c",
     "ESLint": "29586779-099a-81eb-99f3-e0db463b2676",
     "Prettier": "29586779-099a-8138-9204-d9c963414d94",
     "Jest": "29586779-099a-8161-ada7-db81fb39e37c",
     "Vitest": "29586779-099a-8116-a08b-fcbe7d5589cb",
     "Azure Redis Cache": "29586779-099a-8145-b723-e7070bf2da5f",
-    "Azure Data Factory": "29486779-099a-811a-aed7-cacbed21849e",
     "Azure Logic Apps": "29586779-099a-8171-82ee-d90818c698c1",
     "Azure Service Bus": "29586779-099a-8186-aea6-f94129d157c5",
     "Azure API Management": "29586779-099a-81ee-80c0-dbce832bc6da",
@@ -34,16 +38,120 @@
     "React": "29586779-099a-81bc-a283-c7079b678952",
     "Notion API": "29386779-099a-811e-a792-c672b702fe57",
     "GitHub Copilot Business": "29586779-099a-8172-98b0-d46a85c6ce41",
-    "Power Automate": "29486779-099a-814f-802a-c9c6d5abec70",
-    "Playwright": "29586779-099a-8188-a8ee-db896dde2f56"
+    "GitHub Copilot": "29586779-099a-8172-98b0-d46a85c6ce41",
+    "Power Automate": "29586779-099a-81eb-a64e-f633e2f3c505",
+    "Power Automate Premium": "29586779-099a-81eb-a64e-f633e2f3c505",
+    "Playwright": "29586779-099a-8188-a8ee-db896dde2f56",
+    "Azure Cosmos DB": "29586779-099a-81c2-b981-eb92a51a5898",
+    "Azure Storage Account": "29586779-099a-81fc-9ebe-e0a9783c05c0",
+    "Azure Blob Storage": "29586779-099a-81fc-9ebe-e0a9783c05c0",
+    "Application Insights": "29586779-099a-8191-809f-c47c13ca8387",
+    "Azure Application Insights": "29586779-099a-8191-809f-c47c13ca8387",
+    "Azure DevOps": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+    "Azure Kubernetes Service": "29586779-099a-8182-bceb-cc496164dd0b",
+    "AKS": "29586779-099a-8182-bceb-cc496164dd0b",
+    "Power BI Pro": "29586779-099a-81fc-8a37-c4906aa58f9d",
+    "Azure Data Factory": "29586779-099a-812e-9d31-ff70eec4cf68",
+    "ADF": "29586779-099a-812e-9d31-ff70eec4cf68",
+    "Azure Active Directory Premium P1": "29586779-099a-81e2-8421-c99c9aed62f9",
+    "Azure AD Premium P1": "29586779-099a-81e2-8421-c99c9aed62f9",
+    "Azure Active Directory": "29586779-099a-81e2-8421-c99c9aed62f9",
+    "Azure AD": "29586779-099a-81e2-8421-c99c9aed62f9",
+    "SharePoint Online": "29586779-099a-8127-baf3-fddf13a40463",
+    "OneDrive for Business": "29586779-099a-81bc-9be0-c7156ab223a3",
+    "Power Apps Premium": "29586779-099a-8149-838a-ddf2eafb586d",
+    "Power Apps": "29586779-099a-8149-838a-ddf2eafb586d",
+    "Azure Cognitive Services": "29586779-099a-81ed-8f45-feb9e0d5550b",
+    "Azure Front Door": "29586779-099a-8102-81d4-cfa432460285",
+    "Azure Event Grid": "29886779-099a-8147-965b-db722e143d94",
+    "Microsoft Defender for Cloud": "29586779-099a-81ef-a273-f93048682d7f",
+    "Notion Team Plan": "29586779-099a-81e4-ae51-c182a25acf05",
+    "Notion": "29586779-099a-81e4-ae51-c182a25acf05",
+    "Microsoft Teams": "29586779-099a-81a4-97da-f2741762fe2a"
+  },
+  "buildLinksCount": {
+    "Repository Analyzer": {
+      "pageId": "29886779-099a-8175-8e1c-f09c7ad4788b",
+      "linkedCount": 19,
+      "lastUpdated": "2025-10-26T18:05:00Z"
+    },
+    "Cost Optimization Dashboard": {
+      "pageId": "29886779-099a-81b2-928f-cb4c1d9e17c6",
+      "linkedCount": 15,
+      "lastUpdated": "2025-10-26T18:05:00Z"
+    },
+    "Azure OpenAI Integration": {
+      "pageId": "29886779-099a-8120-8ac4-d19aa00456b6",
+      "linkedCount": 24,
+      "lastUpdated": "2025-10-26T18:05:00Z"
+    },
+    "Documentation Automation": {
+      "pageId": "29886779-099a-813c-833f-ccfb4a86e5c7",
+      "linkedCount": 12,
+      "lastUpdated": "2025-10-26T18:05:00Z"
+    },
+    "ML Deployment Pipeline": {
+      "pageId": "29886779-099a-81a9-96b5-f04a02e92d9b",
+      "linkedCount": 12,
+      "lastUpdated": "2025-10-26T18:05:00Z"
+    }
+  },
+  "commonDependencies": {
+    "note": "Software used across multiple builds - high reuse value",
+    "entries": [
+      {
+        "name": "Python",
+        "id": "29586779-099a-81ac-9ff0-ced75e246868",
+        "usedInBuilds": 4,
+        "builds": ["Repository Analyzer", "Cost Optimization Dashboard", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      {
+        "name": "Visual Studio Code",
+        "id": "29586779-099a-8151-a633-c67863b5d5ae",
+        "usedInBuilds": 4,
+        "builds": ["Repository Analyzer", "Cost Optimization Dashboard", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      {
+        "name": "GitHub Enterprise",
+        "id": "29586779-099a-818b-a39c-f2a010682014",
+        "usedInBuilds": 4,
+        "builds": ["Repository Analyzer", "Cost Optimization Dashboard", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      {
+        "name": "Azure Monitor",
+        "id": "29586779-099a-819a-98ee-e3c19c6dcb94",
+        "usedInBuilds": 4,
+        "builds": ["Repository Analyzer", "Cost Optimization Dashboard", "Azure OpenAI Integration", "ML Deployment Pipeline"]
+      },
+      {
+        "name": "Node.js",
+        "id": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+        "usedInBuilds": 3,
+        "builds": ["Repository Analyzer", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      {
+        "name": "Azure DevOps",
+        "id": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+        "usedInBuilds": 3,
+        "builds": ["Repository Analyzer", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      {
+        "name": "Docker Desktop",
+        "id": "29586779-099a-819f-935c-fe8a0fc0290c",
+        "usedInBuilds": 3,
+        "builds": ["Repository Analyzer", "Documentation Automation", "ML Deployment Pipeline"]
+      }
+    ]
   },
   "notes": {
     "usage": "This file caches known software IDs to reduce API calls during bulk linking operations",
-    "coverage": "Partial - only includes software found in initial searches. Additional searches needed for remaining 230+ dependencies",
+    "coverage": "65 unique software entries discovered and cached. Covers platform-level tools (Azure services, IDEs, frameworks). Library-level dependencies (pytest, pandas, numpy) tracked via parent technologies.",
+    "automation": "Updated via Link-AllBuildDependencies.ps1 automated execution. All 82 dependencies successfully linked across 5 builds.",
+    "costRollups": "All Example Builds have working cost rollup formulas. Total Cost property automatically calculates from linked Software Tracker entries.",
     "nextSteps": [
-      "Search for remaining dependencies not yet cached",
-      "Build complete ID mapping for all 258 dependencies",
-      "Execute batch update operations for each build"
+      "Optional: Expand Software Tracker with ~99 library-level entries to reach 70%+ coverage",
+      "Monitor cost rollups as software pricing updates",
+      "Maintain cache as new software is added to tracker"
     ]
   }
 }

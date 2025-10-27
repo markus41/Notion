@@ -15,11 +15,16 @@
 | 🛠️ **Example Builds** | `a1cd1528-971d-4873-a176-5e93b93555f6` | Technical prototype and application tracking |
 | 💰 **Software & Cost Tracker** | `13b5e9de-2dd1-45ec-839a-4f3d50cd8d06` | Centralized software expense management |
 | 📚 **Knowledge Vault** | Query programmatically | Archived learnings and reference documentation |
+| 📝 **Blog Posts** | `97adad39160248d697868056a0075d9c` | Public blog content publishing and management |
 | 🔗 **Integration Registry** | Query programmatically | External system integrations and connectors |
+| 📦 **Projects** | `9f75999b-62d2-4c78-943e-c3e0debccfcd` | Active development project tracking with GitHub integration |
+| ⚡ **Actions Registry** | `9d5a1db0-585f-4f5b-b2bb-a41f875a7de4` | META database tracking all slash commands and automation |
+| 📊 **Data Sources** | `092940f4-1e6d-4321-b06a-1c0a9ee79445` | Client data infrastructure and connection health monitoring |
 | 🤖 **Agent Registry** | `5863265b-eeee-45fc-ab1a-4206d8a523c6` | Claude Code agent specifications |
 | 🤖 **Agent Activity Hub** | `7163aa38-f3d9-444b-9674-bde61868bd2b` | Agent work tracking and productivity analytics |
 | 🎨 **Output Styles Registry** | `199a7a80-224c-470b-9c64-7560ea51b257` | Communication style definitions |
 | 🧪 **Agent Style Tests** | `b109b417-2e3f-4eba-bab1-9d4c047a65c4` | Style effectiveness testing and analytics |
+| 🎨 **Mermaid Diagram Registry** | `7169c29d-ca42-49a7-a867-0a110ee89532` | Centralized tracking of all Mermaid diagrams across GitHub and Notion |
 | 🎯 **OKRs & Initiatives** | Query programmatically | Organizational objectives and key results |
 
 **Workspace ID**: `81686779-099a-8195-b49e-00037e25c23e`
@@ -260,6 +265,48 @@ Views Count: Number (tracked manually or via API)
 
 ---
 
+### Blog Posts
+
+**Data Source ID**: `97adad39160248d697868056a0075d9c`
+
+**Purpose**: Public-facing blog content for Brookside BI website, managed through Notion-to-Webflow publishing pipeline with automated visual content tracking.
+
+**Core Properties**:
+```yaml
+Post Title: Title (required, max 100 chars, SEO optimized)
+Summary: Text (article summary for SEO description, max 500 chars)
+Category: Relation → Knowledge Vault Categories (single, required)
+Tags: Multi-select (article tags for categorization)
+Publish Date: Date (publication timestamp, required)
+Hero Image: Files (cover image, 16:9 aspect ratio, 1600x900+ pixels)
+Body: Text (article content in Markdown format, min 500 words)
+Status: Status (Draft | In Review | Published)
+Webflow Item ID: Text (sync tracking, auto-populated)
+Last Synced: Date (sync timestamp, auto-populated)
+Sync Status: Status (Not Synced | Synced | Sync Failed | Needs Update)
+
+# Visual Content Tracking (auto-populated by syncer)
+Has Mermaid Diagrams: Checkbox (true if post contains Mermaid diagrams)
+Has Lottie Animations: Checkbox (true if post contains Lottie animations)
+Diagram Count: Number (count of Mermaid diagrams in post)
+Animation Count: Number (count of Lottie animations in post)
+Visual Content Last Updated: Date (timestamp of last visual content modification)
+
+# Relations
+Category: Relation → Knowledge Vault Categories (single select)
+```
+
+**Formatting Standard**: `📝 [Post Title]`
+
+**Publishing Workflow**: Use `/blog:sync-post [page-id]` to publish individual posts or `/blog:bulk-sync` for batch operations
+
+**Visual Content Support**:
+- Mermaid diagrams: Write ` ```mermaid ` code fences in Body field
+- Lottie animations: Use `🎬 lottie: [url]` syntax in Body field
+- See [blog-visual-enhancements-guide.md](./../docs/blog-visual-enhancements-guide.md) for implementation details
+
+---
+
 ### Agent Registry
 
 **Data Source ID**: `5863265b-eeee-45fc-ab1a-4206d8a523c6`
@@ -397,6 +444,203 @@ Status: Select (Passed | Failed | Needs Review)
 ```
 
 **Testing**: Use `/test-agent-style` or `/style:compare` commands
+
+---
+
+### 🎨 Mermaid Diagram Registry
+
+**Database ID**: `3d045372-e9b3-45b6-906d-355a3c38430f`
+**Data Source ID**: `7169c29d-ca42-49a7-a867-0a110ee89532`
+
+**Purpose**: Centralized tracking of all Mermaid diagrams across GitHub repositories and Notion pages to streamline visual asset management, diagram reuse, and documentation coverage analysis.
+
+**Core Properties**:
+```yaml
+Name: Title (format: 📊 [Page/File Name] - [Diagram Type])
+Diagram Type: Select (Flowchart | Sequence Diagram | Class Diagram | Entity Relationship | State Diagram | Gantt Chart | Pie Chart | User Journey | Git Graph | Mindmap)
+Source Type: Select (🐙 GitHub | 📝 Notion | 📄 Local File)
+Source Location: URL (GitHub file URL or Notion page URL)
+File Path: Text (GitHub file path or Notion page path)
+Mermaid Code: Text (long - actual diagram code for reuse)
+Description: Text (diagram purpose and context)
+Category: Select (Architecture | Workflow | Data Model | Process Flow | System Design | Integration | User Flow | Timeline | Relationship | Other)
+Complexity: Select (🟢 Simple | 🟡 Medium | 🔴 Complex)
+Status: Select (✅ Active | 🔄 Needs Update | ⚠️ Outdated | 🗃️ Archived)
+Tags: Multi-select (Documentation, Architecture, API, Database, Azure, Workflow, Integration, Agent, Webhook, Innovation)
+Last Scanned: Date (auto-updated by scanner scripts)
+Node Count: Number (approximate number of nodes/elements)
+Reusability: Select (🔄 Highly Reusable | ⚡ Moderately Reusable | 📌 Context-Specific)
+```
+
+**Formatting Standard**: `📊 [Page/File Name] - [Diagram Type]` (e.g., "📊 Webhook Architecture - Sequence Diagram")
+
+**Population Methods**:
+- **GitHub Scanner**: `.\scripts\Scan-GitHubMermaidDiagrams.ps1 -SyncToNotion`
+- **Notion Scanner**: `.\scripts\Scan-NotionMermaidDiagrams.ps1 -SyncToRegistry`
+- **Manual Entry**: Use Notion UI or create-pages API
+
+**Use Cases**:
+- **Diagram Reuse**: Search registry for existing diagrams before creating new ones
+- **Documentation Audit**: Identify pages/files lacking visual elements
+- **Diagram Inventory**: Track all visual assets across organization
+- **Maintenance Tracking**: Monitor outdated diagrams needing updates
+- **Pattern Library**: Curate highly reusable diagram templates
+
+**Common Queries**:
+```sql
+-- Find all architecture diagrams in GitHub
+SELECT * WHERE "Source Type" = "🐙 GitHub" AND "Category" = "Architecture"
+
+-- Find highly reusable diagrams for templates
+SELECT * WHERE "Reusability" = "🔄 Highly Reusable" AND "Status" = "✅ Active"
+
+-- Find diagrams needing updates
+SELECT * WHERE "Status" IN ("🔄 Needs Update", "⚠️ Outdated")
+
+-- Complexity distribution for documentation planning
+SELECT "Complexity", COUNT(*) GROUP BY "Complexity"
+```
+
+**Automation Scripts**:
+- `Scan-GitHubMermaidDiagrams.ps1`: Extract diagrams from all markdown files in GitHub repos
+- `Scan-NotionMermaidDiagrams.ps1`: Extract diagrams from Notion page content (requires Claude Code with Notion MCP)
+
+---
+
+### Projects
+
+**Data Source ID**: `9f75999b-62d2-4c78-943e-c3e0debccfcd`
+
+**Purpose**: Track active development projects with GitHub integration, priority management, and timeline tracking.
+
+**Core Properties**:
+```yaml
+Project Name: Title (required)
+Status: Status (Not Started | In Progress | Blocked | In Review | Done | Archived)
+Priority: Select (P0 | P1 | P2 | P3)
+  - P0 (red): Critical - immediate attention required
+  - P1 (orange): High priority - this quarter
+  - P2 (yellow): Medium priority - next quarter
+  - P3 (green): Low priority - backlog
+Owner: Person (project owner/lead)
+GitHub Repo URL: URL (link to repository)
+Description: Text (project scope and objectives)
+Start Date: Date
+Tags: Multi-select (Agents | AI | SaaS | Web App | Internal | Backend)
+
+# Relations
+Related Builds: Relation → Example Builds (if project produces builds)
+Related Ideas: Relation → Ideas Registry (originating ideas)
+Data Sources: Relation → Data Sources (client data infrastructure)
+
+# Common Queries
+# Active projects by priority
+# Projects without GitHub repos
+# Projects by owner
+# Timeline view by start date
+```
+
+**Formatting Standard**: `📦 [Project Name]`
+
+**Use Cases**:
+- Track multi-build initiatives (e.g., DSP Command Central spanning multiple repositories)
+- Manage client projects with deliverables
+- Coordinate team assignments across related work
+
+---
+
+### Actions Registry
+
+**Data Source ID**: `9d5a1db0-585f-4f5b-b2bb-a41f875a7de4`
+
+**Purpose**: META database tracking all slash commands, automation workflows, and operational procedures. Self-documenting system that registers its own commands.
+
+**Core Properties**:
+```yaml
+Name: Title (required, format: /command:action)
+Category: Select (Innovation | Cost | Knowledge | Team | Repo | Autonomous | Compliance | Sync)
+Status: Select (Active | Deprecated | Experimental)
+Description: Text (what the command does and why it's valuable)
+Parameters: Text (required and optional parameters)
+Example Usage: Text (3-5 practical examples)
+Workflow Steps: Text (step-by-step execution flow)
+Related Databases: Multi-select (Ideas | Research | Builds | Software | Knowledge | Integration | OKRs | Agents | Actions | Repositories)
+Created By: Person (who built this automation)
+Last Updated: Date
+
+# Relations
+Used By Agents: Relation → Agent Registry (which agents invoke this command)
+Documented In: Relation → Knowledge Vault (detailed documentation)
+
+# Analytics
+Usage Count: Number (times invoked)
+Success Rate: Number 0-100 (% successful executions)
+Average Duration: Number (seconds per execution)
+Last Used: Date
+
+# Common Queries
+# Active commands by category
+# Deprecated commands needing replacement
+# Most-used commands (top 10)
+# Commands with low success rate (<80%)
+```
+
+**Formatting Standard**: `⚡ /[command]:[action]`
+
+**Critical Use Cases**:
+- **Self-Registration**: New slash commands automatically register themselves via `/action:register`
+- **Usage Analytics**: Track which commands are most valuable
+- **Deprecation Workflow**: Mark obsolete commands and provide replacement guidance
+- **Automation Discovery**: Browse all available commands by category
+
+**META Nature**: This database tracks the automation system itself, including the command that creates entries in this database (`/action:register`). Enables recursive self-documentation.
+
+---
+
+### Data Sources
+
+**Data Source ID**: `092940f4-1e6d-4321-b06a-1c0a9ee79445`
+
+**Purpose**: Track client data infrastructure for BI projects - databases, APIs, SharePoint libraries, and external data connections with connection health monitoring.
+
+**Core Properties**:
+```yaml
+Data Source Name: Title (required)
+Source Type: Select (SQL Server | Azure SQL | Snowflake | API | Excel/CSV | SharePoint | Other)
+Connection Status: Select (🟢 Active | 🟡 Testing | ⚫ Inactive | 🔴 Error)
+Owner: Person (who manages this data source)
+Connection Details: Text (connection string, endpoint URL, authentication method - encrypted/redacted)
+Documentation Link: URL (vendor docs or internal setup guide)
+Refresh Frequency: Select (Real-time | Hourly | Daily | Weekly | Manual)
+Last Refresh: Last Edited Time (auto-updated)
+Row Count: Number (estimated or actual record count)
+
+# Relations
+Projects Using: Relation → Projects (which projects consume this data)
+Related Builds: Relation → Example Builds (builds that read/write this data)
+Integration Registry: Relation → Integration Registry (technical integration details)
+
+# Data Quality Metrics
+Data Quality Score: Number 0-100 (completeness, accuracy, timeliness)
+Availability: Number 0-100 (uptime percentage)
+Issues: Text (known data quality problems or connection issues)
+
+# Common Queries
+# Active data sources by project
+# Error status data sources (need attention)
+# Data sources without documentation
+# Unused data sources (no project relations)
+```
+
+**Formatting Standard**: `📊 [Data Source Name]`
+
+**Use Cases**:
+- **Client Project Management**: Track which data sources each client project depends on
+- **Connection Health Monitoring**: Identify data sources with connectivity issues
+- **Refresh Scheduling**: Coordinate data refresh frequencies across projects
+- **Dependency Mapping**: Understand impact of data source changes on builds
+
+**Best for**: Organizations managing BI implementations across multiple client data ecosystems requiring systematic data source inventory and health tracking.
 
 ---
 

@@ -87,6 +87,53 @@ You will monitor, analyze, and optimize software and tool expenses to support su
   - Present total monthly and annual estimates
   - Flag if existing licenses can be leveraged
 
+## 10. Market Data & Competitive Intelligence
+- **Capability**: Access real-time financial data and market intelligence via Morningstar and Bloomberg APIs
+- **Authentication**: Azure Key Vault (`morningstar-api-key`, `bloomberg-api-username`, `bloomberg-api-password`)
+- **Best for**: Market comparisons, software vendor analysis, cost benchmarking, competitive intelligence
+
+### Morningstar Financial Data
+```typescript
+// Query stock fundamentals for software vendors
+const stockData = await morningstarAPI.getEquityData({
+  ticker: "MSFT",  // Microsoft for comparison analysis
+  fields: ["price", "pe_ratio", "market_cap", "52_week_high", "beta"],
+  currency: "USD"
+});
+
+// Research fund holdings for investment analysis
+const fundHoldings = await morningstarAPI.getFundRating({
+  ticker: "VFIAX",
+  includeESG: true,
+  includePerformance: true
+});
+```
+
+### Bloomberg Terminal/API
+```typescript
+// Real-time market data for vendor analysis
+const marketData = await bloombergAPI.getSecurityData({
+  securities: ["MSFT US Equity", "CRM US Equity", "NOW US Equity"],
+  fields: ["PX_LAST", "VOLUME", "PE_RATIO", "MARKET_CAP"]
+});
+
+// Industry analytics for cost benchmarking
+const industryData = await bloombergAPI.getIndustryAnalysis({
+  industry: "Cloud Services",
+  metrics: ["MARKET_SIZE", "GROWTH_RATE_5Y", "TOP_PLAYERS"],
+  region: "Global"
+});
+```
+
+### Use Cases
+1. **Software Vendor Financial Health**: Assess vendor stability before long-term commitments
+2. **Market Benchmarking**: Compare our software spend against industry standards
+3. **Competitive Intelligence**: Track competitor spending patterns and tool adoption
+4. **Investment Analysis**: Evaluate software vendors as potential acquisition targets
+5. **Cost Validation**: Verify vendor pricing against market data and competitor rates
+
+**→ Complete Guide**: [Financial APIs Documentation](../docs/financial-apis.md)
+
 # Output Format Standards
 
 Structure all cost analyses using Brookside BI brand guidelines:

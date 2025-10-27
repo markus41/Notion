@@ -181,7 +181,6 @@ function Sync-ToNotion {
             "Session ID" = $Entry.sessionId
             "Start Time" = $Entry.startTime
             "Work Description" = if ($Entry.workDescription) { $Entry.workDescription } else { "" }
-            "Deliverables Count" = if ($Entry.deliverablesCount) { [int]$Entry.deliverablesCount } else { 0 }
             "Files Created" = if ($Entry.filesCreated) { [int]$Entry.filesCreated } else { 0 }
             "Files Updated" = if ($Entry.filesUpdated) { [int]$Entry.filesUpdated } else { 0 }
         }
@@ -192,7 +191,24 @@ function Sync-ToNotion {
         }
 
         if ($Entry.durationMinutes) {
-            $properties["Duration (Minutes)"] = [int]$Entry.durationMinutes
+            $properties["Duration (minutes)"] = [int]$Entry.durationMinutes
+        }
+
+        # Build deliverables text from deliverables object or array
+        if ($Entry.deliverables) {
+            $deliverablesText = ""
+            if ($Entry.deliverables -is [array]) {
+                $deliverablesText = ($Entry.deliverables -join "; ")
+            }
+            elseif ($Entry.deliverables.documentationFiles) {
+                $deliverablesText = ($Entry.deliverables.documentationFiles -join ", ")
+            }
+            elseif ($Entry.deliverables -is [string]) {
+                $deliverablesText = $Entry.deliverables
+            }
+            if ($deliverablesText) {
+                $properties["Deliverables"] = $deliverablesText
+            }
         }
 
         if ($Entry.linesGenerated) {
@@ -319,7 +335,7 @@ function Invoke-NotionMCP {
                         date = @{ start = $value }
                     }
                 }
-                { $_ -in @("Files Created", "Files Updated", "Lines Generated", "Deliverables Count", "Duration (Minutes)") } {
+                { $_ -in @("Files Created", "Files Updated", "Lines Generated", "Duration (minutes)", "Success Rate", "Tokens Used") } {
                     $notionProperties[$key] = @{
                         number = $value
                     }

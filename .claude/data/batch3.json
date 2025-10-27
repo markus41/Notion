@@ -1,0 +1,132 @@
+[
+  {
+    "properties": {
+      "Name": "/what-if-analysis",
+      "Category": "Cost",
+      "Description": "Model different software spending scenarios to forecast budget impact, evaluate strategic decisions, and support data-driven planning through comprehensive what-if cost analysis.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/what-if-analysis",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:refresh-status",
+      "Category": "Datasource",
+      "Description": "Establish data source status refresh to maintain accurate health indicators across integration portfolio",
+      "Parameters": "[name] <status>",
+      "Status": "Active",
+      "Example Usage": "/datasource:refresh-status [name] <status>",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:register",
+      "Category": "Datasource",
+      "Description": "Establish data source registration for external APIs and databases to maintain integration inventory and connection health",
+      "Parameters": "[name] [type] [--connection-string=value] [--api-endpoint=url]",
+      "Status": "Active",
+      "Example Usage": "/datasource:register [name] [type] [--connection-string=value] [--api-endpoint=url]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:validate",
+      "Category": "Datasource",
+      "Description": "Establish data source connection validation to verify integration health and drive proactive issue detection",
+      "Parameters": "[name]",
+      "Status": "Active",
+      "Example Usage": "/datasource:validate [name]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/idea:assess",
+      "Category": "Idea",
+      "Description": "Establish comprehensive viability assessment for existing ideas to drive informed go/no-go decisions through structured evaluation framework",
+      "Parameters": "[idea-name] [--force] [--context=\"additional-info\"]",
+      "Status": "Active",
+      "Example Usage": "/idea:assess [idea-name] [--force] [--context=\"additional-info\"]",
+      "Related Databases": "[\"Ideas\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/idea:create",
+      "Category": "Idea",
+      "Description": "Establish rapid innovation opportunity capture with streamlined entry creation and duplicate prevention",
+      "Parameters": "[description] [--champion=person] [--estimated-cost=amount]",
+      "Status": "Active",
+      "Example Usage": "/idea:create [description] [--champion=person] [--estimated-cost=amount]",
+      "Related Databases": "[\"Ideas\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/orchestrate-complex",
+      "Category": "Innovation",
+      "Description": "**Purpose**: Orchestrate complex multi-agent workflows with parallel execution, dependency management, and automated coordination to drive measurable outcomes through structured approaches.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/orchestrate-complex",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/project-plan",
+      "Category": "Innovation",
+      "Description": "Create comprehensive project plans for Innovation Nexus initiatives from Idea through Research, Build, and Knowledge Vault",
+      "Parameters": "[project-name] [--phase=stage] [--scope=range]",
+      "Status": "Active",
+      "Example Usage": "/project-plan [project-name] [--phase=stage] [--scope=range]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/integration:health-check",
+      "Category": "Integration",
+      "Description": "Establish comprehensive integration health monitoring to maintain operational reliability and drive proactive issue resolution across your connectivity ecosystem",
+      "Parameters": "[--format=table|json] [--filter=status]",
+      "Status": "Active",
+      "Example Usage": "/integration:health-check [--format=table|json] [--filter=status]",
+      "Related Databases": "[\"Integration\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/integration:register",
+      "Category": "Integration",
+      "Description": "Establish integration registration to maintain comprehensive system connectivity inventory and support operational visibility",
+      "Parameters": "[integration-name] [type]",
+      "Status": "Active",
+      "Example Usage": "/integration:register [integration-name] [type]",
+      "Related Databases": "[\"Integration\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  }
+]

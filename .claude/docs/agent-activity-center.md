@@ -454,6 +454,193 @@ rollup(Agent Activity Hub, Files Created + Files Updated, average)
 
 ---
 
+## Troubleshooting
+
+### Common Issues & Quick Fixes
+
+#### Issue: Agents Not Logging to Notion (404 Errors)
+
+**Symptoms**:
+- Markdown and JSON tiers work correctly
+- Notion tier shows 404 errors in logs
+- Pages not appearing in Agent Activity Hub
+
+**Root Cause**: Notion database not shared with integration
+
+**Fix** (2 minutes):
+```
+1. Open: https://www.notion.so/72b879f213bd4edb9c59b43089dbef21
+2. Click "..." menu (top-right) → Connections → Add connection
+3. Select your Notion integration (API token: kv-brookside-secrets/notion-api-key)
+4. Grant access
+```
+
+**→ See [Webhook README: Notion Workspace Configuration](../../azure-functions/notion-webhook/README.md#notion-workspace-configuration) for complete setup instructions including integration creation, database verification, and testing**
+
+**Verification**:
+```powershell
+# Check hook logs for successful sync
+Get-Content .\.claude\logs\auto-activity-hook.log -Tail 20
+# Should show no 404 errors after fix
+```
+
+---
+
+#### Issue: Stale Sessions Stuck "In Progress"
+
+**Symptoms**:
+- Sessions show "in-progress" status for days
+- Active sessions count inflated
+- Old sessions from October 22+ never completed
+
+**Root Cause**: Hook captures START only, not completion
+
+**Fix** (2 minutes):
+```powershell
+# Preview stale sessions (safe check)
+.\.claude\scripts\Update-StaleSessions.ps1 -DryRun
+
+# Clean up sessions >24 hours old
+.\.claude\scripts\Update-StaleSessions.ps1
+
+# Custom threshold (e.g., 2 hours)
+.\.claude\scripts\Update-StaleSessions.ps1 -ThresholdHours 2
+```
+
+**Prevention**: Use manual completion logging for meaningful work:
+```bash
+/agent:log-activity @agent-name completed "Work description with deliverables"
+```
+
+---
+
+#### Issue: Webhook Sync Failing
+
+**Symptoms**:
+- Queue entries with `webhookSynced=false`
+- Delays in Notion page creation (5-15 min instead of <30 sec)
+- Webhook error messages in logs
+
+**Diagnostic**:
+```powershell
+# Check webhook endpoint health
+.\.claude\utils\webhook-utilities.ps1 -Operation HealthCheck -WebhookSecret $(az keyvault secret show --vault-name kv-brookside-secrets --name notion-webhook-secret --query value -o tsv)
+
+# Check Azure Function status
+az functionapp show --name notion-webhook-brookside-prod --resource-group rg-brookside-innovation --query "{State:state, DefaultHostName:defaultHostName}"
+```
+
+**Common Fixes**:
+1. **Function not deployed**: Deploy via `infrastructure/DEPLOYMENT-MANUAL.md` steps
+2. **Cold start timeout**: First request after idle takes 2-5 sec (normal)
+3. **Invalid signature**: Verify webhook secret matches Key Vault value
+4. **Azure outage**: Queue fallback ensures zero data loss
+
+---
+
+#### Issue: Missing Session Data in Notion
+
+**Symptoms**:
+- Session ID created but properties empty
+- "Work Description" or "Agent Name" missing
+- Incomplete activity records
+
+**Root Cause**: Agent didn't trigger completion criteria
+
+**Automatic Logging Criteria** (ALL must be met):
+- ✅ Agent in approved list (38 specialized agents)
+- ✅ Work duration >2 minutes OR files created/updated
+- ✅ Not already logged in current session (5-min deduplication)
+- ✅ TodoWrite shows meaningful work completion
+
+**Manual Override**:
+```bash
+# When criteria not met but work is valuable
+/agent:log-activity @agent-name completed "Detailed work description with specific deliverables and decisions"
+```
+
+---
+
+### Verification Commands
+
+**Check Hook Health**:
+```powershell
+# View recent hook executions
+Get-Content .\.claude\logs\auto-activity-hook.log -Tail 50
+
+# Look for:
+# ✅ "Successfully captured agent activity"
+# ✅ "Successfully synced via webhook"
+# ❌ "ERROR" or "404" messages
+```
+
+**Check Sync Queue**:
+```powershell
+# View pending Notion entries
+Get-Content .\.claude\data\notion-sync-queue.jsonl
+
+# Empty file = all synced
+# Entries present = waiting for processor or webhook retry
+```
+
+**Check Active Sessions**:
+```powershell
+# View current sessions in JSON state
+Get-Content .\.claude\data\agent-state.json | ConvertFrom-Json |
+    Select-Object -ExpandProperty activeSessions |
+    Format-Table sessionId, agentName, status, startTime
+```
+
+**Check Overall Statistics**:
+```powershell
+# View metrics
+Get-Content .\.claude\data\agent-state.json | ConvertFrom-Json |
+    Select-Object -ExpandProperty statistics | Format-List
+
+# Key metrics:
+# - totalSessions: All-time session count
+# - activeSessions: Currently in-progress (should be low)
+# - completedSessions: Successfully finished work
+```
+
+---
+
+### Database ID Verification
+
+If Notion integration fails, verify correct database IDs:
+
+**Agent Activity Hub**:
+- **Database (page) ID**: `72b879f2-13bd-4edb-9c59-b43089dbef21` ✓
+- **Data Source (collection) ID**: `7163aa38-f3d9-444b-9674-bde61868bd2b` ✓
+- **URL**: https://www.notion.so/72b879f213bd4edb9c59b43089dbef21
+
+**Verification**:
+```powershell
+# Test Notion MCP connection
+# In Claude Code, ask: "Use Notion MCP to fetch the Agent Activity Hub database"
+# Should return database properties without errors
+```
+
+---
+
+### Support & Escalation
+
+**Quick Fixes (5-10 minutes)**:
+1. Share Notion database with integration (most common issue)
+2. Clean up stale sessions via Update-StaleSessions.ps1
+3. Verify webhook secret matches Key Vault
+
+**Detailed Troubleshooting**:
+- Review comprehensive fix guide: [.claude/docs/agent-activity-logging-fix.md](.claude/docs/agent-activity-logging-fix.md)
+- Check webhook architecture: [.claude/docs/webhook-architecture.md](.claude/docs/webhook-architecture.md)
+- Review queue processor logs: [.claude/logs/notion-queue-processor.log](.claude/logs/notion-queue-processor.log)
+
+**Still Blocked?**
+- Consultations@BrooksideBI.com | +1 209 487 2047
+- Reference: Phase 4 Autonomous Infrastructure implementation
+
+---
+
 ## Related Resources
 
 **Databases**:
@@ -469,6 +656,8 @@ rollup(Agent Activity Hub, Files Created + Files Updated, average)
 - [Innovation Workflow](./innovation-workflow.md)
 - [Team Structure](./team-structure.md)
 - [Success Metrics](./success-metrics.md)
+- [Webhook Architecture](./webhook-architecture.md)
+- [Agent Activity Logging Fix](./../docs/agent-activity-logging-fix.md)
 
 ---
 

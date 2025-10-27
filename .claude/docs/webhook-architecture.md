@@ -475,6 +475,7 @@ Keep local agent state and Notion in sync:
 - [ ] Azure subscription active with resource group created
 - [ ] Azure CLI authenticated (`az login`)
 - [ ] Notion integration created with Agent Activity Hub access
+  - **→ See [Webhook README: Notion Workspace Configuration](../../azure-functions/notion-webhook/README.md#notion-workspace-configuration) for complete setup instructions**
 - [ ] Key Vault secrets configured:
   - [ ] `notion-api-key` (Notion integration token)
   - [ ] `notion-webhook-secret` (generate via webhook-utilities.ps1)
@@ -525,12 +526,52 @@ A: Yes, in Phase 2. Extend Azure Function with additional endpoints for each dat
 
 ---
 
+## Implementation Status
+
+**Last Updated**: October 26, 2025
+**Overall Progress**: 85% Complete (Infrastructure ready, manual deployment steps required)
+
+### ✅ Completed Components
+
+- **Webhook Code**: Production-ready TypeScript Azure Function with security best practices
+- **Infrastructure Templates**: Bicep templates with parameters for repeatable deployment
+- **APIM Instance**: Provisioned and configured (`apim-brookside-innovation`)
+- **Security**: Webhook secret in Key Vault, policy XML designed, Managed Identity configured
+- **Documentation**: Comprehensive guides for architecture, troubleshooting, and operations
+- **Hook Integration**: Dual-path sync logic implemented in auto-log-agent-activity.ps1
+- **Cost Model**: $0.45 - $2.26/month validated, within budget constraints
+
+### ⏸️ Pending Manual Steps (60-75 minutes)
+
+Due to Azure CLI environment constraints, the following steps require manual execution:
+
+1. **Deploy Webhook Function** (15-20 min) - Execute Bicep deployment via PowerShell
+2. **Apply APIM Policy** (5 min) - Paste policy XML via Azure Portal
+3. **Create MCP Server Export** (5 min) - Use portal preview mode to expose API
+4. **Configure Claude MCP Client** (10 min) - Add APIM server to Claude config
+5. **End-to-End Testing** (15 min) - Validate webhook + MCP integration
+
+**Detailed Step-by-Step Instructions**: See archived [NEXT-STEPS-CHECKLIST.md](.archive/implementations/webhook-deployment-checklist.md)
+
+**Implementation Report**: See archived [WEBHOOK-APIM-IMPLEMENTATION-STATUS.md](.archive/implementations/webhook-apim-status.md)
+
+### Known Limitations
+
+- **Azure CLI Deployment**: Bicep commands fail in current Bash environment (workaround: PowerShell execution)
+- **APIM Policy Management**: No CLI support for API-level policies (workaround: Azure Portal)
+- **MCP Export**: Preview feature requiring portal with feature flag (documented in checklist)
+- **Cold Start Latency**: 2-5 seconds for first request after idle (acceptable within <30s SLO)
+
+---
+
 ## Related Documentation
 
 - [Webhook README](../azure-functions/notion-webhook/README.md) - Deployment guide and local development
 - [Webhook Troubleshooting Guide](webhook-troubleshooting.md) - Common issues and solutions
 - [Queue Processor Documentation](../utils/process-notion-queue.ps1) - Fallback sync mechanism
 - [Agent Activity Center](agent-activity-center.md) - 3-tier logging architecture overview
+- [Webhook Deployment Checklist](.archive/implementations/webhook-deployment-checklist.md) - Step-by-step manual deployment
+- [APIM Implementation Status](.archive/implementations/webhook-apim-status.md) - Detailed completion report
 
 ---
 

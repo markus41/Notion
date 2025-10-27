@@ -46,11 +46,48 @@ SKU: Standard
 | `notion-api-key` | Notion database operations | Notion MCP |
 | `azure-openai-api-key` | Azure OpenAI service access | AI/ML builds, research agents |
 | `azure-openai-endpoint` | Azure OpenAI endpoint URL | AI/ML builds, research agents |
+| `morningstar-api-key` | Morningstar Financial Data API | @cost-analyst, @research-coordinator, @viability-assessor, @market-researcher |
+| `bloomberg-api-username` | Bloomberg Terminal/BLPAPI username | @cost-analyst, @research-coordinator, @viability-assessor, @market-researcher |
+| `bloomberg-api-password` | Bloomberg Terminal/BLPAPI password | @cost-analyst, @research-coordinator, @viability-assessor, @market-researcher |
 | `cosmosdb-connection-string` | Cosmos DB access (if used) | Database builds |
 | `sql-connection-string` | Azure SQL access (if used) | Database builds |
 | `storage-connection-string` | Azure Storage access (if used) | File storage builds |
 
 **Access Policy**: Managed via Azure RBAC with principle of least privilege
+
+### Adding Financial API Secrets
+
+**Initial Setup** (One-time configuration for new financial API credentials):
+
+```powershell
+# Add Morningstar API Key
+az keyvault secret set `
+  --vault-name kv-brookside-secrets `
+  --name morningstar-api-key `
+  --value "<your-morningstar-api-key>"
+
+# Add Bloomberg Terminal Credentials
+az keyvault secret set `
+  --vault-name kv-brookside-secrets `
+  --name bloomberg-api-username `
+  --value "<your-bloomberg-username>"
+
+az keyvault secret set `
+  --vault-name kv-brookside-secrets `
+  --name bloomberg-api-password `
+  --value "<your-bloomberg-password>"
+```
+
+**Verification**:
+```powershell
+# List all secrets
+az keyvault secret list --vault-name kv-brookside-secrets --query "[].name"
+
+# Verify specific secret exists (without revealing value)
+az keyvault secret show --vault-name kv-brookside-secrets --name morningstar-api-key --query "attributes"
+```
+
+**Best for**: Initial configuration when onboarding Morningstar and Bloomberg data sources. Requires appropriate Key Vault permissions (Key Vault Secrets Officer or equivalent).
 
 ---
 
@@ -95,6 +132,9 @@ Retrieving secret 'github-personal-access-token' from Key Vault 'kv-brookside-se
 #   NOTION_API_KEY
 #   AZURE_OPENAI_API_KEY
 #   AZURE_OPENAI_ENDPOINT
+#   MORNINGSTAR_API_KEY
+#   BLOOMBERG_API_USERNAME
+#   BLOOMBERG_API_PASSWORD
 #   (+ any other secrets configured)
 ```
 
@@ -102,11 +142,14 @@ Retrieving secret 'github-personal-access-token' from Key Vault 'kv-brookside-se
 ```
 Setting MCP environment variables from Key Vault...
 ✓ Authenticated to Azure
-✓ Retrieved 4 secrets from kv-brookside-secrets
+✓ Retrieved 7 secrets from kv-brookside-secrets
 ✓ Set GITHUB_PERSONAL_ACCESS_TOKEN
 ✓ Set NOTION_API_KEY
 ✓ Set AZURE_OPENAI_API_KEY
 ✓ Set AZURE_OPENAI_ENDPOINT
+✓ Set MORNINGSTAR_API_KEY
+✓ Set BLOOMBERG_API_USERNAME
+✓ Set BLOOMBERG_API_PASSWORD
 Environment configured successfully.
 ```
 

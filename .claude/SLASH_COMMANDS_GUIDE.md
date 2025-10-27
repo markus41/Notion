@@ -203,6 +203,164 @@ Optimization Opportunities:
 | `/assess-viability` | `@viability-assessor` | Evaluate feasibility |
 | `/assign` | `@workflow-router` | Route work to team members |
 
+## Actions Registry META System
+
+**Best for**: Ensuring command discoverability after adding new slash commands to `.claude/commands/` or validating command inventory accuracy across team environments.
+
+### Bootstrap Process Flow
+
+The Actions Registry bootstrap architecture establishes automated synchronization between command files and the Notion database through systematic discovery, parsing, and intelligent deduplication.
+
+```mermaid
+flowchart TD
+    %% Command Invocation
+    Start(["/action:register-all invoked"]) --> ScanFiles
+
+    %% File Discovery Phase
+    ScanFiles["Scan .claude/commands/**/*.md<br/>Discover all slash command files"] --> ParseFiles
+
+    %% Parsing Phase
+    ParseFiles["For each command file:<br/>Parse YAML frontmatter"] --> ExtractMeta
+    ExtractMeta["Extract metadata:<br/>• name<br/>• description<br/>• parameters<br/>• examples<br/>• category"] --> QueryNotion
+
+    %% Database Query Phase
+    QueryNotion["Query Actions Registry<br/>Database ID: 64697e8c..."] --> CheckExists{Entry<br/>exists?}
+
+    %% Decision Path: New Entry
+    CheckExists -->|No| CreateEntry["Create new registry entry<br/>Insert all metadata fields"]
+    CreateEntry --> IncrementCreated["Increment 'registered' counter"]
+    IncrementCreated --> NextFile{More<br/>files?}
+
+    %% Decision Path: Existing Entry
+    CheckExists -->|Yes| CompareMetadata{Metadata<br/>changed?}
+
+    %% Update Path
+    CompareMetadata -->|Yes| UpdateEntry["Update existing entry<br/>Sync changed fields"]
+    UpdateEntry --> IncrementUpdated["Increment 'updated' counter"]
+    IncrementUpdated --> NextFile
+
+    %% Skip Path
+    CompareMetadata -->|No| SkipEntry["Skip (no changes)"]
+    SkipEntry --> IncrementSkipped["Increment 'skipped' counter"]
+    IncrementSkipped --> NextFile
+
+    %% Loop Control
+    NextFile -->|Yes| ParseFiles
+    NextFile -->|No| GenerateReport
+
+    %% Summary Phase
+    GenerateReport["Generate summary report<br/>Aggregate statistics"] --> OutputResults
+    OutputResults(["Output results:<br/>✓ X commands registered<br/>↻ Y commands updated<br/>⊘ Z commands skipped"])
+
+    %% Styling
+    classDef commandStyle fill:#e1f5ff,stroke:#0277bd,stroke-width:2px
+    classDef successStyle fill:#d4edda,stroke:#28a745,stroke-width:2px
+    classDef actionStyle fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    classDef decisionStyle fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+
+    class Start,OutputResults commandStyle
+    class CreateEntry,UpdateEntry,SkipEntry actionStyle
+    class CheckExists,CompareMetadata,NextFile decisionStyle
+    class IncrementCreated,IncrementUpdated,IncrementSkipped successStyle
+```
+
+*Figure 1: Actions Registry bootstrap process showing command file scanning, frontmatter parsing, duplicate checking, and Notion database registration workflow with create, update, and skip paths.*
+
+**Key Phases**:
+1. **Discovery**: Recursive scan of `.claude/commands/` directory
+2. **Parsing**: YAML frontmatter extraction with schema validation
+3. **Comparison**: Intelligent duplicate detection and change tracking
+4. **Registration**: Conditional create/update/skip operations
+5. **Reporting**: Statistical summary with actionable metrics
+
+### Overview
+
+The Actions Registry establishes self-documenting infrastructure for the Innovation Nexus slash command ecosystem. This META system automatically discovers, catalogs, and maintains a centralized Notion database of all available commands, enabling team members to find commands through semantic search and usage examples.
+
+**Business Impact**: Streamline command discovery workflows and eliminate undocumented commands through automated registration that drives measurable improvements in team productivity and knowledge transfer.
+
+### The `/action:register-all` Command
+
+**Workflow**:
+1. **Scan** - Recursively discovers all `.md` files in `.claude/commands/`
+2. **Parse** - Extracts frontmatter YAML metadata (name, description, parameters)
+3. **Check** - Queries Actions Registry for existing entries to prevent duplicates
+4. **Register** - Creates new entries for unregistered commands
+5. **Update** - Refreshes metadata for commands with changed definitions
+6. **Report** - Generates summary with coverage statistics by category
+
+**Usage Examples**:
+
+```bash
+# Register all commands (standard workflow)
+/action:register-all
+
+# Preview without creating entries (validation mode)
+/action:register-all --dry-run
+
+# Register only cost commands (category filter)
+/action:register-all --category=cost
+
+# Force update all entries even if unchanged
+/action:register-all --force-update
+```
+
+**Expected Output**:
+```
+✅ Actions Registry Bootstrap Complete
+
+Total Commands Discovered: 51
+Pre-existing Entries: 25
+New Registrations: 18
+Updated Entries: 8
+Skipped (unchanged): 0
+
+Coverage by Category:
+- Cost: 14/14 (100%)
+- Innovation: 4/4 (100%)
+- Agent Activity: 5/5 (100%)
+- Style Testing: 3/3 (100%)
+- Team: 2/2 (100%)
+- Knowledge: 2/2 (100%)
+- Autonomous: 2/2 (100%)
+
+Actions Registry: https://notion.so/64697e8c-0d51-4c10-b6ee-a6f643f0fc1c
+```
+
+### When to Use
+
+**Trigger `/action:register-all` when**:
+- ✅ New command files added to `.claude/commands/`
+- ✅ Command frontmatter metadata updated (description, parameters)
+- ✅ Onboarding new team members (validate command inventory)
+- ✅ Quarterly audits to ensure documentation accuracy
+- ✅ After repository updates that may include new commands
+- ✅ When commands aren't appearing in autocomplete suggestions
+
+### Troubleshooting Command Discovery
+
+**Problem**: Command not showing in autocomplete
+
+**Solution**:
+1. Verify file exists: `.claude/commands/category/name.md`
+2. Check frontmatter includes `description` field
+3. Run `/action:register-all` to register new command
+4. Restart Claude Code to reload command definitions
+
+**Problem**: Actions Registry shows "Coming soon" for implemented command
+
+**Solution**:
+1. Run `/action:register-all --force-update` to refresh all entries
+2. Verify command file has proper frontmatter metadata
+3. Check Actions Registry entry was updated (Last Updated timestamp)
+
+**Problem**: Command registered but parameters not documented
+
+**Solution**:
+1. Add `argument-hint` to command frontmatter
+2. Run `/action:register-all --force-update`
+3. Verify Parameters field populated in Actions Registry entry
+
 ## Namespacing Strategy
 
 ### Directory Structure
@@ -1198,7 +1356,56 @@ Invoke @workflow-router agent to analyze and assign work:
 
 ## Integration Examples
 
-### Example 1: Chained Command Workflow
+### Example 1: Cost Management Workflow
+
+User manages software expenses with comprehensive tracking:
+
+```bash
+# Add new software to cost tracker
+/cost:add-software "Webflow" 74 --licenses=1 --category=Development
+
+# Claude output:
+# Added software 'Webflow'
+# Cost: $74/month × 1 license = $74/month
+# Annual: $888
+# Category: Development
+# This increases total spend to $3,524/month (+$74)
+
+# Calculate budget impact of adding licenses
+/cost:cost-impact ADD "GitHub Copilot" 10 --licenses=5
+
+# Claude output:
+# Cost Impact Analysis: ADD GitHub Copilot
+#
+# Current Cost: $10/month × 1 license = $10/month
+# Proposed Change: Add 5 licenses
+# New Cost: $10/month × 6 licenses = $60/month
+# Monthly Impact: +$50/month
+# Annual Impact: +$600/year
+#
+# Total Monthly Spend: $3,450 → $3,500 (+$50)
+# Confirm addition? [yes/no]
+
+# Remove software and show savings
+/cost:cost-impact REMOVE "Old Tool" 150
+
+# Claude output:
+# Cost Impact Analysis: REMOVE Old Tool
+#
+# Current Cost: $150/month
+# Proposed Change: Cancel subscription
+# New Cost: $0/month
+# Monthly Savings: -$150/month
+# Annual Savings: -$1,800/year
+#
+# Total Monthly Spend: $3,500 → $3,350 (-$150)
+# Confirm removal? [yes/no]
+#
+# ⚠️ Warning: This tool is linked to 2 active builds.
+# Consider migrating dependencies before cancellation.
+```
+
+### Example 2: Chained Command Workflow
 
 User executes series of commands for complete innovation lifecycle:
 
@@ -1247,7 +1454,89 @@ User executes series of commands for complete innovation lifecycle:
 # Reusability: Highly Reusable - Template for future dashboards
 ```
 
-### Example 2: Cost Optimization Workflow
+### Example 3: Actions Registry Discovery & Maintenance
+
+User ensures command inventory is current and discoverable:
+
+```bash
+# 1. Register all commands to ensure catalog is up-to-date
+/action:register-all
+
+# Claude output:
+# ✅ Actions Registry Bootstrap Complete
+#
+# Total Commands Discovered: 51
+# Pre-existing Entries: 25
+# New Registrations: 18
+# Updated Entries: 8
+# Skipped (unchanged): 0
+#
+# Coverage by Category:
+# - Cost: 14/14 (100%)
+# - Innovation: 4/4 (100%)
+# - Agent Activity: 5/5 (100%)
+# - Style Testing: 3/3 (100%)
+# - Team: 2/2 (100%)
+# - Knowledge: 2/2 (100%)
+# - Autonomous: 2/2 (100%)
+# - Repository: 3/3 (100%)
+# - Documentation: 1/1 (100%)
+#
+# Actions Registry: https://notion.so/64697e8c-0d51-4c10-b6ee-a6f643f0fc1c
+
+# 2. Preview changes before committing (validation mode)
+/action:register-all --dry-run
+
+# Claude output:
+# 🔍 Actions Registry Dry Run (Preview Mode)
+#
+# Commands to Register: 18
+# - /cost:monthly-spend
+# - /cost:annual-projection
+# - /innovation:project-plan
+# - /autonomous:status
+# ...
+#
+# Commands to Update: 8
+# - /cost:analyze (description changed)
+# - /team:assign (parameters added)
+# ...
+#
+# No changes will be committed. Run without --dry-run to apply.
+
+# 3. Register only cost-related commands after adding new category
+/action:register-all --category=cost
+
+# Claude output:
+# ✅ Actions Registry Update - Cost Category
+#
+# Total Commands Discovered: 14
+# Pre-existing Entries: 12
+# New Registrations: 2
+# Updated Entries: 0
+# Skipped (unchanged): 12
+#
+# New Commands Registered:
+# - /cost:microsoft-alternatives
+# - /cost:license-optimization
+#
+# Coverage: Cost Category 14/14 (100%)
+
+# 4. Force refresh all entries after metadata restructure
+/action:register-all --force-update
+
+# Claude output:
+# ✅ Actions Registry Full Refresh
+#
+# Total Commands Discovered: 51
+# All entries force-updated: 51
+# Metadata refreshed for all commands
+#
+# This ensures parameter hints, descriptions, and related
+# documentation links are synchronized with current command files.
+```
+
+### Example 4: Cost Optimization Workflow
 
 User conducts quarterly cost review:
 
@@ -1284,7 +1573,7 @@ User conducts quarterly cost review:
 # This increases total spend to $3,895/month (+$445)
 ```
 
-### Example 3: Team Workload Balancing
+### Example 5: Team Workload Balancing
 
 User needs to assign new high-priority work:
 
@@ -1377,10 +1666,15 @@ Before committing new commands:
 | `/innovation:create-build` | Structure example/prototype | [name] [type] |
 | `/cost:analyze` | Comprehensive spend analysis | [scope] |
 | `/cost:add-software` | Add tool to tracker | [name] [cost] [licenses] |
+| `/cost:cost-impact` | Budget impact analysis | [ADD\|REMOVE] [tool] [cost] |
+| `/cost:monthly-spend` | Quick total monthly spend | - |
+| `/cost:annual-projection` | Yearly forecast calculation | - |
+| `/cost:microsoft-alternatives` | M365/Azure replacement options | [tool-name] |
 | `/knowledge:archive` | Complete lifecycle with learnings | [item] [database] |
 | `/knowledge:document` | Create Knowledge Vault entry | [topic] [type] |
 | `/team:assign` | Route work to specialist | [description] [database] |
 | `/team:workload` | View team distribution | - |
+| `/action:register-all` | Sync command inventory to Notion | [--dry-run] [--category] |
 | `/notion:search` | Find content across databases | [query] |
 
 ---

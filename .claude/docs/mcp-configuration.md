@@ -14,6 +14,8 @@
 | **GitHub** | Repository operations, CI/CD | PAT from Key Vault | ✓ Connected |
 | **Azure** | Cloud resource management, deployments | Azure CLI (`az login`) | ✓ Connected |
 | **Playwright** | Browser automation, web testing | Local executable | ✓ Connected |
+| **Morningstar** | Financial data, investment research, portfolio analytics | API Key from Key Vault | ⏸️ Provisioning |
+| **Bloomberg** | Real-time market data, news, financial analytics | Terminal credentials or BLPAPI | ⏸️ Provisioning |
 | **Azure APIM** | API gateway with MCP export for tool invocation | Subscription Key | ⏸️ Provisioning |
 
 **Verify Connection**: `claude mcp list` (all should show ✓ Connected)
@@ -331,6 +333,7 @@ az account show
 
 #### Search Azure Documentation
 ```typescript
+// Basic documentation search
 mcp__azure__documentation({
   intent: "search",
   parameters: {
@@ -338,6 +341,34 @@ mcp__azure__documentation({
     maxResults: 10
   }
 })
+
+// Returns: Up to 10 content chunks (500 tokens each)
+// from Microsoft Learn and official Azure docs
+
+// Advanced query patterns for specific topics
+const azureFunctionsDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Azure Functions Durable orchestration error handling retry policies",
+    maxResults: 5
+  }
+});
+
+const powerBIDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Power BI Embedded authentication service principal",
+    maxResults: 5
+  }
+});
+
+const securityDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Azure Key Vault Managed Identity RBAC best practices",
+    maxResults: 5
+  }
+});
 ```
 
 #### List Resource Groups
@@ -368,6 +399,118 @@ mcp__azure__get_bestpractices({
     action: "deployment"
   }
 })
+```
+
+### Microsoft Documentation - Advanced Patterns
+
+**Category-Specific Queries**:
+```typescript
+// Azure Functions - Best for @code-generator, @build-architect
+const functionsDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Azure Functions Python Durable orchestration patterns dependency injection",
+    maxResults: 5
+  }
+});
+
+// Power BI - Best for @integration-specialist
+const powerBIDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Power BI REST API embed report service principal authentication",
+    maxResults: 5
+  }
+});
+
+// Azure DevOps - Best for @deployment-orchestrator
+const devOpsDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Azure DevOps pipelines YAML multi-stage deployment approval gates",
+    maxResults: 5
+  }
+});
+
+// Security & Compliance - Best for @compliance-orchestrator
+const securityDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: {
+    query: "Azure security baseline zero trust Managed Identity RBAC",
+    maxResults: 5
+  }
+});
+```
+
+**Caching Documentation Results**:
+```typescript
+// ✅ Correct - Cache docs (content rarely changes)
+const docCache = new Map();
+
+async function getAzureDocs(topic) {
+  const cacheKey = `docs:${topic}`;
+
+  if (docCache.has(cacheKey)) {
+    return docCache.get(cacheKey);
+  }
+
+  const docs = await mcp__azure__documentation({
+    intent: "search",
+    parameters: { query: topic, maxResults: 5 }
+  });
+
+  docCache.set(cacheKey, docs);
+  return docs;
+}
+
+// ❌ Wrong - Fetching same docs repeatedly
+// Official Microsoft docs don't change frequently
+```
+
+**Integration with Code Generation**:
+```typescript
+// Example: Generate Azure Function with real-time best practices
+async function generateAzureFunction(spec) {
+  // 1. Get latest best practices from Microsoft
+  const bestPractices = await mcp__azure__documentation({
+    intent: "search",
+    parameters: {
+      query: `Azure Functions ${spec.runtime} ${spec.trigger} best practices patterns`,
+      maxResults: 3
+    }
+  });
+
+  // 2. Extract key patterns from docs
+  const patterns = extractPatterns(bestPractices);
+
+  // 3. Generate code following Microsoft guidance
+  const functionCode = await generateCode({
+    spec: spec,
+    patterns: patterns,
+    framework: "Azure Functions"
+  });
+
+  return functionCode;
+}
+```
+
+**Query Optimization Tips**:
+```typescript
+// ✅ Best practice - Specific, technical queries
+"Azure Functions Durable orchestration error handling retry policies"
+"Power BI Embedded row-level security dynamic rules"
+"Azure SQL Database serverless auto-pause delay configuration"
+
+// ❌ Avoid - Too broad, ambiguous queries
+"Azure best practices"
+"How to use Power BI"
+"Database setup"
+
+// ✅ Best practice - Include versions/tiers when relevant
+"Azure Functions Python 3.11 Durable Functions 2.x patterns"
+
+// ✅ Best practice - Specify authentication/security method
+"Azure Key Vault Managed Identity system-assigned RBAC"
 ```
 
 ### Performance Optimization
@@ -492,6 +635,230 @@ await navigate({ url: "https://example.com" });  // Reopens browser
 
 ---
 
+## Morningstar Financial Data API
+
+### Capabilities
+- **Equity Data**: Stock fundamentals, pricing, P/E ratios, market cap
+- **Fund Research**: Mutual fund ratings, expense ratios, performance metrics
+- **Portfolio Analytics**: Performance tracking, risk metrics, asset allocation
+- **ESG Ratings**: Environmental, Social, Governance scores and sustainability data
+- **Screening**: Custom security screening with multiple criteria
+
+### Authentication
+**Method**: API Key from Azure Key Vault
+
+**Setup**:
+```powershell
+# Retrieve API key
+.\scripts\Get-KeyVaultSecret.ps1 -SecretName "morningstar-api-key" -AsPlainText
+
+# Set environment variable
+$env:MORNINGSTAR_API_KEY = "<key-from-vault>"
+
+# Verify (included in Set-MCPEnvironment.ps1)
+.\scripts\Set-MCPEnvironment.ps1
+```
+
+**Key Vault Details**:
+- Secret: `morningstar-api-key`
+- Vault: `kv-brookside-secrets`
+- Rotation: Quarterly
+
+**Verification**:
+```powershell
+# Test API connection
+.\scripts\Test-FinancialAPIs.ps1 -Service Morningstar
+```
+
+### Key Operations
+
+#### Query Stock Fundamentals
+```typescript
+const stockData = await morningstarAPI.getEquityData({
+  ticker: "MSFT",
+  fields: ["price", "pe_ratio", "market_cap", "52_week_high", "beta"],
+  currency: "USD"
+});
+
+// Returns: price, P/E ratio, market cap, highs/lows, volatility
+```
+
+#### Fund Research
+```typescript
+const fundAnalysis = await morningstarAPI.getFundRating({
+  ticker: "VFIAX",
+  includeESG: true,
+  includePerformance: true,
+  timePeriod: "5Y"
+});
+
+// Returns: Morningstar rating, expense ratio, ESG score, returns
+```
+
+#### Portfolio Performance
+```typescript
+const portfolioMetrics = await morningstarAPI.getPortfolioPerformance({
+  holdings: [
+    { ticker: "MSFT", quantity: 1000 },
+    { ticker: "AAPL", quantity: 500 }
+  ],
+  benchmarkIndex: "SP500",
+  startDate: "2024-01-01",
+  endDate: "2025-10-27"
+});
+
+// Returns: total value, return %, alpha, Sharpe ratio, sector allocation
+```
+
+### Performance Optimization
+
+**Batch Queries**:
+```typescript
+// ✅ Correct - Single request for multiple tickers
+const data = await morningstarAPI.getBatchEquityData({
+  tickers: ["MSFT", "AAPL", "GOOGL"],
+  fields: ["price", "pe_ratio"]
+});
+
+// ❌ Wrong - Separate requests
+for (const ticker of tickers) {
+  await morningstarAPI.getEquityData({ ticker });  // Rate limit risk
+}
+```
+
+**Cache Low-Volatility Data**:
+```typescript
+// ✅ Correct - Cache fundamentals (update daily)
+const cached = cache.get(`fundamentals:${ticker}:${today}`);
+
+// ❌ Wrong - Fetch fundamentals repeatedly (wasteful)
+```
+
+**Rate Limits**:
+- Direct API: 10 requests/second, 100,000 requests/month
+- Cloud API: 5 requests/second, 10,000 requests/month
+- Implement exponential backoff for 429 errors
+
+---
+
+## Bloomberg Terminal/API
+
+### Capabilities
+- **Real-Time Market Data**: Live prices, volume, quotes for global securities
+- **Historical Data**: Time series pricing, fundamentals, corporate actions
+- **News & Research**: Bloomberg News, analyst reports, market commentary
+- **Industry Analytics**: Market size, growth rates, competitive landscape
+- **Excel Integration**: BDP, BDH, BDS functions for data retrieval
+
+### Authentication
+**Method**: Bloomberg Terminal credentials or BLPAPI authentication
+
+**Setup Option 1 - Bloomberg Terminal**:
+```powershell
+# Launch terminal
+Start-Process "C:\blp\API\Bloomberg.exe"
+
+# Authenticate via Bloomberg Anywhere
+# User: <bloomberg-username>@brookside-bi
+# Password: <from-key-vault>
+```
+
+**Setup Option 2 - BLPAPI** (programmatic):
+```powershell
+# Retrieve credentials
+.\scripts\Get-KeyVaultSecret.ps1 -SecretName "bloomberg-api-username" -AsPlainText
+.\scripts\Get-KeyVaultSecret.ps1 -SecretName "bloomberg-api-password" -AsPlainText
+
+# Set environment variables
+$env:BLOOMBERG_USERNAME = "<username-from-vault>"
+$env:BLOOMBERG_PASSWORD = "<password-from-vault>"
+
+# Install SDK (if using Python)
+pip install blpapi
+```
+
+**Key Vault Details**:
+- Secrets: `bloomberg-api-username`, `bloomberg-api-password`
+- Vault: `kv-brookside-secrets`
+- Rotation: Monthly
+
+**Verification**:
+```powershell
+# Test connection
+.\scripts\Test-FinancialAPIs.ps1 -Service Bloomberg
+```
+
+### Key Operations
+
+#### Real-Time Market Data
+```typescript
+const marketData = await bloombergAPI.getSecurityData({
+  securities: ["MSFT US Equity", "AAPL US Equity"],
+  fields: ["PX_LAST", "VOLUME", "PE_RATIO", "MARKET_CAP"]
+});
+
+// Returns: Current price, volume, P/E, market cap for each security
+```
+
+#### Historical Price Data
+```typescript
+const priceHistory = await bloombergAPI.getHistoricalData({
+  security: "MSFT US Equity",
+  fields: ["PX_LAST", "PX_OPEN", "PX_HIGH", "PX_LOW"],
+  startDate: "20241027",
+  endDate: "20251027",
+  periodicitySelection: "DAILY"
+});
+
+// Returns: Daily OHLC prices for 1 year
+```
+
+#### News Monitoring
+```typescript
+const newsResults = await bloombergAPI.getNews({
+  topic: "Cloud Computing",
+  companies: ["MSFT", "AMZN", "GOOGL"],
+  timeRange: "24h",
+  limit: 50
+});
+
+// Returns: Recent articles with headlines, sentiment, categories
+```
+
+#### Industry Analytics
+```typescript
+const industryData = await bloombergAPI.getIndustryAnalysis({
+  industry: "Cloud Services",
+  metrics: ["MARKET_SIZE", "GROWTH_RATE_5Y", "TOP_PLAYERS"],
+  region: "Global"
+});
+
+// Returns: Market size, growth rate, top companies, market share
+```
+
+### Performance Optimization
+
+**Request Multiple Fields**:
+```typescript
+// ✅ Correct - Single request with all fields
+const data = await bloomberg.getSecurityData({
+  securities: ["MSFT"],
+  fields: ["PX_LAST", "VOLUME", "PE_RATIO", "MARKET_CAP"]
+});
+
+// ❌ Wrong - Separate requests per field
+const price = await bloomberg.getSecurityData({ securities: ["MSFT"], fields: ["PX_LAST"] });
+const volume = await bloomberg.getSecurityData({ securities: ["MSFT"], fields: ["VOLUME"] });
+```
+
+**Rate Limits**:
+- Terminal: ~100 requests/minute (Excel API)
+- BLPAPI Reference Data: 50 requests/second
+- BLPAPI Market Data: Real-time streaming (no limit)
+- Historical Data: 1000 data points per request recommended
+
+---
+
 ## Environment Setup (Daily Workflow)
 
 ### Complete Setup Sequence
@@ -506,6 +873,7 @@ az account show  # Verify: cfacbbe8-a2a3-445f-a188-68b3b35f0c84
 
 # 3. Verify all MCP servers
 .\scripts\Test-AzureMCP.ps1
+.\scripts\Test-FinancialAPIs.ps1  # Test Morningstar + Bloomberg
 claude mcp list
 
 # 4. Launch Claude Code
@@ -513,6 +881,8 @@ claude
 ```
 
 **Frequency**: Daily (or after system restart)
+
+**Financial APIs Note**: Morningstar and Bloomberg credentials are retrieved from Azure Key Vault during `Set-MCPEnvironment.ps1` execution. No additional authentication required beyond Azure login.
 
 ---
 

@@ -72,7 +72,59 @@ Provide the SharePoint/OneNote links in the Research Hub entry so all documentat
 
 This ensures accurate cost tracking and helps identify optimization opportunities. Always show the user the total estimated cost: "This research will use [tools], adding $X/month to costs during investigation."
 
-### 6. Research Execution Guidance
+### 6. Financial Data & Market Intelligence
+
+**Capability**: Leverage Morningstar and Bloomberg APIs for competitive analysis, market research, and vendor evaluation.
+
+**Authentication**: Azure Key Vault (`morningstar-api-key`, `bloomberg-api-username`, `bloomberg-api-password`)
+
+**Best for**: Market research, competitive intelligence, vendor financial health assessment, industry trend analysis
+
+#### Morningstar Financial Data
+```typescript
+// Industry trend analysis
+const sectorData = await morningstarAPI.getSectorAnalysis({
+  sector: "Technology",
+  subsector: "Cloud Computing",
+  includeForecasts: true,
+  timePeriod: "5Y"
+});
+
+// Competitive vendor analysis
+const companyProfile = await morningstarAPI.getEquityData({
+  ticker: "MSFT",
+  fields: ["market_cap", "revenue_growth", "profit_margin", "r_and_d_spending"],
+  includeESG: true
+});
+```
+
+#### Bloomberg Terminal/API
+```typescript
+// Real-time competitive intelligence
+const competitorAnalysis = await bloombergAPI.getSecurityData({
+  securities: ["MSFT US Equity", "GOOGL US Equity", "AMZN US Equity"],
+  fields: ["PX_LAST", "MARKET_CAP", "PE_RATIO", "REVENUE_GROWTH"]
+});
+
+// News monitoring for market research
+const industryNews = await bloombergAPI.getNews({
+  topic: "Cloud Infrastructure",
+  companies: ["MSFT", "GOOGL", "AMZN"],
+  timeRange: "7d",
+  limit: 50
+});
+```
+
+#### Research Use Cases
+1. **Market Sizing**: Validate market opportunity with real-time industry data
+2. **Competitive Landscape**: Assess competitor positioning and financial strength
+3. **Vendor Due Diligence**: Evaluate software vendor stability before adoption
+4. **Industry Trends**: Identify emerging technologies and market shifts
+5. **Investment Justification**: Support build decisions with market evidence
+
+**→ Complete Guide**: [Financial APIs Documentation](../docs/financial-apis.md)
+
+### 7. Research Execution Guidance
 
 Provide clear guidance to researchers:
 
@@ -87,7 +139,7 @@ Provide clear guidance to researchers:
 - Flag blockers or scope changes immediately
 - Maintain transparency about timeline and budget
 
-### 7. Research Completion Protocol
+### 8. Research Completion Protocol
 
 **When research is complete, you must:**
 
@@ -115,7 +167,7 @@ Provide clear guidance to researchers:
 - Add summary to idea's description or comments
 - Change Status if appropriate (e.g., to "Archived" if abandoned)
 
-### 8. Knowledge Capture
+### 9. Knowledge Capture
 
 For valuable research findings:
 - Recommend creating a Knowledge Vault entry

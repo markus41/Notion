@@ -1,0 +1,548 @@
+[
+  {
+    "properties": {
+      "Name": "/agent:assign-work",
+      "Category": "Agent",
+      "Description": "**Category**: Agent Management",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/agent:assign-work",
+      "Related Databases": "[\"Agents\", \"Ideas\", \"Research\", \"Builds\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/agent:performance-report",
+      "Category": "Agent",
+      "Description": "Establish agent effectiveness measurement to drive performance optimization and inform delegation decisions through historical metrics analysis",
+      "Parameters": "[agent-name] [--timeframe=7d|30d|all]",
+      "Status": "Active",
+      "Example Usage": "/agent:performance-report [agent-name] [--timeframe=7d|30d|all]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/agent:register",
+      "Category": "Agent",
+      "Description": "Establish new agent registration to expand automation capabilities and maintain comprehensive agent portfolio documentation",
+      "Parameters": "[agent-name] [specialization] [--description=text] [--avg-duration=minutes]",
+      "Status": "Active",
+      "Example Usage": "/agent:register [agent-name] [specialization] [--description=text] [--avg-duration=minutes]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/blog:bulk-sync",
+      "Category": "Blog",
+      "Description": "Batch publish unpublished blog posts from Notion to Webflow",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/blog:bulk-sync",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/blog:sync-post",
+      "Category": "Blog",
+      "Description": "Publish single blog post from Notion to Webflow",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/blog:sync-post",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build:create",
+      "Category": "Build",
+      "Description": "Establish build entry with complete innovation lineage tracking from idea through research to implementation",
+      "Parameters": "[name] [--origin-idea=name] [--related-research=name] [--github-repo=url]",
+      "Status": "Active",
+      "Example Usage": "/build:create [name] [--origin-idea=name] [--related-research=name] [--github-repo=url]",
+      "Related Databases": "[\"Builds\", \"Ideas\", \"Research\", \"Software\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build:update-status",
+      "Category": "Build",
+      "Description": "Establish build lifecycle tracking with status transitions to maintain visibility across development phases and drive measurable progress toward deployment",
+      "Parameters": "[build-name] <status> [--notes=\"context\"] [--github-repo=url]",
+      "Status": "Active",
+      "Example Usage": "/build:update-status [build-name] <status> [--notes=\"context\"] [--github-repo=url]",
+      "Related Databases": "[\"Builds\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/annual-projection",
+      "Category": "Cost",
+      "Description": "Project annual software costs based on current spend and identify trending patterns to support strategic budget planning and long-term financial sustainability.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/annual-projection",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build-costs",
+      "Category": "Cost",
+      "Description": "Calculate comprehensive software costs for specific Example Builds by aggregating all linked tools and services to provide transparent project-level financial visibility and support sustainable development decisions.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/build-costs",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/consolidation-opportunities",
+      "Category": "Cost",
+      "Description": "Detect multiple tools serving similar purposes and recommend consolidation strategies to reduce complexity, lower costs, and streamline workflows through Microsoft ecosystem integration.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/consolidation-opportunities",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/cost:consolidation-plan",
+      "Category": "Cost",
+      "Description": "Establish strategic software consolidation roadmap with Microsoft ecosystem migration paths to drive measurable cost reduction and operational simplification",
+      "Parameters": "[--target-savings=amount] [--timeline=months]",
+      "Status": "Active",
+      "Example Usage": "/cost:consolidation-plan [--target-savings=amount] [--timeline=months]",
+      "Related Databases": "[\"Software\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/cost-by-category",
+      "Category": "Cost",
+      "Description": "Analyze software spending by category to identify concentration patterns, optimization opportunities, and strategic investment areas that drive measurable outcomes.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/cost-by-category",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/cost-impact",
+      "Category": "Cost",
+      "Description": "Instantly calculate the budget impact of proposed software additions, cancellations, or license changes to support rapid decision-making and maintain cost transparency.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/cost-impact",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/expiring-contracts",
+      "Category": "Cost",
+      "Description": "Monitor upcoming contract expirations to enable proactive renewal decisions, prevent service disruptions, and identify renegotiation opportunities that drive cost optimization.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/expiring-contracts",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/cost:identify-waste",
+      "Category": "Cost",
+      "Description": "Establish comprehensive software waste identification across portfolio to surface underutilized subscriptions and drive immediate cost reduction opportunities",
+      "Parameters": "[--threshold=percentage] [--min-cost=amount]",
+      "Status": "Active",
+      "Example Usage": "/cost:identify-waste [--threshold=percentage] [--min-cost=amount]",
+      "Related Databases": "[\"Software\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/microsoft-alternatives",
+      "Category": "Cost",
+      "Description": "Research Microsoft ecosystem alternatives for third-party tools to drive cost optimization, improve integration, and align with Microsoft-first strategy through comprehensive service comparison and migration feasibility assessment.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/microsoft-alternatives",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/monthly-spend",
+      "Category": "Cost",
+      "Description": "Analyze total monthly software spending across all active subscriptions to establish transparent cost visibility and drive informed budget decisions.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/monthly-spend",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/research-costs",
+      "Category": "Cost",
+      "Description": "Calculate comprehensive software costs for active research threads by aggregating all linked tools and services to provide transparent research budget visibility and support informed feasibility decisions.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/research-costs",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/cost:track-usage",
+      "Category": "Cost",
+      "Description": "Establish software license utilization monitoring to identify underutilized subscriptions and drive cost optimization through data-driven rightsizing decisions",
+      "Parameters": "[software-name] [--actual-users=N] [--licensed-seats=N]",
+      "Status": "Active",
+      "Example Usage": "/cost:track-usage [software-name] [--actual-users=N] [--licensed-seats=N]",
+      "Related Databases": "[\"Software\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/unused-software",
+      "Category": "Cost",
+      "Description": "Detect software subscriptions with no active project links to identify potential cost savings while verifying critical infrastructure dependencies before recommending cancellations.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/unused-software",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/what-if-analysis",
+      "Category": "Cost",
+      "Description": "Model different software spending scenarios to forecast budget impact, evaluate strategic decisions, and support data-driven planning through comprehensive what-if cost analysis.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/what-if-analysis",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:refresh-status",
+      "Category": "Datasource",
+      "Description": "Establish data source status refresh to maintain accurate health indicators across integration portfolio",
+      "Parameters": "[name] <status>",
+      "Status": "Active",
+      "Example Usage": "/datasource:refresh-status [name] <status>",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:register",
+      "Category": "Datasource",
+      "Description": "Establish data source registration for external APIs and databases to maintain integration inventory and connection health",
+      "Parameters": "[name] [type] [--connection-string=value] [--api-endpoint=url]",
+      "Status": "Active",
+      "Example Usage": "/datasource:register [name] [type] [--connection-string=value] [--api-endpoint=url]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/datasource:validate",
+      "Category": "Datasource",
+      "Description": "Establish data source connection validation to verify integration health and drive proactive issue detection",
+      "Parameters": "[name]",
+      "Status": "Active",
+      "Example Usage": "/datasource:validate [name]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/idea:assess",
+      "Category": "Idea",
+      "Description": "Establish comprehensive viability assessment for existing ideas to drive informed go/no-go decisions through structured evaluation framework",
+      "Parameters": "[idea-name] [--force] [--context=\"additional-info\"]",
+      "Status": "Active",
+      "Example Usage": "/idea:assess [idea-name] [--force] [--context=\"additional-info\"]",
+      "Related Databases": "[\"Ideas\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/idea:create",
+      "Category": "Idea",
+      "Description": "Establish rapid innovation opportunity capture with streamlined entry creation and duplicate prevention",
+      "Parameters": "[description] [--champion=person] [--estimated-cost=amount]",
+      "Status": "Active",
+      "Example Usage": "/idea:create [description] [--champion=person] [--estimated-cost=amount]",
+      "Related Databases": "[\"Ideas\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/orchestrate-complex",
+      "Category": "Innovation",
+      "Description": "**Purpose**: Orchestrate complex multi-agent workflows with parallel execution, dependency management, and automated coordination to drive measurable outcomes through structured approaches.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/orchestrate-complex",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/project-plan",
+      "Category": "Innovation",
+      "Description": "Create comprehensive project plans for Innovation Nexus initiatives from Idea through Research, Build, and Knowledge Vault",
+      "Parameters": "[project-name] [--phase=stage] [--scope=range]",
+      "Status": "Active",
+      "Example Usage": "/project-plan [project-name] [--phase=stage] [--scope=range]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/integration:health-check",
+      "Category": "Integration",
+      "Description": "Establish comprehensive integration health monitoring to maintain operational reliability and drive proactive issue resolution across your connectivity ecosystem",
+      "Parameters": "[--format=table|json] [--filter=status]",
+      "Status": "Active",
+      "Example Usage": "/integration:health-check [--format=table|json] [--filter=status]",
+      "Related Databases": "[\"Integration\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/integration:register",
+      "Category": "Integration",
+      "Description": "Establish integration registration to maintain comprehensive system connectivity inventory and support operational visibility",
+      "Parameters": "[integration-name] [type]",
+      "Status": "Active",
+      "Example Usage": "/integration:register [integration-name] [type]",
+      "Related Databases": "[\"Integration\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/knowledge:retrieve-pattern",
+      "Category": "Knowledge",
+      "Description": "Establish detailed pattern retrieval from Knowledge Vault to accelerate implementation through proven, reusable solution templates",
+      "Parameters": "[pattern-name]",
+      "Status": "Active",
+      "Example Usage": "/knowledge:retrieve-pattern [pattern-name]",
+      "Related Databases": "[\"Knowledge\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/knowledge:search",
+      "Category": "Knowledge",
+      "Description": "Establish comprehensive knowledge retrieval across archived learnings to surface reusable patterns and drive informed decision-making through historical insights",
+      "Parameters": "[query] [--content-type=type] [--viability=level] [--tags=list]",
+      "Status": "Active",
+      "Example Usage": "/knowledge:search [query] [--content-type=type] [--viability=level] [--tags=list]",
+      "Related Databases": "[\"Knowledge\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/okr:create",
+      "Category": "Okr",
+      "Description": "Establish quarterly objectives and key results to drive measurable business outcomes and align innovation initiatives with strategic goals",
+      "Parameters": "[objective-title] [--quarter=Q1|Q2|Q3|Q4] [--year=YYYY]",
+      "Status": "Active",
+      "Example Usage": "/okr:create [objective-title] [--quarter=Q1|Q2|Q3|Q4] [--year=YYYY]",
+      "Related Databases": "[\"OKRs\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/okr:progress-update",
+      "Category": "Okr",
+      "Description": "Establish systematic OKR progress tracking to drive accountability and maintain visibility into quarterly goal achievement",
+      "Parameters": "[okr-title] [--progress=percentage]",
+      "Status": "Active",
+      "Example Usage": "/okr:progress-update [okr-title] [--progress=percentage]",
+      "Related Databases": "[\"OKRs\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/project:create",
+      "Category": "Project",
+      "Description": "Establish project tracking entry with GitHub integration and team assignments to drive coordinated multi-build initiatives",
+      "Parameters": "[project-name] [--github-org=name] [--lead=person]",
+      "Status": "Active",
+      "Example Usage": "/project:create [project-name] [--github-org=name] [--lead=person]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/project:sync-github",
+      "Category": "Project",
+      "Description": "Establish GitHub repository synchronization for projects to maintain accurate repository counts and integration health",
+      "Parameters": "[project-name]",
+      "Status": "Active",
+      "Example Usage": "/project:sync-github [project-name]",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/project:update-status",
+      "Category": "Project",
+      "Description": "Establish project status tracking to maintain portfolio visibility and drive stakeholder communication",
+      "Parameters": "[project-name] <status>",
+      "Status": "Active",
+      "Example Usage": "/project:update-status [project-name] <status>",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/research:complete",
+      "Category": "Research",
+      "Description": "Establish research finalization workflow with comprehensive viability assessment to drive informed build/archive decisions based on investigation outcomes",
+      "Parameters": "[research-topic] [--recommendation=value] [--viability-score=N]",
+      "Status": "Active",
+      "Example Usage": "/research:complete [research-topic] [--recommendation=value] [--viability-score=N]",
+      "Related Databases": "[\"Research\", \"Ideas\", \"Builds\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/research:update-findings",
+      "Category": "Research",
+      "Description": "Establish incremental research documentation to capture intermediate findings and maintain momentum during active investigations",
+      "Parameters": "[research-topic] [--finding=\"text\"] [--append] [--progress=percentage]",
+      "Status": "Active",
+      "Example Usage": "/research:update-findings [research-topic] [--finding=\"text\"] [--append] [--progress=percentage]",
+      "Related Databases": "[\"Research\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/style:assign-default",
+      "Category": "Style",
+      "Description": "Establish default output style for builds to drive consistent documentation patterns and brand alignment across development workflows",
+      "Parameters": "[build-name] [style-name]",
+      "Status": "Active",
+      "Example Usage": "/style:assign-default [build-name] [style-name]",
+      "Related Databases": "[\"Builds\", \"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/style:create",
+      "Category": "Style",
+      "Description": "Establish new output style registration to expand documentation patterns and support diverse audience communication needs",
+      "Parameters": "[style-name] [audience] [--description=text]",
+      "Status": "Active",
+      "Example Usage": "/style:create [style-name] [audience] [--description=text]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/style:effectiveness-report",
+      "Category": "Style",
+      "Description": "Establish output style performance analytics to drive documentation quality optimization and audience engagement measurement",
+      "Parameters": "[--style=name] [--agent=name] [--timeframe=7d|30d|all]",
+      "Status": "Active",
+      "Example Usage": "/style:effectiveness-report [--style=name] [--agent=name] [--timeframe=7d|30d|all]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  }
+]

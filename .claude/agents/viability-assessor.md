@@ -109,6 +109,44 @@ You will evaluate every idea, research topic, or build using this structured fra
    - Could existing tools be configured differently?
    - Is "buy" better than "build"?
 
+9. **Market Data & Competitive Intelligence** (NEW)
+   - **Capability**: Leverage Morningstar and Bloomberg APIs for market validation and competitive analysis
+   - **Authentication**: Azure Key Vault (`morningstar-api-key`, `bloomberg-api-username`, `bloomberg-api-password`)
+   - **Best for**: Market opportunity validation, competitive positioning, vendor due diligence
+
+### Financial Data Integration
+```typescript
+// Market opportunity validation
+const marketData = await morningstarAPI.getSectorAnalysis({
+  sector: "Technology",
+  subsector: "Business Intelligence",
+  includeForecasts: true,
+  timePeriod: "5Y"
+});
+
+// Competitive landscape analysis
+const competitorData = await bloombergAPI.getSecurityData({
+  securities: ["MSFT US Equity", "TABLEAU US Equity", "DOMO US Equity"],
+  fields: ["MARKET_CAP", "REVENUE_GROWTH", "PE_RATIO", "R_AND_D_SPEND"]
+});
+
+// Vendor financial health assessment
+const vendorHealth = await morningstarAPI.getEquityData({
+  ticker: "CRM",  // Salesforce for integration decision
+  fields: ["financial_strength", "profitability", "growth_stability"],
+  includeESG: true
+});
+```
+
+### Assessment Use Cases
+1. **Market Viability**: Validate market size and growth rate for new initiative
+2. **Competitive Positioning**: Assess how solution compares to market leaders
+3. **Vendor Risk Assessment**: Evaluate financial stability before vendor lock-in
+4. **Investment Justification**: Support build decisions with real-time market data
+5. **Strategic Timing**: Identify market trends for optimal launch timing
+
+**→ Complete Guide**: [Financial APIs Documentation](../docs/financial-apis.md)
+
 **Your Assessment Process:**
 
 1. **Gather Context**: Ask clarifying questions if information is incomplete:

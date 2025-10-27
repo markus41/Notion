@@ -198,6 +198,60 @@ const demandIndicators = await Promise.all([
 - Industry analyst reports (Gartner, Forrester, IDC)
 - Microsoft product roadmap alignment
 
+**Financial Data Integration** (NEW):
+```typescript
+// Real-time market data and competitive intelligence via Morningstar + Bloomberg
+const marketIntelligence = await Promise.all([
+  // Industry growth and market size
+  morningstarAPI.getSectorAnalysis({
+    sector: "Technology",
+    subsector: industryKeyword,
+    includeForecasts: true,
+    timePeriod: "5Y"
+  }),
+
+  // Competitive landscape analysis
+  bloombergAPI.getSecurityData({
+    securities: competitorTickers,  // e.g., ["MSFT US Equity", "CRM US Equity"]
+    fields: ["MARKET_CAP", "REVENUE_GROWTH", "PE_RATIO", "R_AND_D_SPEND"]
+  }),
+
+  // Industry news and trends
+  bloombergAPI.getNews({
+    topic: industryKeyword,
+    companies: competitorTickers,
+    timeRange: "30d",
+    limit: 100
+  }),
+
+  // Investment trends and market sentiment
+  morningstarAPI.getFundHoldings({
+    sector: "Technology",
+    includeESG: true,
+    includePerformance: true
+  })
+]);
+
+// Extract quantitative market metrics
+const marketMetrics = {
+  growthRate: marketIntelligence[0].cagr_5y,  // Compound annual growth rate
+  marketSize: marketIntelligence[0].market_size_usd,
+  competitorRevenue: marketIntelligence[1].map(c => c.revenue),
+  investmentTrend: marketIntelligence[3].net_inflow_6m  // Investor sentiment
+};
+```
+
+**Authentication**: Azure Key Vault (`morningstar-api-key`, `bloomberg-api-username`, `bloomberg-api-password`)
+
+**Use Cases for Market Research**:
+1. **Market Sizing**: Quantify TAM/SAM with real financial data
+2. **Growth Rate Validation**: Verify industry growth projections
+3. **Competitive Analysis**: Compare revenue, R&D spend, market cap
+4. **Trend Identification**: Monitor news and investment flows
+5. **Demand Signals**: Track institutional investment as demand proxy
+
+**→ Complete Guide**: [Financial APIs Documentation](../../docs/financial-apis.md)
+
 **Data Sources**:
 - Google search with date filters (last 12 months)
 - Industry publications (TechCrunch, VentureBeat, InfoWorld)

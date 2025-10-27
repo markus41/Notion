@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "created": "2025-10-26T18:08:00Z",
+    "purpose": "Comprehensive dependency linking manifest with all software IDs from Software Tracker",
+    "totalDependenciesFound": 47,
+    "totalDependenciesInMapping": 258,
+    "coveragePercentage": "18.2%",
+    "note": "Many Python libraries (pytest, pydantic, httpx, etc.) do not exist as individual Software Tracker entries. Python is tracked as the parent technology."
+  },
+  "builds": {
+    "Repository Analyzer": {
+      "buildPageId": "29886779-099a-8175-8e1c-f09c7ad4788b",
+      "currentLinkedCount": 17,
+      "expectedDependencies": 52,
+      "foundInTracker": {
+        "Core Python Dependencies": {
+          "poetry": "29586779-099a-81aa-b696-e1487cb6c70b",
+          "python": "29586779-099a-81ac-9ff0-ced75e246868"
+        },
+        "Azure Services": {
+          "Azure Key Vault": "29586779-099a-8151-aa47-e7a707c12230",
+          "Azure Functions": "29586779-099a-8174-8ad8-e29db120da67",
+          "Azure App Service": "29586779-099a-819f-b3ba-d51a575246ae",
+          "Azure Cosmos DB": "29586779-099a-81c2-b981-eb92a51a5898",
+          "Azure Storage Account": "29586779-099a-81fc-9ebe-e0a9783c05c0",
+          "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
+          "Azure Application Insights": "29586779-099a-8191-809f-c47c13ca8387",
+          "Azure DevOps": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+          "Azure Container Registry": "29586779-099a-813c-bb51-e55680e330db",
+          "Azure Kubernetes Service": "29586779-099a-8182-bceb-cc496164dd0b"
+        },
+        "Development Tools": {
+          "GitHub": "29586779-099a-818b-a39c-f2a010682014",
+          "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
+          "Docker": "29586779-099a-819f-935c-fe8a0fc0290c",
+          "Node.js": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+          "npm": "29586779-099a-817b-8738-db3d9203687c",
+          "Notion API": "29386779-099a-811e-a792-c672b702fe57"
+        },
+        "notFoundInTracker": [
+          "pydantic", "httpx", "rich", "typer", "azure-identity", "azure-keyvault-secrets",
+          "pytest", "pytest-cov", "pytest-asyncio", "black", "ruff", "mypy", "pre-commit",
+          "GitPython", "pygithub", "requests", "pandas", "numpy", "matplotlib", "pyyaml",
+          "toml", "Azure CLI", "Git", "Bicep", "PowerShell", "GitHub Actions", "Mermaid",
+          "Markdown", "JSON", "YAML", "REST API", "OAuth 2.0", "Azure Resource Manager"
+        ]
+      },
+      "additionalDependenciesToLink": [
+        "29586779-099a-818b-a39c-f2a010682014",
+        "29586779-099a-81c2-b981-eb92a51a5898",
+        "29586779-099a-81fc-9ebe-e0a9783c05c0",
+        "29586779-099a-8182-bceb-cc496164dd0b",
+        "29586779-099a-813c-bb51-e55680e330db",
+        "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+        "29386779-099a-811e-a792-c672b702fe57",
+        "29586779-099a-819f-b3ba-d51a575246ae",
+        "29586779-099a-8191-809f-c47c13ca8387",
+        "29586779-099a-81aa-b696-e1487cb6c70b",
+        "29586779-099a-817b-8738-db3d9203687c"
+      ]
+    },
+    "Cost Optimization Dashboard": {
+      "buildPageId": "29886779-099a-81b2-928f-cb4c1d9e17c6",
+      "currentLinkedCount": 13,
+      "expectedDependencies": 48,
+      "foundInTracker": {
+        "Core Technologies": {
+          "Power BI Pro": "29586779-099a-81fc-8a37-c4906aa58f9d",
+          "Python": "29586779-099a-81ac-9ff0-ced75e246868",
+          "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
+          "GitHub": "29586779-099a-818b-a39c-f2a010682014"
+        },
+        "Azure Services": {
+          "Azure Synapse Analytics": "Found in searches but need ID",
+          "Azure Data Factory": "29586779-099a-812e-9d31-ff70eec4cf68",
+          "Azure Blob Storage": "Part of Azure Storage - 29586779-099a-81fc-9ebe-e0a9783c05c0",
+          "Azure Key Vault": "29586779-099a-8151-aa47-e7a707c12230",
+          "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
+          "Azure Active Directory": "29586779-099a-81e2-8421-c99c9aed62f9"
+        },
+        "Data Sources & Integrations": {
+          "Notion API": "29386779-099a-811e-a792-c672b702fe57",
+          "Microsoft Teams": "Found in search - need to extract ID",
+          "SharePoint Online": "29586779-099a-8127-baf3-fddf13a40463",
+          "OneDrive for Business": "29586779-099a-81bc-9be0-c7156ab223a3",
+          "Power Automate": "29586779-099a-81eb-a64e-f633e2f3c505",
+          "Power Apps": "29586779-099a-8149-838a-ddf2eafb586d"
+        }
+      }
+    },
+    "Azure OpenAI Integration": {
+      "buildPageId": "29886779-099a-8120-8ac4-d19aa00456b6",
+      "currentLinkedCount": 13,
+      "expectedDependencies": 58,
+      "foundInTracker": {
+        "Azure OpenAI & AI Services": {
+          "Azure OpenAI Service": "29586779-099a-81cd-985a-f8ee96bbee63",
+          "Azure Cognitive Services": "29586779-099a-81ed-8f45-feb9e0d5550b",
+          "Azure Machine Learning": "Found in searches"
+        },
+        "Development Stack": {
+          "TypeScript": "29586779-099a-814e-8701-d8d74bcc1c7d",
+          "Node.js": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+          "Jest": "29586779-099a-8161-ada7-db81fb39e37c",
+          "Vitest": "29586779-099a-8116-a08b-fcbe7d5589cb",
+          "ESLint": "29586779-099a-81eb-99f3-e0db463b2676",
+          "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
+          "GitHub Copilot": "29586779-099a-8172-98b0-d46a85c6ce41",
+          "npm": "29586779-099a-817b-8738-db3d9203687c"
+        },
+        "Azure Infrastructure": {
+          "Azure Key Vault": "29586779-099a-8151-aa47-e7a707c12230",
+          "Azure App Service": "29586779-099a-819f-b3ba-d51a575246ae",
+          "Azure Functions": "29586779-099a-8174-8ad8-e29db120da67",
+          "Azure API Management": "29586779-099a-81ee-80c0-dbce832bc6da",
+          "Azure Front Door": "29586779-099a-8102-81d4-cfa432460285",
+          "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
+          "Azure Application Insights": "29586779-099a-8191-809f-c47c13ca8387",
+          "Azure Storage Account": "29586779-099a-81fc-9ebe-e0a9783c05c0",
+          "Azure Cosmos DB": "29586779-099a-81c2-b981-eb92a51a5898",
+          "Azure Redis Cache": "29586779-099a-8145-b723-e7070bf2da5f",
+          "Azure Service Bus": "29586779-099a-8186-aea6-f94129d157c5",
+          "Azure Event Grid": "29886779-099a-8147-965b-db722e143d94"
+        },
+        "Security & Compliance": {
+          "Azure Active Directory": "29586779-099a-81e2-8421-c99c9aed62f9",
+          "Microsoft Defender for Cloud": "29586779-099a-81efa273f93048682d7f"
+        }
+      }
+    },
+    "Documentation Automation": {
+      "buildPageId": "29886779-099a-813c-833f-ccfb4a86e5c7",
+      "currentLinkedCount": 11,
+      "expectedDependencies": 45,
+      "foundInTracker": {
+        "Documentation Tools": {
+          "Notion": "29586779-099a-81e4-ae51-c182a25acf05"
+        },
+        "Development Tools": {
+          "Visual Studio Code": "29586779-099a-8151-a633-c67863b5d5ae",
+          "GitHub": "29586779-099a-818b-a39c-f2a010682014",
+          "Azure DevOps": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+          "Docker": "29586779-099a-819f-935c-fe8a0fc0290c",
+          "Node.js": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+          "Python": "29586779-099a-81ac-9ff0-ced75e246868",
+          "npm": "29586779-099a-817b-8738-db3d9203687c"
+        },
+        "AI & Automation": {
+          "Azure OpenAI Service": "29586779-099a-81cd-985a-f8ee96bbee63",
+          "Power Automate": "29586779-099a-81eb-a64e-f633e2f3c505",
+          "Azure Logic Apps": "29586779-099a-8171-82ee-d90818c698c1",
+          "Azure Functions": "29586779-099a-8174-8ad8-e29db120da67"
+        }
+      }
+    },
+    "ML Deployment Pipeline": {
+      "buildPageId": "29886779-099a-81a9-96b5-f04a02e92d9b",
+      "currentLinkedCount": 8,
+      "expectedDependencies": 55,
+      "foundInTracker": {
+        "Azure ML Stack": {
+          "Azure Machine Learning": "Need to search specifically",
+          "Azure Databricks": "Need to search",
+          "Azure Synapse Analytics": "Need to search",
+          "Azure Data Factory": "29586779-099a-812e-9d31-ff70eec4cf68",
+          "Azure Blob Storage": "29586779-099a-81fc-9ebe-e0a9783c05c0",
+          "Azure Container Registry": "29586779-099a-813c-bb51-e55680e330db",
+          "Azure Kubernetes Service": "29586779-099a-8182-bceb-cc496164dd0b",
+          "Azure App Service": "29586779-099a-819f-b3ba-d51a575246ae"
+        },
+        "ML Frameworks & Libraries": {
+          "Python": "29586779-099a-81ac-9ff0-ced75e246868"
+        },
+        "MLOps Tools": {
+          "GitHub": "29586779-099a-818b-a39c-f2a010682014",
+          "Azure DevOps": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+          "Docker": "29586779-099a-819f-935c-fe8a0fc0290c",
+          "Azure Monitor": "29586779-099a-819a-98ee-e3c19c6dcb94",
+          "Azure Application Insights": "29586779-099a-8191-809f-c47c13ca8387"
+        }
+      }
+    }
+  },
+  "commonDependencies": {
+    "note": "These dependencies appear across multiple builds and should be linked to all relevant builds",
+    "software": {
+      "Python": {
+        "id": "29586779-099a-81ac-9ff0-ced75e246868",
+        "usedInBuilds": ["Repository Analyzer", "Cost Optimization Dashboard", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      "Visual Studio Code": {
+        "id": "29586779-099a-8151-a633-c67863b5d5ae",
+        "usedInBuilds": ["Repository Analyzer", "Cost Optimization Dashboard", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      "GitHub": {
+        "id": "29586779-099a-818b-a39c-f2a010682014",
+        "usedInBuilds": ["Repository Analyzer", "Cost Optimization Dashboard", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      "Azure Key Vault": {
+        "id": "29586779-099a-8151-aa47-e7a707c12230",
+        "usedInBuilds": ["Repository Analyzer", "Cost Optimization Dashboard", "Azure OpenAI Integration"]
+      },
+      "Azure Monitor": {
+        "id": "29586779-099a-819a-98ee-e3c19c6dcb94",
+        "usedInBuilds": ["Repository Analyzer", "Cost Optimization Dashboard", "Azure OpenAI Integration", "ML Deployment Pipeline"]
+      },
+      "Azure Functions": {
+        "id": "29586779-099a-8174-8ad8-e29db120da67",
+        "usedInBuilds": ["Repository Analyzer", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      "Node.js": {
+        "id": "29586779-099a-816c-a4c2-d9aff32cd9b1",
+        "usedInBuilds": ["Repository Analyzer", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      "npm": {
+        "id": "29586779-099a-817b-8738-db3d9203687c",
+        "usedInBuilds": ["Repository Analyzer", "Azure OpenAI Integration", "Documentation Automation"]
+      },
+      "Docker": {
+        "id": "29586779-099a-819f-935c-fe8a0fc0290c",
+        "usedInBuilds": ["Repository Analyzer", "Documentation Automation", "ML Deployment Pipeline"]
+      },
+      "Azure DevOps": {
+        "id": "29586779-099a-81ee-b23d-cfd46d4ca1fc",
+        "usedInBuilds": ["Repository Analyzer", "Documentation Automation", "ML Deployment Pipeline"]
+      }
+    }
+  },
+  "linkingInstructions": {
+    "manual": "Open each build page in Notion and use the Software/Tools Used relation property to add the listed software IDs",
+    "automated": "Use the PowerShell script at scripts/Update-NotionRelations.ps1 with the software IDs listed above",
+    "verification": "After linking, verify the Total Cost rollup recalculates correctly for each build"
+  },
+  "nextSteps": [
+    "Search for remaining Azure services (Azure Machine Learning, Azure Synapse, Azure Databricks)",
+    "Link all found dependencies to their respective builds",
+    "Update software-tracker-ids.json cache with new discoveries",
+    "Generate final cost analysis report showing rollup accuracy"
+  ]
+}

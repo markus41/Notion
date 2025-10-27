@@ -1,0 +1,786 @@
+[
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\action\\register-all.md",
+    "Category": "Action",
+    "Name": "action:register-all",
+    "Description": "Bootstrap Actions Registry by scanning all command files and establishing META self-documentation system",
+    "ArgumentHint": "[--dry-run] [--force-update]",
+    "AllowedTools": "Glob, Read, mcp__notion__notion-search, mcp__notion__notion-create-pages, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Actions Registry (self-documenting command catalog)"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\activity-summary.md",
+    "Category": "Agent",
+    "Name": "agent:activity-summary",
+    "Description": "**Purpose**: Generate comprehensive activity reports across agent work sessions to establish visibility into progress, identify bottlenecks, and drive measurable outcomes through data-driven insights.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\assign-work.md",
+    "Category": "Agent",
+    "Name": "agent:assign-work",
+    "Description": "**Category**: Agent Management",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Agent Registry",
+      "Ideas Registry",
+      "Research Hub",
+      "Example Builds",
+      "Agent Activity Hub"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\log-activity.md",
+    "Category": "Agent",
+    "Name": "agent:log-activity",
+    "Description": "**Purpose**: Streamline agent work logging across all 3 tracking tiers (Notion, Markdown, JSON) to establish transparent activity tracking and enable seamless agent handoffs.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\performance-report.md",
+    "Category": "Agent",
+    "Name": "agent:performance-report",
+    "Description": "Establish agent effectiveness measurement to drive performance optimization and inform delegation decisions through historical metrics analysis",
+    "ArgumentHint": "[agent-name] [--timeframe=7d|30d|all]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Agent Registry",
+      "Agent Activity Hub",
+      "Agent Style Tests"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\process-queue.md",
+    "Category": "Agent",
+    "Name": "agent:process-queue",
+    "Description": "Process queued agent activity entries and sync to Notion Agent Activity Hub. Establish reliable asynchronous synchronization between local agent activity logs and Notion database through batch processing with retry logic.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\register.md",
+    "Category": "Agent",
+    "Name": "agent:register",
+    "Description": "Establish new agent registration to expand automation capabilities and maintain comprehensive agent portfolio documentation",
+    "ArgumentHint": "[agent-name] [specialization] [--description=text] [--avg-duration=minutes]",
+    "AllowedTools": "mcp__notion__notion-create-pages, mcp__notion__notion-search",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Agent Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\agent\\sync-notion-logs.md",
+    "Category": "Agent",
+    "Name": "agent:sync-notion-logs",
+    "Description": "Process the Notion sync queue to create Agent Activity Hub database entries using Notion MCP, completing the 3-tier agent activity tracking system.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\autonomous\\enable-idea.md",
+    "Category": "Autonomous",
+    "Name": "autonomous:enable-idea",
+    "Description": "Enable autonomous workflow for an idea - from research through deployment with minimal human intervention",
+    "ArgumentHint": "[idea-name]",
+    "AllowedTools": "Task(@notion-orchestrator:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\autonomous\\status.md",
+    "Category": "Autonomous",
+    "Name": "autonomous:status",
+    "Description": "Display real-time status of autonomous innovation pipelines across Ideas Registry, Research Hub, and Example Builds. Shows automation progress, agent activity, viability scores, and pending human decisions. Use when user wants visibility into autonomous workflow execution or needs to monitor pipeline health.",
+    "ArgumentHint": "",
+    "AllowedTools": "SlashCommand(@notion-orchestrator:status-dashboard)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\blog\\bulk-sync.md",
+    "Category": "Blog",
+    "Name": "blog:bulk-sync",
+    "Description": "Batch publish unpublished blog posts from Notion to Webflow",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\blog\\sync-post.md",
+    "Category": "Blog",
+    "Name": "blog:sync-post",
+    "Description": "Publish single blog post from Notion to Webflow",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\build\\create.md",
+    "Category": "Build",
+    "Name": "build:create",
+    "Description": "Establish build entry with complete innovation lineage tracking from idea through research to implementation",
+    "ArgumentHint": "[name] [--origin-idea=name] [--related-research=name] [--github-repo=url]",
+    "AllowedTools": "Task(@build-architect:*), mcp__notion__notion-search, mcp__notion__notion-create-pages, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Example Builds",
+      "Ideas Registry",
+      "Research Hub",
+      "Software & Cost Tracker"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\build\\link-software.md",
+    "Category": "Build",
+    "Name": "build:link-software",
+    "Description": "Establish accurate software dependencies and cost tracking for build entries",
+    "ArgumentHint": "[build-name] [software-names...]",
+    "AllowedTools": "Task(@cost-analyst:*), mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Example Builds",
+      "Software & Cost Tracker"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\build\\update-status.md",
+    "Category": "Build",
+    "Name": "build:update-status",
+    "Description": "Establish build lifecycle tracking with status transitions to maintain visibility across development phases and drive measurable progress toward deployment",
+    "ArgumentHint": "[build-name] <status> [--notes=\"context\"] [--github-repo=url]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Example Builds"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\compliance\\audit.md",
+    "Category": "Compliance",
+    "Name": "compliance:audit",
+    "Description": "Comprehensive compliance assessment for software licensing, data privacy, and third-party security across the Innovation Nexus ecosystem.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\add-software.md",
+    "Category": "Cost",
+    "Name": "cost:add-software",
+    "Description": "Add new software to Software Tracker with accurate cost data and automatic relation setup",
+    "ArgumentHint": "<software-name> <monthly-cost> [--category=type] [--criticality=level]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-create-pages, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\analyze.md",
+    "Category": "Cost",
+    "Name": "cost:analyze",
+    "Description": "Comprehensive software spend analysis with optimization recommendations",
+    "ArgumentHint": "[scope: all|active|unused|expiring]",
+    "AllowedTools": "SlashCommand(@cost-analyst:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\annual-projection.md",
+    "Category": "Cost",
+    "Name": "annual-projection",
+    "Description": "Project annual software costs based on current spend and identify trending patterns to support strategic budget planning and long-term financial sustainability.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\build-costs.md",
+    "Category": "Cost",
+    "Name": "build-costs",
+    "Description": "Calculate comprehensive software costs for specific Example Builds by aggregating all linked tools and services to provide transparent project-level financial visibility and support sustainable development decisions.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\consolidation-opportunities.md",
+    "Category": "Cost",
+    "Name": "consolidation-opportunities",
+    "Description": "Detect multiple tools serving similar purposes and recommend consolidation strategies to reduce complexity, lower costs, and streamline workflows through Microsoft ecosystem integration.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\consolidation-plan.md",
+    "Category": "Cost",
+    "Name": "cost:consolidation-plan",
+    "Description": "Establish strategic software consolidation roadmap with Microsoft ecosystem migration paths to drive measurable cost reduction and operational simplification",
+    "ArgumentHint": "[--target-savings=amount] [--timeline=months]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, WebSearch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Software & Cost Tracker"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\cost-by-category.md",
+    "Category": "Cost",
+    "Name": "cost-by-category",
+    "Description": "Analyze software spending by category to identify concentration patterns, optimization opportunities, and strategic investment areas that drive measurable outcomes.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\cost-impact.md",
+    "Category": "Cost",
+    "Name": "cost-impact",
+    "Description": "Instantly calculate the budget impact of proposed software additions, cancellations, or license changes to support rapid decision-making and maintain cost transparency.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\expiring-contracts.md",
+    "Category": "Cost",
+    "Name": "expiring-contracts",
+    "Description": "Monitor upcoming contract expirations to enable proactive renewal decisions, prevent service disruptions, and identify renegotiation opportunities that drive cost optimization.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\identify-waste.md",
+    "Category": "Cost",
+    "Name": "cost:identify-waste",
+    "Description": "Establish comprehensive software waste identification across portfolio to surface underutilized subscriptions and drive immediate cost reduction opportunities",
+    "ArgumentHint": "[--threshold=percentage] [--min-cost=amount]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Software & Cost Tracker"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\microsoft-alternatives.md",
+    "Category": "Cost",
+    "Name": "microsoft-alternatives",
+    "Description": "Research Microsoft ecosystem alternatives for third-party tools to drive cost optimization, improve integration, and align with Microsoft-first strategy through comprehensive service comparison and migration feasibility assessment.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\monthly-spend.md",
+    "Category": "Cost",
+    "Name": "monthly-spend",
+    "Description": "Analyze total monthly software spending across all active subscriptions to establish transparent cost visibility and drive informed budget decisions.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\research-costs.md",
+    "Category": "Cost",
+    "Name": "research-costs",
+    "Description": "Calculate comprehensive software costs for active research threads by aggregating all linked tools and services to provide transparent research budget visibility and support informed feasibility decisions.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\track-usage.md",
+    "Category": "Cost",
+    "Name": "cost:track-usage",
+    "Description": "Establish software license utilization monitoring to identify underutilized subscriptions and drive cost optimization through data-driven rightsizing decisions",
+    "ArgumentHint": "[software-name] [--actual-users=N] [--licensed-seats=N]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Software & Cost Tracker"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\unused-software.md",
+    "Category": "Cost",
+    "Name": "unused-software",
+    "Description": "Detect software subscriptions with no active project links to identify potential cost savings while verifying critical infrastructure dependencies before recommending cancellations.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\cost\\what-if-analysis.md",
+    "Category": "Cost",
+    "Name": "what-if-analysis",
+    "Description": "Model different software spending scenarios to forecast budget impact, evaluate strategic decisions, and support data-driven planning through comprehensive what-if cost analysis.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\datasource\\refresh-status.md",
+    "Category": "Datasource",
+    "Name": "datasource:refresh-status",
+    "Description": "Establish data source status refresh to maintain accurate health indicators across integration portfolio",
+    "ArgumentHint": "[name] <status>",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Data Sources"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\datasource\\register.md",
+    "Category": "Datasource",
+    "Name": "datasource:register",
+    "Description": "Establish data source registration for external APIs and databases to maintain integration inventory and connection health",
+    "ArgumentHint": "[name] [type] [--connection-string=value] [--api-endpoint=url]",
+    "AllowedTools": "mcp__notion__notion-create-pages",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Data Sources"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\datasource\\validate.md",
+    "Category": "Datasource",
+    "Name": "datasource:validate",
+    "Description": "Establish data source connection validation to verify integration health and drive proactive issue detection",
+    "ArgumentHint": "[name]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, Bash",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Data Sources"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\docs\\sync-notion.md",
+    "Category": "Docs",
+    "Name": "docs:sync-notion",
+    "Description": "**Category**: Documentation | Notion Integration",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\docs\\update-complex.md",
+    "Category": "Docs",
+    "Name": "docs:update-complex",
+    "Description": "Establish comprehensive documentation management through intelligent parallel agent orchestration, automated diagram generation, and systematic quality enforcement across file hierarchies",
+    "ArgumentHint": "<scope> <description> [--diagrams] [--full-refresh] [--commit] [--create-pr] [--sync-notion] [--parallel-agents=N]",
+    "AllowedTools": "Task(@documentation-orchestrator:*, @markdown-expert:*, @mermaid-diagram-expert:*), mcp__github__*, mcp__notion__*, Glob, Read, Write, Edit",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\docs\\update-simple.md",
+    "Category": "Docs",
+    "Name": "docs:update-simple",
+    "Description": "**Category**: Documentation",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\dsp\\demo-prep.md",
+    "Category": "Dsp",
+    "Name": "dsp:demo-prep",
+    "Description": "**Purpose**: Orchestrate complete DSP Command Central demo environment preparation including infrastructure provisioning, dummy data generation, mock service configuration, and validation testing.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\dsp\\deploy-demo.md",
+    "Category": "Dsp",
+    "Name": "dsp:deploy-demo",
+    "Description": "**Purpose**: Establish streamlined Azure deployment automation for DSP Command Central demo environment, condensing infrastructure provisioning, application build, and validation into single command execution.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\dsp\\sync-notion.md",
+    "Category": "Dsp",
+    "Name": "dsp:sync-notion",
+    "Description": "**Purpose**: Establish automated bidirectional synchronization between DSP Command Central GitHub repository documentation and Notion DSP Command Center database, ensuring single source of truth across platforms.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\idea\\assess.md",
+    "Category": "Idea",
+    "Name": "idea:assess",
+    "Description": "Establish comprehensive viability assessment for existing ideas to drive informed go/no-go decisions through structured evaluation framework",
+    "ArgumentHint": "[idea-name] [--force] [--context=\"additional-info\"]",
+    "AllowedTools": "Task(@viability-assessor:*), mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Ideas Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\idea\\create.md",
+    "Category": "Idea",
+    "Name": "idea:create",
+    "Description": "Establish rapid innovation opportunity capture with streamlined entry creation and duplicate prevention",
+    "ArgumentHint": "[description] [--champion=person] [--estimated-cost=amount]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-create-pages",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Ideas Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\idea\\search.md",
+    "Category": "Idea",
+    "Name": "idea:search",
+    "Description": "Retrieve innovation opportunities with flexible filtering across status, viability, and ownership",
+    "ArgumentHint": "[query] [--status=filter] [--viability=level] [--champion=person]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Ideas Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\innovation\\new-idea.md",
+    "Category": "Innovation",
+    "Name": "innovation:new-idea",
+    "Description": "Capture and structure new innovation opportunity with viability assessment",
+    "ArgumentHint": "[idea description]",
+    "AllowedTools": "SlashCommand(@ideas-capture:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\innovation\\orchestrate-complex.md",
+    "Category": "Innovation",
+    "Name": "orchestrate-complex",
+    "Description": "**Purpose**: Orchestrate complex multi-agent workflows with parallel execution, dependency management, and automated coordination to drive measurable outcomes through structured approaches.",
+    "ArgumentHint": "",
+    "AllowedTools": "",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\innovation\\project-plan.md",
+    "Category": "Innovation",
+    "Name": "project-plan",
+    "Description": "Create comprehensive project plans for Innovation Nexus initiatives from Idea through Research, Build, and Knowledge Vault",
+    "ArgumentHint": "[project-name] [--phase=stage] [--scope=range]",
+    "AllowedTools": "Task(@ideas-capture:*), Task(@research-coordinator:*), Task(@build-architect:*), Task(@cost-analyst:*), Task(@workflow-router:*), Task(@integration-specialist:*), Task(@compliance-orchestrator:*), Task(@architect-supreme:*), Task(@viability-assessor:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\innovation\\start-research.md",
+    "Category": "Innovation",
+    "Name": "innovation:start-research",
+    "Description": "Begin structured feasibility investigation with hypothesis and methodology",
+    "ArgumentHint": "[research topic] [originating-idea-title]",
+    "AllowedTools": "SlashCommand(@research-coordinator:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\integration\\health-check.md",
+    "Category": "Integration",
+    "Name": "integration:health-check",
+    "Description": "Establish comprehensive integration health monitoring to maintain operational reliability and drive proactive issue resolution across your connectivity ecosystem",
+    "ArgumentHint": "[--format=table|json] [--filter=status]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Integration Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\integration\\register.md",
+    "Category": "Integration",
+    "Name": "integration:register",
+    "Description": "Establish integration registration to maintain comprehensive system connectivity inventory and support operational visibility",
+    "ArgumentHint": "[integration-name] [type]",
+    "AllowedTools": "mcp__notion__notion-create-pages, mcp__notion__notion-search",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Integration Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\knowledge\\archive.md",
+    "Category": "Knowledge",
+    "Name": "knowledge:archive",
+    "Description": "Complete work lifecycle with learnings documentation and knowledge preservation",
+    "ArgumentHint": "[item-name] [database: idea|research|build]",
+    "AllowedTools": "SlashCommand(@archive-manager:*), SlashCommand(@knowledge-curator:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\knowledge\\retrieve-pattern.md",
+    "Category": "Knowledge",
+    "Name": "knowledge:retrieve-pattern",
+    "Description": "Establish detailed pattern retrieval from Knowledge Vault to accelerate implementation through proven, reusable solution templates",
+    "ArgumentHint": "[pattern-name]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Knowledge Vault"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\knowledge\\search.md",
+    "Category": "Knowledge",
+    "Name": "knowledge:search",
+    "Description": "Establish comprehensive knowledge retrieval across archived learnings to surface reusable patterns and drive informed decision-making through historical insights",
+    "ArgumentHint": "[query] [--content-type=type] [--viability=level] [--tags=list]",
+    "AllowedTools": "mcp__notion__notion-search",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Knowledge Vault"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\okr\\create.md",
+    "Category": "Okr",
+    "Name": "okr:create",
+    "Description": "Establish quarterly objectives and key results to drive measurable business outcomes and align innovation initiatives with strategic goals",
+    "ArgumentHint": "[objective-title] [--quarter=Q1|Q2|Q3|Q4] [--year=YYYY]",
+    "AllowedTools": "mcp__notion__notion-create-pages, mcp__notion__notion-search",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "OKRs"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\okr\\progress-update.md",
+    "Category": "Okr",
+    "Name": "okr:progress-update",
+    "Description": "Establish systematic OKR progress tracking to drive accountability and maintain visibility into quarterly goal achievement",
+    "ArgumentHint": "[okr-title] [--progress=percentage]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "OKRs"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\project\\create.md",
+    "Category": "Project",
+    "Name": "project:create",
+    "Description": "Establish project tracking entry with GitHub integration and team assignments to drive coordinated multi-build initiatives",
+    "ArgumentHint": "[project-name] [--github-org=name] [--lead=person]",
+    "AllowedTools": "mcp__notion__notion-create-pages",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Projects"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\project\\sync-github.md",
+    "Category": "Project",
+    "Name": "project:sync-github",
+    "Description": "Establish GitHub repository synchronization for projects to maintain accurate repository counts and integration health",
+    "ArgumentHint": "[project-name]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page, mcp__github__search_repositories",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Projects"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\project\\update-status.md",
+    "Category": "Project",
+    "Name": "project:update-status",
+    "Description": "Establish project status tracking to maintain portfolio visibility and drive stakeholder communication",
+    "ArgumentHint": "[project-name] <status>",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Projects"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\repo\\analyze.md",
+    "Category": "Repo",
+    "Name": "repo:analyze",
+    "Description": "Analyze a single GitHub repository with comprehensive viability assessment and optional Notion sync",
+    "ArgumentHint": "<repo-name> [--sync] [--deep]",
+    "AllowedTools": "Task(@repo-analyzer:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\repo\\calculate-costs.md",
+    "Category": "Repo",
+    "Name": "repo:calculate-costs",
+    "Description": "Calculate portfolio-wide software costs with optimization recommendations",
+    "ArgumentHint": "[--detailed] [--category <name>]",
+    "AllowedTools": "Task(@repo-analyzer:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\repo\\extract-patterns.md",
+    "Category": "Repo",
+    "Name": "repo:extract-patterns",
+    "Description": "Extract cross-repository architectural patterns and assess reusability",
+    "ArgumentHint": "[--min-usage 3] [--sync]",
+    "AllowedTools": "Task(@repo-analyzer:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\repo\\scan-org.md",
+    "Category": "Repo",
+    "Name": "repo:scan-org",
+    "Description": "Scan all GitHub organization repositories with comprehensive analysis and Notion synchronization",
+    "ArgumentHint": "[--sync] [--deep] [--exclude repo1,repo2]",
+    "AllowedTools": "Task(@repo-analyzer:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\research\\complete.md",
+    "Category": "Research",
+    "Name": "research:complete",
+    "Description": "Establish research finalization workflow with comprehensive viability assessment to drive informed build/archive decisions based on investigation outcomes",
+    "ArgumentHint": "[research-topic] [--recommendation=value] [--viability-score=N]",
+    "AllowedTools": "Task(@research-coordinator:*), mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Research Hub",
+      "Ideas Registry",
+      "Example Builds"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\research\\update-findings.md",
+    "Category": "Research",
+    "Name": "research:update-findings",
+    "Description": "Establish incremental research documentation to capture intermediate findings and maintain momentum during active investigations",
+    "ArgumentHint": "[research-topic] [--finding=\"text\"] [--append] [--progress=percentage]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Research Hub"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\assign-default.md",
+    "Category": "Style",
+    "Name": "style:assign-default",
+    "Description": "Establish default output style for builds to drive consistent documentation patterns and brand alignment across development workflows",
+    "ArgumentHint": "[build-name] [style-name]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch, mcp__notion__notion-update-page",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Example Builds",
+      "Output Styles Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\compare.md",
+    "Category": "Style",
+    "Name": "style:compare",
+    "Description": "Run side-by-side style comparison for same agent+task. Executes all specified styles (default: all 5) and generates comparative effectiveness analysis with recommendation.",
+    "ArgumentHint": "<agent-name> \"<task-description>\" [--styles=style1,style2,...] [--ultrathink]",
+    "AllowedTools": "Task(@style-orchestrator:*, @ultrathink-analyzer:*), mcp__notion__*",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\create.md",
+    "Category": "Style",
+    "Name": "style:create",
+    "Description": "Establish new output style registration to expand documentation patterns and support diverse audience communication needs",
+    "ArgumentHint": "[style-name] [audience] [--description=text]",
+    "AllowedTools": "mcp__notion__notion-create-pages, mcp__notion__notion-search",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Output Styles Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\effectiveness-report.md",
+    "Category": "Style",
+    "Name": "style:effectiveness-report",
+    "Description": "Establish output style performance analytics to drive documentation quality optimization and audience engagement measurement",
+    "ArgumentHint": "[--style=name] [--agent=name] [--timeframe=7d|30d|all]",
+    "AllowedTools": "mcp__notion__notion-search, mcp__notion__notion-fetch",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": [
+      "Agent Style Tests",
+      "Output Styles Registry"
+    ]
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\report.md",
+    "Category": "Style",
+    "Name": "style:report",
+    "Description": "Generate performance analytics reports for output styles. Query historical test data from Notion Agent Style Tests database and provide trend analysis, top/bottom performers, and optimization recommendations.",
+    "ArgumentHint": "[--agent=name] [--style=name] [--timeframe=7d|30d|all]",
+    "AllowedTools": "mcp__notion__*",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\style\\test-agent-style.md",
+    "Category": "Style",
+    "Name": "style:test-agent-style",
+    "Description": "Test agent+style combinations with comprehensive behavioral and effectiveness metrics. Supports UltraThink mode for deep analysis with tier classification. Compare all styles for an agent or run targeted tests with custom tasks.",
+    "ArgumentHint": "<agent-name> <style-name|?> [--task=\"description\"] [--interactive] [--ultrathink]",
+    "AllowedTools": "Task(@style-orchestrator:*), mcp__notion__*",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  },
+  {
+    "FilePath": "c:\\Users\\MarkusAhling\\Notion\\.claude\\commands\\team\\assign.md",
+    "Category": "Team",
+    "Name": "team:assign",
+    "Description": "Route work to appropriate team member based on specialization and workload",
+    "ArgumentHint": "[work-description] [database: idea|research|build]",
+    "AllowedTools": "SlashCommand(@workflow-router:*)",
+    "Model": "claude-sonnet-4-5-20250929",
+    "RelatedDatabases": []
+  }
+]

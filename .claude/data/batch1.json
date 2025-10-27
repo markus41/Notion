@@ -1,0 +1,132 @@
+[
+  {
+    "properties": {
+      "Name": "/agent:assign-work",
+      "Category": "Agent",
+      "Description": "**Category**: Agent Management",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/agent:assign-work",
+      "Related Databases": "[\"Agents\", \"Ideas\", \"Research\", \"Builds\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/agent:performance-report",
+      "Category": "Agent",
+      "Description": "Establish agent effectiveness measurement to drive performance optimization and inform delegation decisions through historical metrics analysis",
+      "Parameters": "[agent-name] [--timeframe=7d|30d|all]",
+      "Status": "Active",
+      "Example Usage": "/agent:performance-report [agent-name] [--timeframe=7d|30d|all]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/agent:register",
+      "Category": "Agent",
+      "Description": "Establish new agent registration to expand automation capabilities and maintain comprehensive agent portfolio documentation",
+      "Parameters": "[agent-name] [specialization] [--description=text] [--avg-duration=minutes]",
+      "Status": "Active",
+      "Example Usage": "/agent:register [agent-name] [specialization] [--description=text] [--avg-duration=minutes]",
+      "Related Databases": "[\"Agents\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/blog:bulk-sync",
+      "Category": "Blog",
+      "Description": "Batch publish unpublished blog posts from Notion to Webflow",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/blog:bulk-sync",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/blog:sync-post",
+      "Category": "Blog",
+      "Description": "Publish single blog post from Notion to Webflow",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/blog:sync-post",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build:create",
+      "Category": "Build",
+      "Description": "Establish build entry with complete innovation lineage tracking from idea through research to implementation",
+      "Parameters": "[name] [--origin-idea=name] [--related-research=name] [--github-repo=url]",
+      "Status": "Active",
+      "Example Usage": "/build:create [name] [--origin-idea=name] [--related-research=name] [--github-repo=url]",
+      "Related Databases": "[\"Builds\", \"Ideas\", \"Research\", \"Software\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build:update-status",
+      "Category": "Build",
+      "Description": "Establish build lifecycle tracking with status transitions to maintain visibility across development phases and drive measurable progress toward deployment",
+      "Parameters": "[build-name] <status> [--notes=\"context\"] [--github-repo=url]",
+      "Status": "Active",
+      "Example Usage": "/build:update-status [build-name] <status> [--notes=\"context\"] [--github-repo=url]",
+      "Related Databases": "[\"Builds\"]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/annual-projection",
+      "Category": "Cost",
+      "Description": "Project annual software costs based on current spend and identify trending patterns to support strategic budget planning and long-term financial sustainability.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/annual-projection",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/build-costs",
+      "Category": "Cost",
+      "Description": "Calculate comprehensive software costs for specific Example Builds by aggregating all linked tools and services to provide transparent project-level financial visibility and support sustainable development decisions.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/build-costs",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  },
+  {
+    "properties": {
+      "Name": "/consolidation-opportunities",
+      "Category": "Cost",
+      "Description": "Detect multiple tools serving similar purposes and recommend consolidation strategies to reduce complexity, lower costs, and streamline workflows through Microsoft ecosystem integration.",
+      "Parameters": "",
+      "Status": "Active",
+      "Example Usage": "/consolidation-opportunities",
+      "Related Databases": "[]",
+      "date:Last Updated:start": "2025-10-26",
+      "date:Last Updated:is_datetime": 0
+    }
+  }
+]
