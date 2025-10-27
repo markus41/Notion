@@ -58,6 +58,43 @@ Before starting, verify you have:
 
 ## 5-Minute Setup
 
+**Visual Overview: Complete Setup Workflow**
+
+```mermaid
+flowchart LR
+    A[Clone Repository] --> B[Azure Authentication]
+    B --> C[Configure MCP Environment]
+    C --> D[Launch Claude Code]
+    D --> E{MCP Servers<br/>Connected?}
+    E -->|No| F[OAuth Flow]
+    F --> E
+    E -->|Yes| G[First Notion Query]
+    G --> H[Fully Operational]
+
+    style A fill:#3B82F6,color:#fff
+    style H fill:#10B981,color:#fff
+    style F fill:#F59E0B,color:#fff
+
+    subgraph "5 Minutes Total"
+    A
+    B
+    C
+    end
+
+    subgraph "Validation"
+    D
+    E
+    F
+    end
+
+    subgraph "Success"
+    G
+    H
+    end
+```
+
+*Figure 1: Complete setup workflow from repository clone to operational status in 5 minutes. MCP OAuth happens automatically on first launch.*
+
 ### Step 1: Clone Repository (1 minute)
 
 ```bash
@@ -171,6 +208,44 @@ claude mcp list
 ✓ playwright: Connected
   Browser: Microsoft Edge (headless)
 ```
+
+**Visual Flow: MCP Connection Sequence**
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant Claude as Claude Code
+    participant Notion as Notion MCP
+    participant GitHub as GitHub MCP
+    participant Azure as Azure MCP
+    participant Browser as Web Browser
+
+    User->>Claude: Launch Claude Code
+    Claude->>Notion: Initialize connection
+    Notion-->>Claude: Check authentication
+
+    alt Not Authenticated
+        Notion->>Browser: Open OAuth flow
+        Browser->>User: Notion login page
+        User->>Browser: Enter credentials
+        Browser->>Notion: Grant access
+        Notion-->>Claude: ✓ Connected
+    else Already Authenticated
+        Notion-->>Claude: ✓ Connected
+    end
+
+    Claude->>GitHub: Initialize with PAT
+    GitHub-->>Claude: ✓ Connected
+
+    Claude->>Azure: Initialize with Azure CLI
+    Azure-->>Claude: ✓ Connected
+
+    Claude-->>User: All MCP servers ready
+
+    Note over User,Azure: Ready for first Notion query
+```
+
+*Figure 2: MCP server connection sequence showing automatic OAuth flow for Notion and credential-based authentication for GitHub and Azure.*
 
 **If Notion shows "Not authenticated"**:
 1. Claude Code will automatically trigger OAuth browser flow
@@ -314,6 +389,51 @@ List all resource groups in Azure subscription
 ---
 
 ## Troubleshooting Quick Tips
+
+**Visual Guide: Troubleshooting Decision Tree**
+
+```mermaid
+flowchart TD
+    A[Issue Detected] --> B{Which MCP Server?}
+
+    B -->|Notion| C{Browser OAuth<br/>Triggered?}
+    C -->|No| D[Check Popup Blockers<br/>Restart Claude Code]
+    C -->|Yes but Failed| E[Clear Browser Cookies<br/>Retry OAuth]
+    D --> F[OAuth Success]
+    E --> F
+
+    B -->|GitHub| G{PAT Environment<br/>Variable Set?}
+    G -->|No| H[Run Set-MCPEnvironment.ps1<br/>Restart Claude Code]
+    G -->|Yes but Invalid| I[Regenerate PAT<br/>Store in Key Vault]
+    H --> J[GitHub Connected]
+    I --> J
+
+    B -->|Azure| K{Azure CLI<br/>Authenticated?}
+    K -->|No| L[Run: az login<br/>Set subscription]
+    K -->|Yes but Wrong Sub| M[az account set<br/>--subscription ID]
+    L --> N[Azure Connected]
+    M --> N
+
+    B -->|Playwright| O{Browser<br/>Installed?}
+    O -->|No| P[Run: npx playwright<br/>install msedge]
+    O -->|Yes but Crashes| Q[Update Playwright<br/>npm install -g]
+    P --> R[Playwright Ready]
+    Q --> R
+
+    F --> S[All Systems Operational]
+    J --> S
+    N --> S
+    R --> S
+
+    style A fill:#EF4444,color:#fff
+    style S fill:#10B981,color:#fff
+    style D fill:#F59E0B,color:#fff
+    style H fill:#F59E0B,color:#fff
+    style L fill:#F59E0B,color:#fff
+    style P fill:#F59E0B,color:#fff
+```
+
+*Figure 3: Troubleshooting decision tree for common MCP server issues. Follow the path for your specific problem to reach operational status.*
 
 ### Issue: Notion MCP Not Connected
 

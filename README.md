@@ -22,6 +22,44 @@ Brookside BI Innovation Nexus streamlines key workflows for innovation managemen
 
 **Best for**: Organizations scaling innovation workflows across teams who require enterprise-grade reliability, autonomous execution capabilities, and comprehensive cost visibility while maintaining sustainable development practices.
 
+**Visual Architecture: System Components & Integrations**
+
+```mermaid
+C4Context
+    title Brookside BI Innovation Nexus - System Architecture
+
+    Person(user, "Innovation Team", "Team members, researchers, and developers")
+
+    System_Boundary(nexus, "Innovation Nexus") {
+        System(claude, "Claude Code", "AI agent orchestration with 38+ specialized agents")
+        System(hooks, "Repository Hooks", "3-layer quality enforcement (pre-commit, commit-msg, branch protection)")
+        System(scripts, "Automation Scripts", "PowerShell utilities for MCP setup, validation, and deployment")
+    }
+
+    System_Ext(notion, "Notion Workspace", "Central hub: 11 databases tracking ideas, research, builds, costs, knowledge")
+    System_Ext(azure, "Azure Cloud", "App Services, Functions, Key Vault, SQL, Application Insights, APIM")
+    System_Ext(github, "GitHub", "Source control, Actions CI/CD, organization repositories")
+    System_Ext(playwright, "Playwright", "Browser automation for web testing and scraping")
+
+    Rel(user, claude, "Delegates work to", "Natural language commands, slash commands")
+    Rel(claude, notion, "Reads/writes data via", "Notion MCP (OAuth)")
+    Rel(claude, azure, "Provisions infrastructure via", "Azure MCP (Azure CLI)")
+    Rel(claude, github, "Manages repositories via", "GitHub MCP (PAT)")
+    Rel(claude, playwright, "Automates browser via", "Playwright MCP")
+
+    Rel(hooks, github, "Enforces quality on", "Git commits and pushes")
+    Rel(scripts, azure, "Configures environment from", "Azure Key Vault secrets")
+    Rel(scripts, claude, "Prepares environment for", "MCP server connections")
+
+    Rel(notion, azure, "Triggers deployments to", "Webhook + Azure Functions")
+    Rel(github, azure, "Deploys applications to", "GitHub Actions → App Services")
+    Rel(azure, notion, "Syncs activity logs to", "Agent Activity Hub")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+*Figure 1: System architecture showing Claude Code as orchestrator connecting Notion (data hub), Azure (infrastructure), GitHub (source control), and Playwright (automation) via MCP servers. Repository hooks enforce quality, automation scripts manage environment.*
+
 ---
 
 ## Phase 3 Capabilities (Current)
@@ -489,12 +527,11 @@ C:\Users\MarkusAhling\Notion\
 **Located in repository root** - Start here for quick access:
 
 - **[QUICKSTART.md](QUICKSTART.md)** - Get started in 15 minutes
-- **[CLAUDE.md](CLAUDE.md)** - Comprehensive agent instructions and workspace guide (25,000+ words)
+- **[CLAUDE.md](CLAUDE.md)** - Comprehensive agent instructions and workspace guide
 - **[GIT-STRUCTURE.md](GIT-STRUCTURE.md)** - Git branching strategy, commit conventions, and repository organization
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and standards
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
-- **[README-START-HERE.md](README-START-HERE.md)** - Webhook + APIM deployment quickstart
 
 ### Technical Documentation
 **Organized by purpose** - For developers and agents:
@@ -525,7 +562,7 @@ C:\Users\MarkusAhling\Notion\
 - Session summaries and brainstorm results
 - Experimental features and prototype concepts
 
-**Note**: Documentation was reorganized on 2025-10-26 to reduce root-level sprawl from 42 files to 8 essential guides.
+**Note**: Documentation was reorganized on 2025-10-26 to reduce root-level sprawl from 42 files to 7 essential guides, with 23 files archived for historical reference.
 
 ### External Resources
 - [Notion Workspace](https://notion.so/brookside-bi) (requires authentication)

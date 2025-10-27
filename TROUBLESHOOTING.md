@@ -21,6 +21,70 @@ This guide establishes systematic diagnostic procedures for common Innovation Ne
 
 ## MCP Server Issues
 
+**Visual Diagnostic: Comprehensive MCP Troubleshooting Workflow**
+
+```mermaid
+flowchart TD
+    START[MCP Server Issue] --> CHECK{Run: claude mcp list}
+
+    CHECK --> NOTION_CHECK{Notion Status?}
+    NOTION_CHECK -->|Disconnected| NOTION_DIAG[Notion Diagnostics]
+    NOTION_DIAG --> NOTION_FIX1{OAuth Flow<br/>Triggered?}
+    NOTION_FIX1 -->|No| NOTION_ACT1[Restart Claude Code<br/>Check popup blockers]
+    NOTION_FIX1 -->|Yes| NOTION_ACT2[Clear browser cache<br/>Retry authentication]
+    NOTION_ACT1 --> NOTION_VERIFY
+    NOTION_ACT2 --> NOTION_VERIFY[Verify: claude mcp list]
+    NOTION_VERIFY -->|Still Failing| NOTION_ESC[Check firewall/VPN<br/>Escalate to support]
+    NOTION_VERIFY -->|Success| RESOLVED
+
+    CHECK --> GITHUB_CHECK{GitHub Status?}
+    GITHUB_CHECK -->|Disconnected| GITHUB_DIAG[GitHub Diagnostics]
+    GITHUB_DIAG --> GITHUB_FIX1{PAT Environment<br/>Variable Set?}
+    GITHUB_FIX1 -->|No| GITHUB_ACT1[Run: Set-MCPEnvironment.ps1<br/>Restart Claude Code]
+    GITHUB_FIX1 -->|Yes| GITHUB_FIX2{Test PAT:<br/>curl GitHub API}
+    GITHUB_FIX2 -->|401 Unauthorized| GITHUB_ACT2[Regenerate PAT<br/>Update Key Vault]
+    GITHUB_FIX2 -->|403 Forbidden| GITHUB_ACT3[Check PAT scopes:<br/>repo, workflow, admin:org]
+    GITHUB_ACT1 --> GITHUB_VERIFY
+    GITHUB_ACT2 --> GITHUB_VERIFY
+    GITHUB_ACT3 --> GITHUB_VERIFY[Verify: GitHub commands work]
+    GITHUB_VERIFY -->|Still Failing| GITHUB_ESC[Verify org membership<br/>Check PAT expiration]
+    GITHUB_VERIFY -->|Success| RESOLVED
+
+    CHECK --> AZURE_CHECK{Azure Status?}
+    AZURE_CHECK -->|Disconnected| AZURE_DIAG[Azure Diagnostics]
+    AZURE_DIAG --> AZURE_FIX1{Azure CLI<br/>Authenticated?}
+    AZURE_FIX1 -->|No| AZURE_ACT1[Run: az login<br/>Set subscription]
+    AZURE_FIX1 -->|Yes| AZURE_FIX2{Correct<br/>Subscription?}
+    AZURE_FIX2 -->|No| AZURE_ACT2[az account set<br/>--subscription ID]
+    AZURE_FIX2 -->|Yes| AZURE_ACT3[Update Azure MCP:<br/>npm install -g]
+    AZURE_ACT1 --> AZURE_VERIFY
+    AZURE_ACT2 --> AZURE_VERIFY
+    AZURE_ACT3 --> AZURE_VERIFY[Verify: az account show]
+    AZURE_VERIFY -->|Still Failing| AZURE_ESC[Check network/proxy<br/>Verify subscription access]
+    AZURE_VERIFY -->|Success| RESOLVED
+
+    CHECK --> PLAYWRIGHT_CHECK{Playwright Status?}
+    PLAYWRIGHT_CHECK -->|Disconnected| PLAY_DIAG[Playwright Diagnostics]
+    PLAY_DIAG --> PLAY_FIX1{Browser<br/>Installed?}
+    PLAY_FIX1 -->|No| PLAY_ACT1[npx playwright<br/>install msedge]
+    PLAY_FIX1 -->|Yes| PLAY_ACT2[Update Playwright:<br/>npm install -g]
+    PLAY_ACT1 --> PLAY_VERIFY
+    PLAY_ACT2 --> PLAY_VERIFY[Test browser launch]
+    PLAY_VERIFY -->|Still Failing| PLAY_ESC[Check system requirements<br/>Reinstall dependencies]
+    PLAY_VERIFY -->|Success| RESOLVED
+
+    RESOLVED[All MCP Servers Operational]
+
+    style START fill:#EF4444,color:#fff
+    style RESOLVED fill:#10B981,color:#fff
+    style NOTION_ESC fill:#F59E0B,color:#fff
+    style GITHUB_ESC fill:#F59E0B,color:#fff
+    style AZURE_ESC fill:#F59E0B,color:#fff
+    style PLAY_ESC fill:#F59E0B,color:#fff
+```
+
+*Figure 1: Comprehensive MCP diagnostic workflow covering all four MCP servers with specific troubleshooting paths and escalation points.*
+
 ### Notion MCP Not Connected
 
 **Symptoms**:
@@ -184,6 +248,97 @@ npm install -g @playwright/mcp@latest
 ---
 
 ## Authentication Problems
+
+**Visual Flow: Authentication Troubleshooting Process**
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant System as Local System
+    participant Azure as Azure CLI
+    participant KV as Key Vault
+    participant GitHub as GitHub API
+    participant Notion as Notion API
+
+    Note over User,Notion: Authentication Diagnostic Sequence
+
+    User->>System: Detect auth issue
+
+    alt Azure Key Vault Access Denied
+        User->>Azure: az account show
+        Azure-->>User: Authentication status
+
+        alt Not Authenticated
+            User->>Azure: az login
+            Azure->>User: Browser OAuth flow
+            User->>Azure: Credentials
+            Azure-->>User: ✓ Authenticated
+        end
+
+        User->>KV: az keyvault secret list
+        KV-->>User: Check permissions
+
+        alt 403 Forbidden
+            User->>Azure: az role assignment list
+            Azure-->>User: Check roles
+            Note over User,Azure: Request "Key Vault<br/>Secrets User" role
+            Azure->>KV: Assign role
+            Note over KV: Wait 5-10 min<br/>for propagation
+        end
+
+        KV-->>User: ✓ Access granted
+    end
+
+    alt GitHub PAT Issues
+        User->>System: Check $GITHUB_PERSONAL_ACCESS_TOKEN
+        System-->>User: Variable status
+
+        alt Not Set
+            User->>System: Run Set-MCPEnvironment.ps1
+            System->>KV: Retrieve PAT
+            KV-->>System: PAT value
+            System-->>User: ✓ Environment configured
+        end
+
+        User->>GitHub: curl -H "Authorization: token PAT"
+        GitHub-->>User: Test authentication
+
+        alt PAT Expired or Invalid
+            User->>GitHub: Generate new PAT
+            GitHub-->>User: New token
+            User->>KV: az keyvault secret set
+            KV-->>User: ✓ PAT stored
+            User->>System: Run Set-MCPEnvironment.ps1
+            System-->>User: ✓ Updated
+        end
+
+        GitHub-->>User: ✓ Authenticated
+    end
+
+    alt Notion OAuth Issues
+        User->>Notion: Notion MCP connection
+        Notion-->>User: Check authentication
+
+        alt Not Authenticated
+            Notion->>User: Trigger OAuth browser flow
+            User->>Notion: Login credentials
+            Notion->>User: Grant workspace access
+            User->>Notion: Approve
+            Notion-->>User: ✓ Connected
+        end
+
+        alt OAuth Loop
+            User->>System: Clear browser cookies
+            User->>System: Restart Claude Code
+            System->>Notion: Retry OAuth
+            Notion-->>User: ✓ Connected
+        end
+    end
+
+    Note over User,Notion: All authentication systems operational
+```
+
+*Figure 2: Authentication troubleshooting sequence showing diagnostic steps for Azure Key Vault, GitHub PAT, and Notion OAuth with resolution paths.*
 
 ### Azure Key Vault Access Denied
 

@@ -18,6 +18,8 @@
 /cost:analyze [all|active|unused|expiring]   # Comprehensive spend analysis
 /cost:monthly-spend                          # Quick total
 /cost:unused-software                        # Identify waste
+/cost:add-software <name> <monthly-cost> [--licenses=N]  # Add software to tracker
+/cost:cost-impact ADD|REMOVE <software> <amount>          # Quick budget impact
 
 # Repository Intelligence
 /repo:scan-org [--sync] [--deep]            # Full GitHub portfolio analysis
@@ -37,6 +39,107 @@
 # Team Coordination
 /team:assign [work-description] [database]   # Route work by specialization
 ```
+
+### Command Discovery
+
+Establish self-documenting infrastructure to streamline command visibility and team discoverability.
+
+```bash
+/action:register-all     # Bootstrap Actions Registry META system
+```
+
+**Best for**: Organizations scaling slash command libraries across teams needing centralized documentation of available automation capabilities.
+
+Automatically scans all slash command files (`.claude/commands/`), extracts metadata (command names, descriptions, parameters), and populates the Actions Registry Notion database. This creates a searchable, team-accessible catalog of all available automation commands with structured parameter definitions and usage guidance.
+
+**Business Value**: Drives measurable improvements in team onboarding efficiency and command discoverability by eliminating manual documentation overhead. Enables non-technical stakeholders to explore available automation capabilities through Notion's familiar interface.
+
+---
+
+### Command Categories Overview
+
+The Innovation Nexus includes 51 specialized slash commands organized across 14 functional categories, each designed to streamline specific workflows and drive measurable outcomes across the innovation lifecycle.
+
+**Mindmap: Complete Command Hierarchy**
+
+```mermaid
+mindmap
+  root((Innovation Nexus<br/>51 Commands))
+    💰 Cost Management
+      /cost:monthly-spend
+      /cost:analyze
+      /cost:add-software
+      /cost:cost-impact
+      13 total commands
+    💡 Innovation Lifecycle
+      /innovation:new-idea
+      /innovation:start-research
+      /innovation:project-plan
+      4 total commands
+    📚 Knowledge
+      /knowledge:archive
+      1 total command
+    👥 Team Coordination
+      /team:assign
+      1 total command
+    🔬 Repository Intelligence
+      /repo:scan-org
+      /repo:analyze
+      /repo:extract-patterns
+      4 total commands
+    🤖 Autonomous Operations
+      /autonomous:enable-idea
+      /autonomous:status
+      2 total commands
+    📊 Agent Activity
+      /agent:log-activity
+      /agent:activity-summary
+      /agent:sync-notion-logs
+      5 total commands
+    🎨 Style Testing
+      /style:test-agent-style
+      /style:compare
+      /style:report
+      3 total commands
+    📖 Documentation
+      /docs:update-complex
+      /docs:update-simple
+      /docs:sync-notion
+      3 total commands
+    🎯 DSP Commands
+      /dsp:demo-prep
+      /dsp:sync-notion
+      /dsp:deploy-demo
+      3 total commands
+    🛠️ Build Management
+      /build:create
+      /build:link-software
+      /build:update-status
+      3 total commands
+    💭 Idea Management
+      /idea:create
+      /idea:search
+      /idea:assess
+      3 total commands
+    🔍 Research Management
+      /research:update-findings
+      /research:complete
+      2 total commands
+    🎬 Actions Registry
+      /action:register-all
+      1 total command
+```
+
+*Figure 1: Hierarchical view of all 51 slash commands organized by functional category. Each category supports specific workflows across the innovation lifecycle from idea capture through knowledge archival.*
+
+**Category Distribution**:
+- **Highest Coverage**: Cost Management (14 commands) - comprehensive spend analysis, optimization, and forecasting
+- **Core Lifecycle**: Innovation (4), Build (3), Idea (3), Research (2), Knowledge (1) - complete idea-to-archive workflow
+- **Operational Excellence**: Agent Activity (5), Repository Intelligence (4), Documentation (3) - visibility and governance
+- **Quality & Testing**: Style Testing (3), Autonomous Operations (2) - continuous improvement
+- **Specialized**: Team (1), DSP (3), Actions Registry (1) - targeted workflows
+
+---
 
 ### Core Agents
 
@@ -103,9 +206,133 @@
 🤖 Agent Activity Hub    → 7163aa38-f3d9-444b-9674-bde61868bd2b
 🎨 Output Styles Registry → 199a7a80-224c-470b-9c64-7560ea51b257
 🧪 Agent Style Tests     → b109b417-2e3f-4eba-bab1-9d4c047a65c4
+🎬 Actions Registry      → 64697e8c-0d51-4c10-b6ee-a6f643f0fc1c
 ```
 
 **Workspace ID**: `81686779-099a-8195-b49e-00037e25c23e`
+
+**Visual Architecture: Notion Database Relationships**
+
+```mermaid
+erDiagram
+    IDEAS_REGISTRY ||--o{ SOFTWARE_TRACKER : "requires"
+    IDEAS_REGISTRY ||--o{ RESEARCH_HUB : "triggers"
+    IDEAS_REGISTRY ||--o{ EXAMPLE_BUILDS : "evolves-into"
+
+    RESEARCH_HUB ||--o{ SOFTWARE_TRACKER : "evaluates"
+    RESEARCH_HUB ||--o{ IDEAS_REGISTRY : "updates-viability"
+    RESEARCH_HUB ||--o{ EXAMPLE_BUILDS : "informs"
+
+    EXAMPLE_BUILDS ||--o{ SOFTWARE_TRACKER : "uses"
+    EXAMPLE_BUILDS ||--o{ IDEAS_REGISTRY : "originated-from"
+    EXAMPLE_BUILDS ||--o{ RESEARCH_HUB : "based-on"
+    EXAMPLE_BUILDS ||--o{ INTEGRATION_REGISTRY : "creates"
+    EXAMPLE_BUILDS ||--o{ KNOWLEDGE_VAULT : "archives-to"
+
+    SOFTWARE_TRACKER ||--o{ INTEGRATION_REGISTRY : "powers"
+    SOFTWARE_TRACKER }o--|| EXAMPLE_BUILDS : "cost-rollup"
+    SOFTWARE_TRACKER }o--|| IDEAS_REGISTRY : "cost-rollup"
+    SOFTWARE_TRACKER }o--|| RESEARCH_HUB : "cost-rollup"
+
+    KNOWLEDGE_VAULT ||--o{ IDEAS_REGISTRY : "references"
+    KNOWLEDGE_VAULT ||--o{ RESEARCH_HUB : "references"
+    KNOWLEDGE_VAULT ||--o{ EXAMPLE_BUILDS : "references"
+
+    AGENT_REGISTRY ||--o{ AGENT_ACTIVITY_HUB : "logs-activity"
+    AGENT_REGISTRY ||--o{ AGENT_STYLE_TESTS : "performance-data"
+    AGENT_REGISTRY ||--o{ OUTPUT_STYLES_REGISTRY : "uses-styles"
+
+    ACTIONS_REGISTRY ||--o{ AGENT_REGISTRY : "automates"
+
+    IDEAS_REGISTRY {
+        string Idea_Title PK
+        string Status
+        string Viability
+        string Champion
+        date Created
+        relation Software_Tools
+        relation Related_Research
+        relation Example_Builds
+    }
+
+    RESEARCH_HUB {
+        string Research_Topic PK
+        string Status
+        int Viability_Score
+        string Researcher
+        relation Origin_Idea
+        relation Software_Tools
+        relation Related_Builds
+    }
+
+    EXAMPLE_BUILDS {
+        string Build_Name PK
+        string Status
+        string Build_Type
+        relation Origin_Idea
+        relation Related_Research
+        relation Software_Tools
+        relation Integrations
+    }
+
+    SOFTWARE_TRACKER {
+        string Software_Name PK
+        number Monthly_Cost
+        int Licenses
+        date Renewal_Date
+        rollup Total_Monthly_Cost
+    }
+
+    KNOWLEDGE_VAULT {
+        string Article_Title PK
+        string Content_Type
+        date Published
+        relation Referenced_Ideas
+        relation Referenced_Research
+        relation Referenced_Builds
+    }
+
+    AGENT_REGISTRY {
+        string Agent_Name PK
+        string Specialization
+        string Status
+    }
+
+    AGENT_ACTIVITY_HUB {
+        string Session_ID PK
+        relation Agent
+        datetime Start_Time
+        string Status
+    }
+
+    OUTPUT_STYLES_REGISTRY {
+        string Style_Name PK
+        string Target_Audience
+        relation Compatible_Agents
+    }
+
+    AGENT_STYLE_TESTS {
+        string Test_ID PK
+        relation Agent
+        relation Style
+        int Effectiveness_Score
+    }
+
+    INTEGRATION_REGISTRY {
+        string Integration_Name PK
+        string Type
+        relation Related_Software
+        relation Related_Builds
+    }
+
+    ACTIONS_REGISTRY {
+        string Command_Name PK
+        string Description
+        relation Automated_Agent
+    }
+```
+
+*Figure: Notion database relationship architecture showing how Ideas flow through Research and Builds to Knowledge Vault, with Software Tracker as central hub for cost rollups across all databases.*
 
 ---
 
@@ -121,6 +348,7 @@
 - Suggest non-Microsoft solutions without checking Microsoft offerings first
 - Archive without documenting lessons learned
 - Create builds without linking origin ideas
+- **Ask for approval before executing Notion MCP operations** (search, create, update, fetch, webhook, API calls)
 
 ### ✅ ALWAYS Do This
 
@@ -133,167 +361,108 @@
 - Structure technical docs for AI-agent execution
 - Check Microsoft ecosystem first (M365 → Azure → Power Platform → GitHub)
 - Apply Brookside BI brand voice to all outputs
+- **Execute all Notion MCP operations immediately** (search, create pages, update properties, fetch data, API/webhook calls) - no approval needed
 
 ---
 
-## Agent Activity Logging Requirements
+## Agent Activity Logging
 
-### Automatic Logging (Hook-Based) ✅
+**Status**: Fully operational - Phase 4 autonomous infrastructure with mandatory Claude main logging
 
-**Status**: Fully operational - Phase 4 autonomous infrastructure
+### Automatic Logging (Subagents Only)
 
-The system automatically captures agent work through a PowerShell hook that triggers on every Task tool invocation (agent delegation). This hook-based approach establishes comprehensive activity tracking with zero manual overhead for standard agent operations.
+**Scope**: Hook-based system captures **specialized agent work** automatically via 3-tier tracking (Markdown + JSON + Notion).
 
-**What's Automatically Logged**:
-- Session start timestamps
-- Agent identification (subagent_type from Task tool)
-- Work description (from task parameters)
-- Files created/updated (categorized by type)
-- Lines generated (estimated from file sizes)
-- Session duration (start to completion)
-- Related Notion items (Ideas, Research, Builds)
-- Deliverables (organized by category)
+**Trigger**: Task tool invocations (when Claude delegates to @agent-name)
 
-**Auto-Logging Criteria** (only logs when ALL conditions met):
-- ✅ Agent in approved list (38 specialized agents)
-- ✅ Work duration >2 minutes OR files created/updated
-- ✅ Not already logged in current session (5-minute deduplication)
-- ✅ TodoWrite shows meaningful work completion
+**Coverage**: 38+ specialized agents including:
+- @build-architect, @code-generator, @deployment-orchestrator
+- @research-coordinator, @viability-assessor, @cost-analyst
+- @knowledge-curator, @archive-manager, @integration-specialist
+- *(See [.claude/agents/](.claude/agents/) for complete list)*
 
-**3-Tier Update System**:
-1. **Markdown Log**: [.claude/logs/AGENT_ACTIVITY_LOG.md](.claude/logs/AGENT_ACTIVITY_LOG.md)
-2. **JSON State**: [.claude/data/agent-state.json](.claude/data/agent-state.json)
-3. **Notion Database**: Agent Activity Hub (Data Source: `7163aa38-f3d9-444b-9674-bde61868bd2b`)
+**No action required** - Automatic logging handles session tracking when subagents are invoked.
 
-**No action required from agents for standard work** - the hook handles session tracking automatically.
+---
 
-### Manual Logging (When Agents MUST Use `/agent:log-activity`)
+### Mandatory Manual Logging (Claude Main) ⚠️ **REQUIRED**
 
-Agents should explicitly invoke the `/agent:log-activity` command for **special events** that require human visibility or workflow coordination:
+**Critical Gap Identified**: Automatic logging does NOT capture Claude's direct work. All significant work performed by Claude main **MUST** be manually logged to ensure complete activity tracking.
 
-**1. Work Handoffs** 🔄
+**When Claude MUST Log**:
+After completing work that meets **ANY** of these criteria:
+- ✅ **Duration** >10 minutes
+- ✅ **Files** created or updated >2
+- ✅ **Deliverables** produced (documentation, analysis, architecture, troubleshooting)
+- ✅ **User request** completed with tangible outcomes
+- ✅ **Significant decisions** made (architecture, cost, security, design)
+
+**How to Log**:
 ```bash
-# When transferring work to another agent or team member
-/agent:log-activity @current-agent handed-off "Transferring cost analysis to @cost-analyst - technical feasibility complete, financial analysis needed. See Research Hub entry R-2025-10-26-001 for context."
+/agent:log-activity @claude-main completed "[work-description]"
+# Then answer prompts for:
+# - Deliverables (files, analysis, decisions)
+# - Metrics (duration, lines generated, scope)
+# - Next steps (specific actions with owners)
+# - Related work (Ideas, Research, Builds)
 ```
 
-**2. Blockers Encountered** 🚧
+**Example**:
 ```bash
-# When progress is blocked and requires external input
-/agent:log-activity @build-architect blocked "Azure subscription quota limit reached for F1 App Service plans. Need subscription owner to request quota increase before deployment can proceed."
+/agent:log-activity @claude-main completed "Git structure documentation - Established comprehensive branching strategy, commit conventions, folder hierarchy, PR templates, and workflow examples"
+# Prompts answered:
+# Deliverables: GIT-STRUCTURE.md (1,100 lines), .github/pull_request_template.md, README.md update
+# Metrics: 35 min, 1,200 lines generated, 7 workflow examples, 15 quality checklists
+# Next steps: Team review, configure GitHub protection, enforce submodule schedule
 ```
 
-**3. Critical Milestones** 🎯
+**Non-Compliance Impact**:
+- ❌ Work invisible to team and stakeholders
+- ❌ Incomplete activity records in Agent Activity Hub
+- ❌ Lost knowledge and context for future work
+- ❌ Inconsistent tracking (subagents tracked, main agent invisible)
+
+**→ Architecture Documentation**: [Claude Main Logging Architecture](.claude/docs/claude-main-logging-architecture.md) - Complete solution design, 3-phase implementation plan
+
+---
+
+### Manual Logging (Special Events - All Agents)
+
+**When ANY agent (including subagents) should use `/agent:log-activity`**:
+- 🔄 **Work handoffs** to other agents/team members
+- 🚧 **Blockers** requiring external help
+- 🎯 **Critical milestones** needing stakeholder visibility
+- ✅ **Key decisions** requiring documentation (architecture, cost, design)
+- ⏹️ **Early termination** or scope changes
+
+**Command Format**:
 ```bash
-# When reaching significant progress points requiring stakeholder awareness
-/agent:log-activity @deployment-orchestrator completed "Production deployment successful - Application live at https://app.example.com. Zero-downtime migration completed, all health checks passing."
+/agent:log-activity @agent-name <status> "Detailed description with context"
+# Status: completed | blocked | handed-off | in-progress
 ```
 
-**4. Session Completion with Key Decisions** ✅
+---
+
+### Verification & Compliance
+
+**Check Your Logging**:
 ```bash
-# When finishing work that involved important architectural or strategic decisions
-/agent:log-activity @viability-assessor completed "Viability assessment complete: 87/100 (High). Recommend immediate build approval. Key decision: Selected Azure Functions over Container Apps due to cost efficiency ($12/month vs $78/month for expected load)."
+# View recent activity
+cat .claude/logs/AGENT_ACTIVITY_LOG.md | head -100
+
+# Check JSON state
+cat .claude/data/agent-state.json | grep -A 20 "claude-main"
+
+# Verify Notion sync (when database shared)
+# Agent Activity Hub: https://www.notion.so/72b879f213bd4edb9c59b43089dbef21
 ```
 
-**5. Early Termination** ⏹️
-```bash
-# When stopping work before completion due to user request or discovered issues
-/agent:log-activity @research-coordinator blocked "Research halted - discovered existing Microsoft solution (Power BI Deployment Pipelines) that fully addresses requirement. Recommend archiving idea as duplicate."
-```
+**Target Compliance**:
+- ✅ 100% of significant work logged (manual protocol)
+- ✅ 0 work sessions >20 min without activity log entry
+- ✅ Complete work record visible in Agent Activity Hub
 
-### Decision Tree: Automatic vs. Manual
-
-```
-Agent completes delegated task
-    ↓
-Is this a STANDARD work completion?
-    ├─ YES (99% of cases) → Let automatic hook handle logging
-    │                       ✓ Hook captures session data
-    │                       ✓ Updates all 3 tiers
-    │                       ✓ Zero manual effort
-    │
-    └─ NO (special event) → Does it involve...?
-        ├─ Handoff to another agent/person? → Use /agent:log-activity
-        ├─ Blocker requiring external help? → Use /agent:log-activity
-        ├─ Critical milestone needing visibility? → Use /agent:log-activity
-        ├─ Key decision requiring documentation? → Use /agent:log-activity
-        └─ Early termination/scope change? → Use /agent:log-activity
-```
-
-### Command Format
-
-```bash
-/agent:log-activity <agent-name> <status> "<detailed-description>"
-
-# Status values:
-#   - completed:  Work finished successfully
-#   - blocked:    Waiting for external input/dependency
-#   - handed-off: Transferred to another agent/team member
-#   - in-progress: Milestone update while work continues
-
-# Examples:
-/agent:log-activity @cost-analyst completed "Quarterly analysis complete - identified $450/month savings opportunity through Microsoft consolidation. See Software Tracker for recommendations."
-
-/agent:log-activity @build-architect handed-off "Architecture complete, transferring to @code-generator for implementation. ADR-2025-10-26-Azure-Functions documents all decisions."
-
-/agent:log-activity @deployment-orchestrator blocked "Bicep validation failed - Microsoft.Web/sites API version 2023-01-01 not supported in target region (West Europe). Need to update template or change region."
-```
-
-### Best Practices for Manual Logging
-
-**✅ DO**:
-- Provide specific, actionable details (not just "work complete")
-- Include file paths, URLs, or Notion page links for context
-- Document decisions and rationale (especially cost/architecture choices)
-- Mention handoff recipient by name/agent (@recipient)
-- Explain blockers clearly with specific resolution requirements
-
-**❌ DON'T**:
-- Log routine work that automatic hook already captures
-- Use vague descriptions ("made progress", "worked on stuff")
-- Skip logging handoffs (causes workflow breaks)
-- Forget to update status when blockers are resolved
-- Log without including next steps or required actions
-
-### Troubleshooting
-
-**If automatic logging isn't working**:
-1. Verify hook configuration in [.claude/settings.local.json](.claude/settings.local.json)
-2. Check hook execution log: [.claude/logs/auto-activity-hook.log](.claude/logs/auto-activity-hook.log)
-3. Confirm agent is in approved list (see hook script line 58-86)
-4. Verify Notion database access permissions
-
-**If Notion tier is queued but not syncing**:
-- ✅ **Status**: Notion API integration implemented with full retry logic and error handling
-- ⚠️ **Action Required**: Share Agent Activity Hub database with your Notion integration
-- 📋 **Queue Location**: [.claude/data/notion-sync-queue.jsonl](.claude/data/notion-sync-queue.jsonl)
-- 🔧 **Processor Script**: [.claude/utils/process-notion-queue.ps1](.claude/utils/process-notion-queue.ps1)
-- **Database IDs Verified**:
-  - Database (page) ID: `72b879f2-13bd-4edb-9c59-b43089dbef21` ✓ Correct
-  - Data Source (collection) ID: `7163aa38-f3d9-444b-9674-bde61868bd2b` ✓ Correct
-
-**Setup Steps** (One-time configuration):
-1. Open [Agent Activity Hub](https://www.notion.so/72b879f213bd4edb9c59b43089dbef21) in Notion
-2. Click "..." menu → "Connections" → "Add connection"
-3. Select your Notion integration (the one whose API token is stored in Key Vault as `notion-api-key`)
-4. Grant access to the database
-5. Test the processor: `.claude\utils\process-notion-queue.ps1`
-
-**How to verify**:
-```powershell
-# Create test entry (simulates hook behavior)
-echo '{"sessionId":"test-$(Get-Date -Format yyyyMMdd-HHmmss)","agentName":"@cost-analyst","status":"completed","workDescription":"Test entry","startTime":"2025-10-26T10:00:00Z","queuedAt":"2025-10-26T10:00:00Z","syncStatus":"pending","retryCount":0}' >> .claude\data\notion-sync-queue.jsonl
-
-# Process queue (syncs to Notion)
-.\.claude\utils\process-notion-queue.ps1
-
-# Check results
-# - Should show "Successfully processed: 1"
-# - Entry should appear in Agent Activity Hub database
-# - Queue file should be empty after successful sync
-```
-
-**→ Full Documentation**: [Agent Activity Center](.claude/docs/agent-activity-center.md)
+**→ Complete Documentation**: [Agent Activity Center](.claude/docs/agent-activity-center.md) - Full logging requirements, troubleshooting, verification commands
 
 ---
 
@@ -325,114 +494,105 @@ echo '{"sessionId":"test-$(Get-Date -Format yyyyMMdd-HHmmss)","agentName":"@cost
 /cost:microsoft-alternatives [tool]    # M365/Azure replacements
 ```
 
+### Financial Data APIs
+
+Establish access to real-time market data and investment research to support cost analysis, viability assessments, and market research workflows.
+
+```typescript
+// Morningstar Financial Data - Stock/Fund Research
+const stockData = await morningstarAPI.getEquityData({
+  ticker: "MSFT",
+  fields: ["price", "pe_ratio", "market_cap"]
+});
+
+// Bloomberg Terminal - Real-Time Market Data
+const marketData = await bloombergAPI.getSecurityData({
+  securities: ["MSFT US Equity"],
+  fields: ["PX_LAST", "VOLUME", "PE_RATIO"]
+});
+
+// Microsoft Documentation - Technical References
+const azureDocs = await mcp__azure__documentation({
+  intent: "search",
+  parameters: { query: "Azure Functions best practices" }
+});
+```
+
+**Best for**: @cost-analyst (market comparisons), @research-coordinator (competitive analysis), @viability-assessor (market validation), @market-researcher (industry trends)
+
+**Authentication**: Azure Key Vault (`morningstar-api-key`, `bloomberg-api-username`, `bloomberg-api-password`)
+
+**→ Complete Guide**: [Financial APIs Documentation](.claude/docs/financial-apis.md) | [MCP Configuration](.claude/docs/mcp-configuration.md)
+
 ---
 
-## Detailed Documentation (Modular Structure)
+## Documentation
 
-All comprehensive documentation has been organized into focused, modular files to optimize token usage while maintaining complete information access.
+**Comprehensive guides available in [.claude/docs/](.claude/docs/)**:
+- **[Innovation Workflow](.claude/docs/innovation-workflow.md)** - Complete lifecycle, autonomous pipeline, research swarm
+- **[Common Workflows](.claude/docs/common-workflows.md)** - Step-by-step procedures for frequent operations
+- **[Notion Schema](.claude/docs/notion-schema.md)** - Database architecture, relations, rollups
+- **[Azure Infrastructure](.claude/docs/azure-infrastructure.md)** - Subscription, Key Vault, security
+- **[MCP Configuration](.claude/docs/mcp-configuration.md)** - Server setup, authentication, troubleshooting
+- **[Team Structure](.claude/docs/team-structure.md)** - Member specializations, assignment routing
+- **[Agent Activity Center](.claude/docs/agent-activity-center.md)** - 3-tier tracking, hook architecture
+- **[Configuration & Environment](.claude/docs/configuration.md)** - Settings, environment variables, hooks
+- **[Microsoft Ecosystem](.claude/docs/microsoft-ecosystem.md)** - Service priority, decision framework
+- **[Agent Guidelines](.claude/docs/agent-guidelines.md)** - Core principles, security, brand voice
+- **[Success Metrics](.claude/docs/success-metrics.md)** - KPIs, measurement framework
 
-### Innovation & Workflow
-
-**[Innovation Workflow](.claude/docs/innovation-workflow.md)** ⭐ Core
-- Complete 4-phase lifecycle (Idea → Research → Build → Knowledge)
-- Phase 3 autonomous build pipeline (40-60 min deployments)
-- Research swarm coordination (4 parallel agents)
-- Repository safety hooks and security patterns
-- Decision matrices and integration points
-
-**[Common Workflows](.claude/docs/common-workflows.md)** 🔄 Practical
-- Step-by-step procedures for frequent operations
-- Complete innovation lifecycle example
-- Quarterly cost optimization workflow
-- Repository portfolio analysis workflow
-- Emergency research fast-track procedures
-- Daily startup routines
-
-### Notion & Data
-
-**[Notion Schema](.claude/docs/notion-schema.md)** 📊 Database Architecture
-- Complete database schemas with all properties
-- Relation rules and rollup formulas
-- Standard operations protocol (search-first)
-- Query patterns and examples
-- Validation checklists
-
-### Azure & Infrastructure
-
-**[Azure Infrastructure](.claude/docs/azure-infrastructure.md)** ☁️ Cloud Configuration
-- Active subscription and tenant details
-- Key Vault configuration and secret retrieval
-- Security best practices and credential handling
-- Cost optimization strategies
-- Daily authentication workflow
-
-**[MCP Configuration](.claude/docs/mcp-configuration.md)** 🔌 Integration Setup
-- Active MCP servers (Notion, GitHub, Azure, Playwright)
-- Authentication methods per server
-- Environment setup procedures
-- Connection verification and troubleshooting
-- Performance optimization tips
-
-### Team & Operations
-
-**[Team Structure](.claude/docs/team-structure.md)** 👥 Team Coordination
-- Team member specializations (5 members)
-- Assignment routing logic and auto-assignment
-- Collaboration patterns and handoff procedures
-- Workload management and capacity planning
-
-**[Agent Activity Center](.claude/docs/agent-activity-center.md)** 🤖 Activity Tracking
-- 3-tier tracking system (Notion + Markdown + JSON)
-- Automatic activity logging (Phase 4)
-- Hook architecture and filtering rules
-- Logging operations and status workflows
-- Productivity analytics
-
-### Configuration & Environment
-
-**[Configuration & Environment](.claude/docs/configuration.md)** ⚙️ Setup
-- Claude Code settings (settings.local.json)
-- Environment variables (complete list)
-- Repository hooks (pre-commit, commit-msg, tool-call)
-- PowerShell scripts and utilities
-- Daily startup routine
-
-**[Microsoft Ecosystem](.claude/docs/microsoft-ecosystem.md)** 🏢 Microsoft-First
-- Selection priority order (M365 → Azure → Power Platform → GitHub)
-- Service comparison matrices
-- Cost optimization benefits
-- Integration patterns and decision framework
-
-### Guidelines & Best Practices
-
-**[Agent Guidelines](.claude/docs/agent-guidelines.md)** 📋 Agent Operations
-- Core principles for agents
-- Automated integration patterns
-- Performance optimization (MCP usage)
-- Security best practices
-- Brookside BI brand voice application
-
-**[Success Metrics](.claude/docs/success-metrics.md)** 📈 Measurement
-- Innovation workflow success criteria
-- Cost optimization KPIs
-- Knowledge reuse metrics
-- Team productivity indicators
-- Security and compliance standards
-- Quarterly review checklists
+**Agent Specifications**: [38+ specialized agents](.claude/agents/)
+**Command Reference**: [All slash commands](.claude/commands/)
+**Output Styles**: [Style definitions](.claude/styles/)
 
 ---
 
 ## Innovation Workflow (Quick Summary)
 
+**Visual Workflow: Complete Innovation Lifecycle**
+
+```mermaid
+flowchart TD
+    A[💡 New Idea Captured] --> B{Viability Assessment}
+
+    B -->|Needs Research| C[🔬 Research Hub]
+    C --> D[4-Agent Parallel Swarm]
+    D --> E{Viability Score<br/>0-100}
+
+    E -->|>85: High| F[Auto-Approve for Build]
+    E -->|60-85: Medium| G[Manual Review Required]
+    E -->|<60: Low| H[Archive with Learnings]
+
+    B -->|High Viability| F
+    G -->|Approved| F
+    G -->|Rejected| H
+
+    F --> I[🛠️ Example Build]
+    I --> J[Phase 3 Autonomous Pipeline]
+    J --> K[Code Generation]
+    K --> L[Infrastructure Provisioning]
+    L --> M[Azure Deployment]
+
+    M --> N{Deployment<br/>Success?}
+    N -->|No| O[Troubleshoot & Retry]
+    O --> M
+    N -->|Yes| P[Production Ready]
+
+    P --> Q[📚 Knowledge Vault]
+    H --> Q
+
+    Q --> R[Reusable Patterns & Learnings]
+
+    style A fill:#3B82F6,color:#fff
+    style C fill:#8B5CF6,color:#fff
+    style I fill:#F97316,color:#fff
+    style M fill:#10B981,color:#fff
+    style P fill:#10B981,color:#fff
+    style Q fill:#3B82F6,color:#fff
+    style H fill:#6B7280,color:#fff
 ```
-💡 Idea (Concept) → Viability Assessment
-  ↓ (if Needs Research)
-🔬 Research (Active) → 4-Agent Parallel Swarm → Viability Score (0-100)
-  ↓ (if >85: Auto-Approve | 60-85: Review | <60: Archive)
-🛠️ Build (Active) → Autonomous Pipeline (40-60 min) → Azure Deployment
-  ↓ (when Complete)
-📚 Knowledge Vault (Archived for Reference)
-```
+
+*Figure: Complete innovation lifecycle showing idea capture through knowledge archival. 4-agent research swarm provides viability scores, autonomous build pipeline deploys to Azure in 40-60 minutes.*
 
 **Phase 3 Autonomous Build Pipeline** (Completed Oct 2025):
 - 40-60 min from high-viability idea to deployed Azure application
@@ -478,13 +638,11 @@ claude                                  # Launch Claude Code
 - Use retrieval scripts: `.\scripts\Get-KeyVaultSecret.ps1`
 
 **Webhook + APIM MCP** (Real-time agent activity tracking):
+- **Status**: 85% complete (infrastructure ready, manual deployment required)
 - **Webhook Endpoint**: `https://notion-webhook-brookside-prod.azurewebsites.net/api/NotionWebhook`
 - **APIM Gateway**: `https://apim-brookside-innovation.azure-api.net`
 - **MCP Server**: `azure-apim-innovation` (5th MCP server for AI agent API invocation)
-- **Status**: 85% complete, [manual deployment steps](NEXT-STEPS-CHECKLIST.md) required
-- **→ See [Webhook Architecture](.claude/docs/webhook-architecture.md) for design**
-- **→ See [APIM MCP Configuration](.claude/docs/azure-apim-mcp-configuration.md) for setup**
-- **→ See [Implementation Status](WEBHOOK-APIM-IMPLEMENTATION-STATUS.md) for detailed progress**
+- **→ See [Webhook Architecture](.claude/docs/webhook-architecture.md) for complete design and deployment steps**
 
 **→ See [Azure Infrastructure](.claude/docs/azure-infrastructure.md) for complete configuration**
 **→ See [MCP Configuration](.claude/docs/mcp-configuration.md) for server setup**
@@ -520,35 +678,6 @@ claude                                  # Launch Claude Code
 
 ---
 
-## Additional Resources
-
-### Documentation Directories
-- **Patterns**: [.claude/docs/patterns/](.claude/docs/patterns) - Circuit-breaker, Retry, Saga, Event Sourcing
-- **Templates**: [.claude/templates/](.claude/templates) - ADR, Runbook, Research Entry
-- **Agents**: [.claude/agents/](.claude/agents) - 38+ specialized agent specifications
-- **Commands**: [.claude/commands/](.claude/commands) - All slash commands with usage examples
-- **Styles**: [.claude/styles/](.claude/styles) - Output style definitions
-
-### Scripts & Utilities
-- **Get-KeyVaultSecret.ps1**: Retrieve individual secrets from Azure Key Vault
-- **Set-MCPEnvironment.ps1**: Configure all MCP environment variables
-- **Test-AzureMCP.ps1**: Validate Azure MCP server connectivity
-- **session-parser.ps1**: Parse Claude session context
-- **invoke-agent.ps1**: Manually invoke specialized agents
-- **notion-queries.ps1**: Common Notion database queries
-
-### Logs & State
-- **Agent Activity Log**: [.claude/logs/AGENT_ACTIVITY_LOG.md](.claude/logs/AGENT_ACTIVITY_LOG.md)
-- **Agent State JSON**: [.claude/data/agent-state.json](.claude/data/agent-state.json)
-- **Notion Agent Activity Hub**: https://www.notion.so/72b879f213bd4edb9c59b43089dbef21
-
-### Repository Analyzer
-- **Quick Start**: [brookside-repo-analyzer/README.md](brookside-repo-analyzer/README.md)
-- **Architecture**: [brookside-repo-analyzer/docs/ARCHITECTURE.md](brookside-repo-analyzer/docs/ARCHITECTURE.md)
-- **API Reference**: [brookside-repo-analyzer/docs/API.md](brookside-repo-analyzer/docs/API.md)
-
----
-
 ## Success Indicators (At-a-Glance)
 
 **You're driving measurable outcomes when:**
@@ -579,4 +708,4 @@ claude                                  # Launch Claude Code
 
 **Brookside BI Innovation Nexus - Where Ideas Become Examples, and Examples Become Knowledge - Secured by Azure.**
 
-**Last Updated**: 2025-10-26 | **Structure**: Modular (11 detailed documentation files)
+**Last Updated**: 2025-10-26 (Updated: Cost commands, Actions Registry, Command Discovery) | **Structure**: Modular (11 detailed documentation files)
