@@ -17,7 +17,6 @@ Updated `.claude/commands/README.md` to accurately document all 49 operational s
 - **Repository Intelligence** (4 commands) - GitHub analysis, pattern extraction, cost calculation
 - **Style Testing & Analysis** (3 commands) - Output quality optimization, comparative testing
 - **Documentation Management** (3 commands) - Multi-file updates, diagram generation, PR creation
-- **DSP Commands** (3 commands) - Demo environment management, deployment
 - **Build Management** (3 commands) - Build lifecycle, software linking, status tracking
 - **Idea Management** (3 commands) - Idea search, creation, viability assessment
 - **Research Management** (2 commands) - Findings updates, research completion
@@ -65,13 +64,12 @@ Updated `.claude/commands/README.md` to accurately document all 49 operational s
 | Repo | 4 | scan-org, analyze, extract-patterns, calculate-costs |
 | Style | 3 | test-agent-style, compare, report |
 | Docs | 3 | sync-notion, update-simple, update-complex |
-| DSP | 3 | demo-prep, sync-notion, deploy-demo |
 | Build | 3 | create, link-software, update-status |
 | Idea | 3 | search, create, assess |
 | Research | 2 | update-findings, complete |
 | Compliance | 1 | audit |
 | Action | 1 | register-all |
-| **TOTAL** | **49** | |
+| **TOTAL** | **46** | |
 
 **Updated Documentation References**:
 - Summary table: "Total: 49 Commands Across 15 Functional Categories"

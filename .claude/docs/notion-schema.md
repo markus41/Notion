@@ -500,7 +500,7 @@ Data Sources: Relation → Data Sources (client data infrastructure)
 **Formatting Standard**: `📦 [Project Name]`
 
 **Use Cases**:
-- Track multi-build initiatives (e.g., DSP Command Central spanning multiple repositories)
+- Track multi-build initiatives spanning multiple repositories
 - Manage client projects with deliverables
 - Coordinate team assignments across related work
 

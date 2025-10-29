@@ -490,7 +490,6 @@ The Actions Registry represents a **recursive META system** where:
 | **Repo** | 4 | 0 (External - GitHub) | N/A |
 | **Style** | 3 | 2 (Styles + Tests) | **47%** |
 | **Docs** | 3 | 0 (External - File system) | N/A |
-| **DSP** | 3 | 0 (External - Submodule) | N/A |
 | **Build** | 3 | 1 (Example Builds) | **60%** |
 | **Idea** | 3 | 1 (Ideas Registry) | **80%** |
 | **Research** | 2 | 1 (Research Hub) | **70%** |
@@ -810,11 +809,6 @@ For each new command:
 - `/docs:update-complex`
 - `/docs:update-simple`
 - `/docs:sync-notion`
-
-#### DSP (3)
-- `/dsp:demo-prep`
-- `/dsp:deploy-demo`
-- `/dsp:sync-notion`
 
 #### Build (3)
 - `/build:create`

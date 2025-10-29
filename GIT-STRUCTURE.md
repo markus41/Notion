@@ -161,9 +161,6 @@ Notion/
 │   │   ├── audits/                # Audit reports
 │   │   ├── notion-setup/          # Batch setup guides
 │   │   └── experiments/           # Experimental features
-│   └── dsp/                       # DSP Command Central docs
-│
-├── dsp-command-central/            # Submodule: DSP integration (separate repo)
 │
 ├── infrastructure/                 # Infrastructure as Code
 │   ├── bicep/                     # Azure Bicep templates
@@ -455,11 +452,14 @@ List any breaking changes and migration steps.
 
 ### Active Submodules
 
-| Submodule | Repository | Purpose | Update Frequency |
-|-----------|------------|---------|------------------|
-| `dsp-command-central` | `markus41/dsp-command-central` | DSP integration and command routing | Weekly |
+*Currently, there are no active submodules in this repository.*
+
+**Historical Submodules** (removed):
+- `dsp-command-central` - DSP integration and command routing (removed in commit 9c8c964)
 
 ### Submodule Operations
+
+*The following procedures are documented for future submodule management if needed.*
 
 **Initialize Submodules (First Clone):**
 ```powershell
@@ -470,15 +470,15 @@ git submodule update --init --recursive
 
 **Update Submodule to Latest:**
 ```powershell
-# Update dsp-command-central to latest commit
-cd dsp-command-central
+# Update submodule to latest commit (example)
+cd <submodule-name>
 git checkout main
 git pull origin main
 cd ..
 
 # Commit submodule reference update
-git add dsp-command-central
-git commit -m "chore: Update dsp-command-central submodule reference"
+git add <submodule-name>
+git commit -m "chore: Update <submodule-name> submodule reference"
 git push
 ```
 
@@ -499,13 +499,13 @@ sequenceDiagram
     participant Sub as Submodule Repository
     participant Remote as Remote Origin
 
-    Dev->>Sub: cd dsp-command-central
+    Dev->>Sub: cd <submodule-name>
     Dev->>Sub: git checkout main
     Dev->>Sub: git pull origin main
     Note over Sub: Submodule updated<br/>to latest commit
 
     Dev->>Main: cd .. (back to main repo)
-    Dev->>Main: git add dsp-command-central
+    Dev->>Main: git add <submodule-name>
     Note over Main: Stage submodule<br/>reference update
 
     Dev->>Main: git commit -m "chore: Update submodule"
@@ -524,16 +524,16 @@ sequenceDiagram
 **Remove Submodule (if needed):**
 ```powershell
 # 1. Deinitialize
-git submodule deinit -f dsp-command-central
+git submodule deinit -f <submodule-name>
 
 # 2. Remove from .git/modules
-Remove-Item -Recurse -Force .git/modules/dsp-command-central
+Remove-Item -Recurse -Force .git/modules/<submodule-name>
 
 # 3. Remove from working tree
-git rm -f dsp-command-central
+git rm -f <submodule-name>
 
 # 4. Commit removal
-git commit -m "chore: Remove dsp-command-central submodule"
+git commit -m "chore: Remove <submodule-name> submodule"
 ```
 
 ### Submodule Best Practices
@@ -818,7 +818,7 @@ git submodule status
 git submodule update --init --recursive
 
 # 3. If still broken, re-clone
-Remove-Item -Recurse -Force dsp-command-central
+Remove-Item -Recurse -Force <submodule-name>
 git submodule update --init --recursive
 ```
 

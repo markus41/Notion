@@ -58,13 +58,13 @@ Automatically scans all slash command files (`.claude/commands/`), extracts meta
 
 ### Command Categories Overview
 
-The Innovation Nexus includes 68 specialized slash commands organized across 19 functional categories, each designed to streamline specific workflows and drive measurable outcomes across the innovation lifecycle.
+The Innovation Nexus includes 63 specialized slash commands organized across 18 functional categories, each designed to streamline specific workflows and drive measurable outcomes across the innovation lifecycle.
 
 **Mindmap: Complete Command Hierarchy**
 
 ```mermaid
 mindmap
-  root((Innovation Nexus<br/>68 Commands))
+  root((Innovation Nexus<br/>63 Commands))
     💰 Cost Management
       /cost:monthly-spend
       /cost:analyze
@@ -111,11 +111,6 @@ mindmap
       /knowledge:search
       /knowledge:retrieve-pattern
       3 total commands
-    🎯 DSP Commands
-      /dsp:demo-prep
-      /dsp:sync-notion
-      /dsp:deploy-demo
-      3 total commands
     🗄️ Data Source
       /datasource:register
       /datasource:refresh-status
@@ -151,14 +146,14 @@ mindmap
       1 total command
 ```
 
-*Figure 1: Hierarchical view of all 68 slash commands organized by functional category. Each category supports specific workflows across the innovation lifecycle from idea capture through knowledge archival.*
+*Figure 1: Hierarchical view of all 65 slash commands organized by functional category. Each category supports specific workflows across the innovation lifecycle from idea capture through knowledge archival.*
 
 **Category Distribution**:
 - **Highest Coverage**: Cost Management (16 commands) - comprehensive spend analysis, optimization, and forecasting
 - **Core Lifecycle**: Innovation (4), Build (3), Idea (3), Research (2), Knowledge (3) - complete idea-to-archive workflow
 - **Operational Excellence**: Agent Activity (7), Repository Intelligence (4), Documentation (3), Project (3) - visibility and governance
 - **Quality & Testing**: Style Testing (6), Autonomous Operations (2), Compliance (1) - continuous improvement
-- **Infrastructure**: Data Source (3), Integration (2), OKR (2), DSP (3), Actions Registry (1), Team (1) - platform capabilities
+- **Infrastructure**: Data Source (3), Integration (2), OKR (2), Actions Registry (1), Team (1) - platform capabilities
 
 ---
 
@@ -173,7 +168,7 @@ mindmap
 | `@knowledge-curator` | Archive learnings | Build completes or "document learnings" |
 | `@archive-manager` | Complete work lifecycle | "archive", "done with", "complete" |
 
-**→ Full Directory**: [56 specialized agents](.claude/agents/) including autonomous pipeline, research swarm, and output styles
+**→ Full Directory**: [46 specialized agents](.claude/agents/) including autonomous pipeline, research swarm, and output styles
 
 ---
 
@@ -396,7 +391,7 @@ erDiagram
 
 **Trigger**: Task tool invocations (when Claude delegates to @agent-name)
 
-**Coverage**: 56 specialized agents including:
+**Coverage**: 46 specialized agents including:
 - @build-architect, @code-generator, @deployment-orchestrator
 - @research-coordinator, @viability-assessor, @cost-analyst
 - @knowledge-curator, @archive-manager, @integration-specialist
@@ -562,8 +557,8 @@ const azureDocs = await mcp__azure__documentation({
 - **[Agent Guidelines](.claude/docs/agent-guidelines.md)** - Core principles, security, brand voice
 - **[Success Metrics](.claude/docs/success-metrics.md)** - KPIs, measurement framework
 
-**Agent Specifications**: [56 specialized agents](.claude/agents/)
-**Command Reference**: [68 slash commands](.claude/commands/)
+**Agent Specifications**: [46 specialized agents](.claude/agents/)
+**Command Reference**: [63 slash commands](.claude/commands/)
 **Output Styles**: [Style definitions](.claude/styles/)
 
 ---

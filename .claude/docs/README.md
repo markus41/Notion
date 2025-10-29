@@ -63,7 +63,6 @@
 - azure-apim-mcp-configuration.md
 - azure-openai-integration-architecture.md
 - architecture-diagrams.md
-- dsp-notion-sync-configuration.md
 
 **Notion Specific**:
 - notion-connection-overhaul-findings.md

@@ -22,7 +22,7 @@ After restarting Claude Code, these commands become available for immediate use:
 
 ## Available Commands
 
-**Total: 49 Commands Across 15 Functional Categories**
+**Total: 63 Commands Across 14 Functional Categories**
 
 | Category | Commands | Key Use Cases |
 |----------|----------|---------------|
@@ -35,7 +35,6 @@ After restarting Claude Code, these commands become available for immediate use:
 | Repository Intelligence | 4 | GitHub analysis, pattern extraction, cost calculation |
 | Style Testing & Analysis | 3 | Output quality optimization, comparative testing |
 | Documentation Management | 3 | Multi-file updates, diagram generation, PR creation |
-| DSP Commands | 3 | Demo environment management, deployment |
 | Build Management | 3 | Build lifecycle, software linking, status tracking |
 | Idea Management | 3 | Idea search, creation, viability assessment |
 | Research Management | 2 | Findings updates, research completion |
@@ -143,7 +142,7 @@ Commands that provide comprehensive GitHub portfolio analysis, pattern extractio
 | Command | Purpose | Example |
 |---------|---------|---------|
 | `/repo:scan-org` | Scan all GitHub organization repositories with viability assessment | `/repo:scan-org --sync --deep` |
-| `/repo:analyze` | Analyze single repository with comprehensive assessment | `/repo:analyze "dsp-command-central" --sync` |
+| `/repo:analyze` | Analyze single repository with comprehensive assessment | `/repo:analyze "notion-webhook" --sync` |
 | `/repo:extract-patterns` | Extract cross-repository architectural patterns for reusability | `/repo:extract-patterns --min-usage=3 --sync` |
 | `/repo:calculate-costs` | Calculate portfolio-wide software costs with optimization recommendations | `/repo:calculate-costs --detailed` |
 
@@ -176,20 +175,6 @@ Commands that manage comprehensive documentation through intelligent parallel ag
 | `/docs:update-complex` | Update multi-file documentation with diagrams, validation, and PRs | `/docs:update-complex .claude/docs "Update agent guidelines" --diagrams --create-pr` |
 
 **Best for**: Organizations requiring automated documentation maintenance across complex file hierarchies with architectural diagram generation and quality validation.
-
----
-
-### DSP (Deployment Support Package) Commands (3 Commands)
-
-Commands specific to managing DSP demo environments, Notion synchronization, and deployment orchestration.
-
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/dsp:demo-prep` | Prepare comprehensive demo environment and materials | `/dsp:demo-prep "Q4 Sales Demo"` |
-| `/dsp:sync-notion` | Sync DSP data and status to Notion tracking | `/dsp:sync-notion` |
-| `/dsp:deploy-demo` | Deploy DSP demo environment to Azure | `/dsp:deploy-demo "production"` |
-
-**Best for**: Teams managing demonstration environments requiring coordinated deployment, data synchronization, and presentation material preparation.
 
 ---
 
@@ -554,7 +539,6 @@ See `SLASH_COMMANDS_GUIDE.md` for comprehensive guide on:
 
 **Phase 5: Infrastructure & Specialized** ✅ COMPLETE
 - ✅ Documentation management (3 docs commands)
-- ✅ DSP operations (3 dsp commands)
 - ✅ Compliance auditing (`/compliance:audit`)
 - ✅ Actions Registry META (`/action:register-all`)
 
