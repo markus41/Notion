@@ -44,3 +44,31 @@ brookside-repo-analyzer/deployment/azure_function_deploy/
 LogFiles/
 *-analysis-*.json
 *-repos.json
+
+# Claude Code performance optimization
+.claudeignore
+.claude/cache/
+.claude/index/
+.claude/temp/
+
+# Migration artifacts (completed)
+.claude/data/migration-batches/
+.claude/data/migration-archive-*.zip
+.claude/data/reconstructed-sessions-*.json
+.claude/data/temp-blocked-session.json
+.claude/data/test-batch.json
+.claude/data/batch*.json
+
+# Large logs (compress before archiving)
+.claude/logs/notion-queue-processor.log
+.claude/logs/*.log.zip
+
+# Editor and IDE
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+Thumbs.db
+
+# Git LFS
+*.lfs.*

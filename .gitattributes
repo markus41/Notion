@@ -1,0 +1,117 @@
+# .gitattributes - Establish Git handling rules to streamline diff operations and optimize repository performance
+# Best for: Organizations requiring consistent cross-platform development workflows
+
+# Auto detect text files and normalize line endings to LF in repository
+* text=auto
+
+# Explicitly declare text files for consistent handling
+*.md text
+*.txt text
+*.json text
+*.yaml text
+*.yml text
+*.xml text
+*.html text
+*.css text
+*.js text
+*.ts text
+*.jsx text
+*.tsx text
+*.py text
+*.sh text
+*.ps1 text
+*.psm1 text
+*.psd1 text
+*.bat text
+*.cmd text
+*.sql text
+
+# Force LF line endings on checkout for Unix scripts (cross-platform compatibility)
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Force CRLF line endings on checkout for Windows scripts
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files - prevent git from attempting text operations
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.tif binary
+*.tiff binary
+*.webp binary
+*.svg binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+
+# Diff optimization for specific file types
+*.md diff=markdown
+*.json diff=json
+*.yaml diff=yaml
+*.yml diff=yaml
+*.py diff=python
+*.ps1 diff=powershell
+
+# Linguist overrides for GitHub language statistics
+# Documentation should not count toward project language percentages
+.claude/** linguist-documentation
+documentation/** linguist-documentation
+docs/** linguist-documentation
+
+# Archive directories should not be analyzed
+.archive/** linguist-documentation=false linguist-generated
+
+# Vendored or generated code
+node_modules/** linguist-vendored
+.venv/** linguist-vendored
+dist/** linguist-generated
+build/** linguist-generated
+
+# Markdown files should be detectable for statistics
+*.md linguist-detectable
+
+# Large file handling - configure Git LFS for files over 100MB
+# (Uncomment and configure if your repository will track large binary assets)
+# *.psd filter=lfs diff=lfs merge=lfs -text
+# *.ai filter=lfs diff=lfs merge=lfs -text
+# *.mp4 filter=lfs diff=lfs merge=lfs -text
+# *.mov filter=lfs diff=lfs merge=lfs -text
+
+# Configuration files - always text
+.gitignore text
+.gitattributes text
+.editorconfig text
+.claudeignore text
+.npmignore text
+.dockerignore text
+
+# CI/CD configuration - always text with LF
+.github/**/*.yml text eol=lf
+.gitlab-ci.yml text eol=lf
+azure-pipelines.yml text eol=lf
+
+# Lock files - generated, but should be tracked
+package-lock.json text -diff
+yarn.lock text -diff
+poetry.lock text -diff
+Pipfile.lock text -diff

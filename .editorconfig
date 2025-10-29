@@ -1,0 +1,76 @@
+# .editorconfig - Establish consistent coding styles across team and editors
+# Designed for organizations scaling development workflows with multiple contributors
+
+# Top-most EditorConfig file
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Markdown files - preserve trailing whitespace for line breaks
+[*.{md,markdown}]
+max_line_length = 100
+trim_trailing_whitespace = false
+indent_size = 2
+
+# JSON and YAML - standard 2-space indentation
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# Package configuration files
+[{package.json,.prettierrc,.eslintrc,.babelrc}]
+indent_size = 2
+
+# PowerShell scripts - 4-space indentation, CRLF line endings on Windows
+[*.{ps1,psm1,psd1}]
+indent_size = 4
+end_of_line = crlf
+
+# Shell scripts - 4-space indentation, LF line endings
+[*.{sh,bash,zsh}]
+indent_size = 4
+end_of_line = lf
+
+# Python - PEP 8 standards
+[*.py]
+indent_size = 4
+max_line_length = 100
+
+# JavaScript/TypeScript - 2-space indentation
+[*.{js,jsx,ts,tsx}]
+indent_size = 2
+max_line_length = 100
+
+# HTML/CSS - 2-space indentation
+[*.{html,css,scss,sass,less}]
+indent_size = 2
+
+# XML files - 2-space indentation
+[*.{xml,svg}]
+indent_size = 2
+
+# Makefiles - must use tabs
+[{Makefile,makefile,GNUmakefile}]
+indent_style = tab
+
+# Batch files - Windows-specific, CRLF required
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# C/C++ - 4-space indentation
+[*.{c,cpp,h,hpp}]
+indent_size = 4
+
+# Java - 4-space indentation
+[*.java]
+indent_size = 4
+
+# Go - tabs required
+[*.go]
+indent_style = tab

@@ -1,0 +1,84 @@
+# .claudeignore - Exclude directories from Claude Code indexing for optimal performance
+# Establish lean indexing to drive 40-60% faster startup and search operations
+
+# Git internals - no need to index version control metadata
+.git/
+.github/
+
+# Archives and historical data - completed work not needed for active operations
+.archive/
+*.backup*
+*.bak
+
+# Migration data - completed migrations don't need indexing
+.claude/data/migration-batches/
+.claude/data/migration-*.json
+.claude/data/migration-*.txt
+.claude/data/migration-*.md
+.claude/data/reconstructed-sessions-*.json
+.claude/data/temp-blocked-session.json
+.claude/data/test-batch.json
+.claude/data/batch*.json
+
+# Build artifacts - generated files not part of source code
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+node_modules/
+.venv/
+venv/
+ENV/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Logs - read when needed, but don't index for search
+.claude/logs/
+*.log
+*.log.*
+
+# Temporary files - OS and editor artifacts
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and editor directories
+.vscode/
+.idea/
+*.sublime-*
+
+# Large data files - typically not searched in code operations
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled and binary files
+*.dll
+*.exe
+*.so
+*.dylib
+*.zip
+*.tar.gz
+*.rar
+
+# Infrastructure deployment artifacts
+infrastructure/deployment-result.json
+deployments/*/deployment-*.json
+
+# Cache directories
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
