@@ -1,4 +1,0 @@
-<step title="Incoming Request" date="2025-10-26T18:12:03.241" instance="14081d" url="/dump" method="GET" type="request" pid="823,1,22" Host="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" User-Agent="AZURECLI/2.77.0 (MSI)" Accept-Encoding="identity" Authorization="Bea..." x-ms-client-request-id="441e7e51-b297-11f0-8351-dc567bd6348a" X-ARR-LOG-ID="441e7e51-b297-11f0-8351-dc567bd6348a" CLIENT-IP="73.235.38.158:57088" X-SITE-DEPLOYMENT-ID="app-dsp-backend-dev-dfb8575d" WAS-DEFAULT-HOSTNAME="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/dump" X-Client-IP="73.235.38.158" X-Client-Port="57088" >
-  <step title="Cleanup Xml Logs" date="2025-10-26T18:12:03.250" >
-    <step title="Cleanup Infos" date="2025-10-26T18:12:03.331" totalFiles="288" totalCleanup="128" /><!-- duration: 22ms -->
-  </step><!-- duration: 161ms -->

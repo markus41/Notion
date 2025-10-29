@@ -1,8 +1,0 @@
-<step title="Incoming Request" date="2025-10-26T18:00:48.263" instance="14081d" url="/api/deployments/latest" method="GET" type="request" pid="821,1,20" Accept="*/*" Host="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" User-Agent="AZURECLI/2.77.0 (MSI)" Accept-Encoding="gzip, deflate" Authorization="Bea..." x-ms-client-request-id="9c9d0b16-b295-11f0-a123-dc567bd6348a" X-ARR-LOG-ID="9c9d0b16-b295-11f0-a123-dc567bd6348a" CLIENT-IP="73.235.38.158:54610" X-SITE-DEPLOYMENT-ID="app-dsp-backend-dev-dfb8575d" WAS-DEFAULT-HOSTNAME="app-dsp-backend-dev-dfb8575d.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/deployments/latest" X-Client-IP="73.235.38.158" X-Client-Port="54610" >
-  <step title="DeploymentService.GetResult" date="2025-10-26T18:00:48.269" >
-    <step title="DeploymentService.GetLatestDeployment" date="2025-10-26T18:00:48.276" >
-      <step title="DeploymentManager.GetResults" date="2025-10-26T18:00:48.306" /><!-- duration: 232ms -->
-    </step><!-- duration: 264ms -->
-  </step><!-- duration: 279ms -->
-  <step title="Outgoing response" date="2025-10-26T18:00:48.558" type="response" statusCode="202" statusText="Accepted" /><!-- duration: 8ms -->
-</step><!-- duration: 306ms -->
