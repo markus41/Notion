@@ -90,3 +90,4 @@ export interface WebhookConfig {
   maxRetries: number;
   timeoutSeconds: number;
 }
+

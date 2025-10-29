@@ -1,0 +1,257 @@
+{
+  "mcpServers": {
+    "web-flow": {
+      "command": "node",
+      "args": [
+        "c:/Users/MarkusAhling/Notion/mcp-servers/web-flow-server/dist/index.js"
+      ],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}",
+        "REDIS_CONNECTION_STRING": "${AZURE_CACHE_REDIS_CONNECTION}",
+        "WEBFLOW_API_TOKEN": "${WEBFLOW_API_TOKEN}",
+        "AZURE_FRONT_DOOR_ENDPOINT": "${AZURE_FRONT_DOOR_ENDPOINT}"
+      },
+      "description": "Web Flow MCP server for public-facing portfolio, idea intake, and content synchronization operations",
+      "tools": [
+        {
+          "name": "web-flow__get-public-builds",
+          "description": "Fetch published Example Builds for portfolio showcase (filtered by PublishToWeb = true, Status = Completed). Returns build metadata with sensitive data redacted (no costs, internal notes, team details).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of builds to return (default: 10, max: 100)",
+                "default": 10
+              },
+              "category": {
+                "type": "string",
+                "description": "Filter by build category (e.g., 'Data & Analytics', 'Integration', 'Automation')"
+              },
+              "techStack": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Filter by technology stack (e.g., ['Azure Functions', 'Power BI'])"
+              },
+              "sortBy": {
+                "type": "string",
+                "enum": ["publishedDate", "webEngagement", "alphabetical"],
+                "description": "Sort order for results",
+                "default": "publishedDate"
+              }
+            }
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "builds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "title": {"type": "string"},
+                    "tagline": {"type": "string"},
+                    "summary": {"type": "string"},
+                    "techStack": {"type": "array", "items": {"type": "string"}},
+                    "category": {"type": "string"},
+                    "publishedDate": {"type": "string"},
+                    "githubUrl": {"type": "string"},
+                    "demoUrl": {"type": "string"},
+                    "featuredImage": {"type": "string"}
+                  }
+                }
+              },
+              "total": {"type": "number"},
+              "hasMore": {"type": "boolean"}
+            }
+          }
+        },
+        {
+          "name": "web-flow__get-public-knowledge",
+          "description": "Fetch published Knowledge Vault articles for public website (filtered by Visibility = Public). Returns article metadata with redacted sensitive information.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number",
+                "description": "Maximum number of articles to return (default: 20, max: 100)",
+                "default": 20
+              },
+              "contentType": {
+                "type": "string",
+                "description": "Filter by content type (e.g., 'Technical Doc', 'Case Study', 'Process')"
+              },
+              "tags": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Filter by tags"
+              },
+              "search": {
+                "type": "string",
+                "description": "Search query for article titles and content"
+              }
+            }
+          }
+        },
+        {
+          "name": "web-flow__submit-idea",
+          "description": "Accept public idea submission from web form and create entry in Ideas Registry. Performs validation, deduplication, and auto-assigns initial viability assessment. Rate-limited to 5 submissions per IP per day.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["title", "description", "submitterEmail"],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Idea title (max 200 chars)",
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "description": "Idea description (min 50 chars, max 2000 chars)",
+                "minLength": 50,
+                "maxLength": 2000
+              },
+              "submitterEmail": {
+                "type": "string",
+                "format": "email",
+                "description": "Submitter email address (validated, no disposable domains)"
+              },
+              "submitterName": {
+                "type": "string",
+                "description": "Submitter name (optional)"
+              },
+              "companyName": {
+                "type": "string",
+                "description": "Company name (optional)"
+              },
+              "industry": {
+                "type": "string",
+                "description": "Industry (optional)"
+              },
+              "expectedROI": {
+                "type": "string",
+                "description": "Expected ROI or business impact (optional)"
+              }
+            }
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean"},
+              "ideaId": {"type": "string"},
+              "trackingId": {"type": "string"},
+              "status": {"type": "string"},
+              "message": {"type": "string"}
+            }
+          }
+        },
+        {
+          "name": "web-flow__check-duplicate-idea",
+          "description": "Check if similar idea already exists in Ideas Registry to prevent duplicates. Uses semantic similarity search on title and description.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["title", "description"],
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "similarityThreshold": {
+                "type": "number",
+                "description": "Similarity threshold (0-1, default: 0.85)",
+                "default": 0.85
+              }
+            }
+          }
+        },
+        {
+          "name": "web-flow__get-portfolio-metrics",
+          "description": "Fetch portfolio statistics for public display (total builds, categories breakdown, tech stack summary, engagement metrics).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "includeEngagement": {
+                "type": "boolean",
+                "description": "Include web engagement metrics (views, clicks)",
+                "default": false
+              }
+            }
+          }
+        },
+        {
+          "name": "web-flow__cache-refresh",
+          "description": "Trigger cache invalidation for specific keys (Redis + CDN). Used when Notion content updated and needs immediate refresh.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["keys"],
+            "properties": {
+              "keys": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Cache keys to invalidate (e.g., ['builds:list', 'build:abc123'])"
+              },
+              "purgeC DN": {
+                "type": "boolean",
+                "description": "Also purge Azure Front Door CDN",
+                "default": true
+              },
+              "prewarmCache": {
+                "type": "boolean",
+                "description": "Pre-warm cache with fresh data immediately",
+                "default": false
+              }
+            }
+          }
+        },
+        {
+          "name": "web-flow__check-publish-status",
+          "description": "Verify publish status for Notion page (is it approved for web, what's the current cache state, is it live on Webflow).",
+          "inputSchema": {
+            "type": "object",
+            "required": ["notionPageId"],
+            "properties": {
+              "notionPageId": {"type": "string"},
+              "database": {
+                "type": "string",
+                "enum": ["example-builds", "knowledge-vault"],
+                "description": "Database containing the page"
+              }
+            }
+          }
+        },
+        {
+          "name": "web-flow__track-event",
+          "description": "Track web analytics event (page view, idea submission, portfolio click). Sends to Azure Application Insights.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["eventType"],
+            "properties": {
+              "eventType": {
+                "type": "string",
+                "enum": [
+                  "portfolio_view",
+                  "portfolio_click_github",
+                  "portfolio_click_demo",
+                  "portfolio_share",
+                  "idea_form_start",
+                  "idea_form_submit",
+                  "idea_form_abandon",
+                  "knowledge_view",
+                  "portfolio_search",
+                  "portfolio_filter"
+                ]
+              },
+              "resourceId": {
+                "type": "string",
+                "description": "Build ID, article ID, or other resource identifier"
+              },
+              "metadata": {
+                "type": "object",
+                "description": "Additional event metadata (UTM params, user agent, etc.)"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

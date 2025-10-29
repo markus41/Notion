@@ -15,7 +15,6 @@
 | 🛠️ **Example Builds** | `a1cd1528-971d-4873-a176-5e93b93555f6` | Technical prototype and application tracking |
 | 💰 **Software & Cost Tracker** | `13b5e9de-2dd1-45ec-839a-4f3d50cd8d06` | Centralized software expense management |
 | 📚 **Knowledge Vault** | Query programmatically | Archived learnings and reference documentation |
-| 📝 **Blog Posts** | `97adad39160248d697868056a0075d9c` | Public blog content publishing and management |
 | 🔗 **Integration Registry** | Query programmatically | External system integrations and connectors |
 | 📦 **Projects** | `9f75999b-62d2-4c78-943e-c3e0debccfcd` | Active development project tracking with GitHub integration |
 | ⚡ **Actions Registry** | `9d5a1db0-585f-4f5b-b2bb-a41f875a7de4` | META database tracking all slash commands and automation |
@@ -262,48 +261,6 @@ Views Count: Number (tracked manually or via API)
 **Formatting Standard**: `📚 [Article Name]`
 
 **Archival Trigger**: Use `/knowledge:archive [item-name] [database]` when work completes
-
----
-
-### Blog Posts
-
-**Data Source ID**: `97adad39160248d697868056a0075d9c`
-
-**Purpose**: Public-facing blog content for Brookside BI website, managed through Notion-to-Webflow publishing pipeline with automated visual content tracking.
-
-**Core Properties**:
-```yaml
-Post Title: Title (required, max 100 chars, SEO optimized)
-Summary: Text (article summary for SEO description, max 500 chars)
-Category: Relation → Knowledge Vault Categories (single, required)
-Tags: Multi-select (article tags for categorization)
-Publish Date: Date (publication timestamp, required)
-Hero Image: Files (cover image, 16:9 aspect ratio, 1600x900+ pixels)
-Body: Text (article content in Markdown format, min 500 words)
-Status: Status (Draft | In Review | Published)
-Webflow Item ID: Text (sync tracking, auto-populated)
-Last Synced: Date (sync timestamp, auto-populated)
-Sync Status: Status (Not Synced | Synced | Sync Failed | Needs Update)
-
-# Visual Content Tracking (auto-populated by syncer)
-Has Mermaid Diagrams: Checkbox (true if post contains Mermaid diagrams)
-Has Lottie Animations: Checkbox (true if post contains Lottie animations)
-Diagram Count: Number (count of Mermaid diagrams in post)
-Animation Count: Number (count of Lottie animations in post)
-Visual Content Last Updated: Date (timestamp of last visual content modification)
-
-# Relations
-Category: Relation → Knowledge Vault Categories (single select)
-```
-
-**Formatting Standard**: `📝 [Post Title]`
-
-**Publishing Workflow**: Use `/blog:sync-post [page-id]` to publish individual posts or `/blog:bulk-sync` for batch operations
-
-**Visual Content Support**:
-- Mermaid diagrams: Write ` ```mermaid ` code fences in Body field
-- Lottie animations: Use `🎬 lottie: [url]` syntax in Body field
-- See [blog-visual-enhancements-guide.md](./../docs/blog-visual-enhancements-guide.md) for implementation details
 
 ---
 
@@ -894,7 +851,7 @@ notion-create-pages {
 
 ---
 
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-10-28 (Cleaned: Removed Blog Posts database and Webflow-related fields)
 **Related Documentation**:
 - [Innovation Workflow](./innovation-workflow.md)
 - [Agent Activity Center](./agent-activity-center.md)

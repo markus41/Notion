@@ -133,7 +133,7 @@ export async function createAgentActivityPage(
       success: true,
       message: 'Agent activity page created successfully',
       pageId: response.id,
-      pageUrl: response.url
+      pageUrl: 'url' in response ? response.url : `https://notion.so/${response.id.replace(/-/g, '')}`
     };
   } catch (error: any) {
     console.error('Failed to create Notion page:', error);

@@ -32,8 +32,12 @@
     Secrets Retrieved:
     - github-personal-access-token → GITHUB_PERSONAL_ACCESS_TOKEN
     - notion-api-key → NOTION_API_KEY
+    - morningstar-api-key → MORNINGSTAR_API_KEY
+    - bloomberg-api-username → BLOOMBERG_API_USERNAME
+    - bloomberg-api-password → BLOOMBERG_API_PASSWORD
 
     Created: 2025-10-21
+    Updated: 2025-10-26 (Added financial API credentials)
     Author: Brookside BI
 #>
 
@@ -48,6 +52,9 @@ $VaultName = "kv-brookside-secrets"
 $SecretsToRetrieve = @{
     "github-personal-access-token" = "GITHUB_PERSONAL_ACCESS_TOKEN"
     "notion-api-key" = "NOTION_API_KEY"
+    "morningstar-api-key" = "MORNINGSTAR_API_KEY"
+    "bloomberg-api-username" = "BLOOMBERG_API_USERNAME"
+    "bloomberg-api-password" = "BLOOMBERG_API_PASSWORD"
 }
 
 Write-Host "Establishing secure connection to Azure Key Vault..." -ForegroundColor Cyan

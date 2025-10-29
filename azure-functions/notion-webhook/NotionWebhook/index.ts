@@ -42,10 +42,10 @@ export async function NotionWebhookHandler(
     const notionSignature = request.headers.get('notion-signature');
 
     // 3. Verify Notion signature (security: prevent unauthorized webhooks)
-    const isValid = verifyNotionSignature(rawBody, notionSignature, secrets.notionWebhookSecret);
+    const isValid = verifyNotionSignature(rawBody, notionSignature ?? undefined, secrets.notionWebhookSecret);
 
     if (!isValid) {
-      context.log.error('Invalid webhook signature - rejecting request');
+      context.error('Invalid webhook signature - rejecting request');
       return {
         status: 401,
         jsonBody: {
@@ -63,7 +63,7 @@ export async function NotionWebhookHandler(
     try {
       event = JSON.parse(rawBody) as AgentActivityEvent;
     } catch (parseError: any) {
-      context.log.error('Failed to parse webhook payload:', parseError);
+      context.error('Failed to parse webhook payload:', parseError);
       return {
         status: 400,
         jsonBody: {
@@ -76,7 +76,7 @@ export async function NotionWebhookHandler(
 
     // 5. Validate required fields
     if (!event.sessionId || !event.agentName || !event.status) {
-      context.log.error('Missing required fields in webhook payload');
+      context.error('Missing required fields in webhook payload');
       return {
         status: 400,
         jsonBody: {
@@ -112,7 +112,7 @@ export async function NotionWebhookHandler(
         }
       };
     } else {
-      context.log.error(`Failed to create page: ${result.error}`);
+      context.error(`Failed to create page: ${result.error}`);
 
       return {
         status: 500,
@@ -126,7 +126,7 @@ export async function NotionWebhookHandler(
     }
   } catch (error: any) {
     const duration = Date.now() - startTime;
-    context.log.error('Webhook handler error:', error);
+    context.error('Webhook handler error:', error);
 
     return {
       status: 500,

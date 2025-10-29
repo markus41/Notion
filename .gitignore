@@ -39,3 +39,8 @@ deployment-output.txt
 # Azure Function deployment packages
 brookside-repo-analyzer/deployment/*.zip
 brookside-repo-analyzer/deployment/azure_function_deploy/
+
+# Temporary analysis files
+LogFiles/
+*-analysis-*.json
+*-repos.json
